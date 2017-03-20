@@ -2014,6 +2014,11 @@ all_centroids_corrected=data_struct.all_centroids_corrected;
 num_sessions=data_struct.num_sessions;
 pixel_to_mic=str2double(get(handles.pixel_to_mic,'string'));
 
+if get(handles.use_joint_model,'value')==1
+    errordlg('The joint model is not implemented in this version. Please uncheck this checkbox')
+    error_variable=non_existing_variable;
+end
+
 if num_sessions>7
     num_bins=100;
 elseif num_sessions>5
@@ -5237,5 +5242,5 @@ function use_joint_model_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of use_joint_model
 
 if get(handles.use_joint_model,'value')==1
-    errordlg('The joint model is not implemented in this version. Please uncheck this radio button')
+    errordlg('The joint model is not implemented in this version. Please uncheck this checkbox')
 end
