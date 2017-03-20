@@ -3595,7 +3595,7 @@ data_struct.optimal_cell_to_index_map=optimal_cell_to_index_map;
 
 % Saving a log file with all the chosen parameters:
 cd(results_dir)
-logFile=fopen(['logFile - final registration_' datestr(current_time,'yyyymmdd_HHMMss') '.txt'], 'wt' );
+logFile=fopen(['logFile - final registration_' datestr(clock,'yyyymmdd_HHMMss') '.txt'], 'wt' );
 
 % General data parameters:
 registered_sessions=data_struct.sessions_list;
