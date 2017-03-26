@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 01-Mar-2017 19:23:56
+% Last Modified by GUIDE v2.5 26-Mar-2017 13:36:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -153,6 +153,7 @@ set(handles.final_p_same_slider,'value',0.5);
 set(handles.model_maximal_distance,'string','12')
 set(handles.distance_threshold,'string','5')
 set(handles.correlation_threshold,'string','0.65')
+set(handles.one_photon,'Value',1);
 set(handles.translations_rotations,'Value',1);
 set(handles.spatial_correlations_2,'Value',1);
 set(handles.spatial_correlations,'Value',1);
@@ -2019,6 +2020,11 @@ if get(handles.use_joint_model,'value')==1
     error_variable=non_existing_variable;
 end
 
+if get(handles.use_joint_model,'value')==1 & get(handles.two_photon,'value')==1
+    errordlg('The joint model is only applied for 1-photon imaging data');
+    error_variable=non_existing_variable;
+end
+
 if num_sessions>7
     num_bins=100;
 elseif num_sessions>5
@@ -2033,19 +2039,19 @@ data_struct.number_of_bins=num_bins;
 temp_dist_thresh=str2double(get(handles.model_maximal_distance,'string'))/pixel_to_mic;
 
 compute_model_again=0;
-if ~isfield(data_struct,'all_to_all_p_value_corr_multi')
+if ~isfield(data_struct,'all_to_all_p_value_dist_multi')
     compute_model_again=1;
+else
+    max_measured_distance=max(data_struct.all_neighbor_distances);
+    if max_measured_distance<0.99*temp_dist_thresh
+        compute_model_again=1;
+    end
 end
 
 cd(data_struct.results_dir);
 mkdir('Figures');
-if isfield(data_struct,'figures_dir')
-    figures_dir=data_struct.figures_dir;
-else
-    mkdir('Figures');
-    figures_dir=fullfile(data_struct.results_dir,'Figures');
-    data_struct.figures_dir=figures_dir;
-end
+figures_dir=fullfile(data_struct.results_dir,'Figures');
+data_struct.figures_dir=figures_dir;
 
 if compute_model_again % If the distributions were not estiamted yet
     % Computing correlations and distances across days:
@@ -2175,6 +2181,13 @@ else % if the distributions were already estimated
     NNN_distances=data_struct.NNN_distances;
 end
 
+if get(handles.one_photon,'value')==1
+    imaging_technique='one_photon';
+else
+    imaging_technique='two_photon';
+end
+data_struct.imaging_technique=imaging_technique;
+
 all_neighbor_correlations_temp=all_neighbor_correlations;
 all_neighbor_correlations_temp(all_neighbor_correlations_temp==0)=10^-10;
 all_neighbor_correlations_temp(all_neighbor_correlations_temp==1)=1-10^-10;
@@ -2184,8 +2197,16 @@ all_neighbor_distances_temp(all_neighbor_distances_temp==0)=10^-10;
 all_neighbor_correlations_temp(all_neighbor_distances>temp_dist_thresh)=[];
 all_neighbor_distances_temp(all_neighbor_distances>temp_dist_thresh)=[];
 
-all_neighbor_distances_temp(all_neighbor_correlations_temp<0)=[];
-all_neighbor_correlations_temp(all_neighbor_correlations_temp<0)=[];    
+if strcmp(imaging_technique,'one_photon');
+    if sum(all_neighbor_correlations_temp<0)/length(all_neighbor_correlations_temp)>0.05
+        errordlg('The cells seem to be smaller than expected. Either the micron/pixel ratio is incorrect or you should lower the maximal distance')
+        error_variable=non_existing_variable;
+    else
+        all_neighbor_distances_temp(all_neighbor_correlations_temp<0)=[];
+        all_neighbor_correlations_temp(all_neighbor_correlations_temp<0)=[];
+    end
+end
+
 
 ctrs=cell(1,2);
 xout_temp=linspace(0,1,2*num_bins+1);
@@ -2208,10 +2229,17 @@ NN_correlations_temp(NN_distances>temp_dist_thresh)=[];
 NN_distances_temp(NN_distances>temp_dist_thresh)=[];
 NNN_correlations_temp(NNN_distances>temp_dist_thresh)=[];
 NNN_distances_temp(NNN_distances>temp_dist_thresh)=[];
-NN_distances_temp(NN_correlations_temp<0)=[];
-NN_correlations_temp(NN_correlations_temp<0)=[];
-NNN_distances_temp(NNN_correlations_temp<0)=[];
-NNN_correlations_temp(NNN_correlations_temp<0)=[];
+if strcmp(imaging_technique,'one_photon');
+    NN_distances_temp(NN_correlations_temp<0)=[];
+    NN_correlations_temp(NN_correlations_temp<0)=[];
+    NNN_distances_temp(NNN_correlations_temp<0)=[];
+    NNN_correlations_temp(NNN_correlations_temp<0)=[];
+end
+if length(NNN_distances_temp)<0.1*length(NN_distances_temp);
+    errordlg('There is insufficient number of non-nearest neighboring cells to estiamte the different cells distribution. Either the micron/pixel ratio is incorrect or you should increase the maximal distance')
+    error_variable=non_existing_variable;
+end
+
 grid_NN=hist3([NN_distances_temp;NN_correlations_temp]',ctrs);
 grid_NNN=hist3([NNN_distances_temp;NNN_correlations_temp]',ctrs);
 grid_NN=flipud(grid_NN);
@@ -2309,42 +2337,44 @@ hold on
 plot(num_bins/2+num_bins/2*8/temp_dist_thresh/pixel_to_mic*sin(x_for_circle),num_bins/2+num_bins/2*8/temp_dist_thresh/pixel_to_mic*cos(x_for_circle),'--','color',[1 1 1],'linewidth',4);
 
 % Estimating the distributions of spatial correlations for same cell and different cells:
-[n1,~]=hist(all_neighbor_correlations_temp,ctrs{2});
-if sum(n1(ctrs{2}<0.05))>0.04*sum(n1)
-    errordlg('The cells seem to be smaller than expected. Either the micron/pixel ratio is incorrect or you should lower the maximal distance')
-    error_variable=non_existing_variable;
+if strcmp(imaging_technique,'one_photon');
+    [n1,~]=hist(all_neighbor_correlations_temp,ctrs{2});
+    if sum(n1(ctrs{2}<0.05))>0.04*sum(n1)
+        errordlg('The cells seem to be smaller than expected. Either the micron/pixel ratio is incorrect or you should increase the maximal distance')
+        error_variable=non_existing_variable;
+    end
+    
+    pdf_betamixture = @(x,p,A1,A2,B1,B2) ...
+        p*lognpdf(x,A1,B1) + (1-p)*betapdf(x,A2,B2);
+    
+    phat_same=lognfit(1-all_neighbor_correlations_temp(all_neighbor_correlations_temp>=0.7));
+    phat_diff=betafit(all_neighbor_correlations_temp(all_neighbor_correlations_temp<0.7));
+    pStart=0.5;
+    AStart=[phat_same(1) phat_diff(1)];
+    BStart=[phat_same(2) phat_diff(2)];
+    start=[pStart AStart BStart];
+    lb = [0 -inf 0 0 0];
+    ub = [1 Inf Inf Inf Inf];
+    options = statset('MaxIter',1000, 'MaxFunEvals',2000);
+    paramEsts=mle(1-all_neighbor_correlations_temp,'pdf',pdf_betamixture, 'start',start, 'lower',lb, 'upper',ub,'options',options);
+    p_corr_marg_same=lognpdf(1-ctrs{2},paramEsts(2),paramEsts(4));
+    p_corr_marg_same=p_corr_marg_same./sum(p_corr_marg_same)*(num_bins/((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1))));
+    smoothing_func=sigmf(ctrs{2},[20 min(ctrs{2})+0.25]);
+    p_corr_marg_same=p_corr_marg_same.*smoothing_func;
+    p_corr_marg_same(1:round(num_bins/10:end))=0;
+    p_corr_marg_diff=betapdf(1-ctrs{2},paramEsts(3),paramEsts(5));
+    p_corr_marg_diff=p_corr_marg_diff./sum(p_corr_marg_diff)*(num_bins/((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1))));
+    p_corr_marg_both=paramEsts(1)*p_corr_marg_same+(1-paramEsts(1))*p_corr_marg_diff;
+    [n1,~]=hist(all_neighbor_correlations_temp,ctrs{2});
+    n_corr=n1./sum(n1)*(num_bins/((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1))));
+    ind_for_thresh=find(ctrs{2}>0.3 & ctrs{2}<0.95);
+    [~,ind_intersection]=min(abs(paramEsts(1)*p_corr_marg_same(ind_for_thresh)-(1-paramEsts(1))*p_corr_marg_diff(ind_for_thresh)));
+    thresh_corr_from_intersection=round(100*ctrs{2}(ind_intersection+ind_for_thresh(1)-1))/100;
+    set(handles.correlation_threshold,'string',num2str(thresh_corr_from_intersection))
+    data_struct.thresh_corr_from_intersection=thresh_corr_from_intersection;
+    MSE_corr_model=sum(abs(((n_corr-p_corr_marg_both))*((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1)))/num_bins))/2;
+    p_same_corr_model=paramEsts(1);
 end
-
-pdf_betamixture = @(x,p,A1,A2,B1,B2) ...
-    p*lognpdf(x,A1,B1) + (1-p)*betapdf(x,A2,B2);
-
-phat_same=lognfit(1-all_neighbor_correlations_temp(all_neighbor_correlations_temp>=0.7));
-phat_diff=betafit(all_neighbor_correlations_temp(all_neighbor_correlations_temp<0.7));
-pStart=0.5;
-AStart=[phat_same(1) phat_diff(1)];
-BStart=[phat_same(2) phat_diff(2)];
-start=[pStart AStart BStart];
-lb = [0 -inf 0 0 0];
-ub = [1 Inf Inf Inf Inf];
-options = statset('MaxIter',1000, 'MaxFunEvals',2000);
-paramEsts=mle(1-all_neighbor_correlations_temp,'pdf',pdf_betamixture, 'start',start, 'lower',lb, 'upper',ub,'options',options);
-p_corr_marg_same=lognpdf(1-ctrs{2},paramEsts(2),paramEsts(4));
-p_corr_marg_same=p_corr_marg_same./sum(p_corr_marg_same)*(num_bins/((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1))));
-smoothing_func=sigmf(ctrs{2},[20 min(ctrs{2})+0.25]);
-p_corr_marg_same=p_corr_marg_same.*smoothing_func;
-p_corr_marg_same(1:round(num_bins/10:end))=0;
-p_corr_marg_diff=betapdf(1-ctrs{2},paramEsts(3),paramEsts(5));
-p_corr_marg_diff=p_corr_marg_diff./sum(p_corr_marg_diff)*(num_bins/((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1))));
-p_corr_marg_both=paramEsts(1)*p_corr_marg_same+(1-paramEsts(1))*p_corr_marg_diff;
-[n1,~]=hist(all_neighbor_correlations_temp,ctrs{2});
-n_corr=n1./sum(n1)*(num_bins/((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1))));
-ind_for_thresh=find(ctrs{2}>0.3 & ctrs{2}<0.95);
-[~,ind_intersection]=min(abs(paramEsts(1)*p_corr_marg_same(ind_for_thresh)-(1-paramEsts(1))*p_corr_marg_diff(ind_for_thresh)));
-thresh_corr_from_intersection=round(100*ctrs{2}(ind_intersection+ind_for_thresh(1)-1))/100;
-set(handles.correlation_threshold,'string',num2str(thresh_corr_from_intersection))
-data_struct.thresh_corr_from_intersection=thresh_corr_from_intersection;
-MSE_corr_model=sum(abs(((n_corr-p_corr_marg_both))*((ctrs{2}(2)-ctrs{2}(1))+(ctrs{2}(end)-ctrs{2}(1)))/num_bins))/2;
-p_same_corr_model=paramEsts(1);
 
 % Estimating the distributions of centroid distances for same cell and different cells:
 [n1,~]=hist(all_neighbor_distances_temp,ctrs{1});
@@ -2354,8 +2384,11 @@ max_dist_to_fit=9;
 data_to_fit=all_neighbor_distances_temp(pixel_to_mic*all_neighbor_distances_temp<max_dist_to_fit);
 parmhat=lognfit(data_to_fit);
 
-optimal_delta=paramEsts(1);
-% optimal_delta=length(data_to_fit)/length(all_neighbor_distances_temp);
+if strcmp(imaging_technique,'one_photon');
+    optimal_delta=paramEsts(1);
+else
+    optimal_delta=length(data_to_fit)/length(all_neighbor_distances_temp);
+end
 
 p_0=optimal_delta;
 c_0=6;
@@ -2390,33 +2423,35 @@ p_same_dist_model=params_final(1);
 
 p_value_dist=1-params_final(1).*p_dist_marg_same./(params_final(1).*p_dist_marg_same+(1-params_final(1)).*p_dist_marg_diff);
 p_value_dist(1)=p_value_dist(2);
-p_value_corr=1-paramEsts(1).*p_corr_marg_same./(paramEsts(1).*p_corr_marg_same+(1-paramEsts(1)).*p_corr_marg_diff);
-
+    
 figure('units','normalized','outerposition',[0.15 0.04 0.7 0.96])
-subplot(2,2,2)
-[n1,~]=hist(NN_correlations_temp,ctrs{2});
-[n2,~]=hist(NNN_correlations_temp,ctrs{2});
-bar(ctrs{2}+0.25/num_bins,n1,'g','EdgeColor','none','barwidth',0.5);
-hold on
-bar(ctrs{2}-0.25/num_bins,n2,'r','EdgeColor','none','barwidth',0.5);
-hold on
-plot([0.6 0.6],[0 max(n1)],'--','linewidth',2,'color','k')
-xlim([0 1])
-legend('Nearest neighbors','Other neighbors','location','northwest')
-legend('boxoff')
-x_label=linspace(0,1,6);
-x=linspace(0,1,6);
-set(gca,'fontsize',16)
-set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',16)
-set(gcf,'PaperPositionMode','auto')
-xlabel('Spatial correlation','FontWeight','Bold','fontsize',16)
-ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',16)
-text(0.5,0.9*max(n1),[num2str(round(100*(1-more_than_06_fraction))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','g')
-text(0.7,0.9*max(n1),[num2str(round(100*more_than_06_fraction)) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','g')
-text(0.5,0.8*max(n1),[num2str(round(100*less_than_06_fraction)) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
-text(0.7,0.8*max(n1),[num2str(round(100*(1-less_than_06_fraction))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
-set(gca,'fontsize',16)
+if strcmp(imaging_technique,'one_photon');
+    subplot(2,2,2)
+    p_value_corr=1-paramEsts(1).*p_corr_marg_same./(paramEsts(1).*p_corr_marg_same+(1-paramEsts(1)).*p_corr_marg_diff);
+    [n1,~]=hist(NN_correlations_temp,ctrs{2});
+    [n2,~]=hist(NNN_correlations_temp,ctrs{2});
+    bar(ctrs{2}+0.25/num_bins,n1,'g','EdgeColor','none','barwidth',0.5);
+    hold on
+    bar(ctrs{2}-0.25/num_bins,n2,'r','EdgeColor','none','barwidth',0.5);
+    hold on
+    plot([0.6 0.6],[0 max(n1)],'--','linewidth',2,'color','k')
+    xlim([0 1])
+    legend('Nearest neighbors','Other neighbors','location','northwest')
+    legend('boxoff')
+    x_label=linspace(0,1,6);
+    x=linspace(0,1,6);
+    set(gca,'fontsize',16)
+    set(gca,'XTick',x)
+    set(gca,'XTickLabel',x_label,'fontsize',16)
+    set(gcf,'PaperPositionMode','auto')
+    xlabel('Spatial correlation','FontWeight','Bold','fontsize',16)
+    ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',16)
+    text(0.5,0.9*max(n1),[num2str(round(100*(1-more_than_06_fraction))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','g')
+    text(0.7,0.9*max(n1),[num2str(round(100*more_than_06_fraction)) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','g')
+    text(0.5,0.8*max(n1),[num2str(round(100*less_than_06_fraction)) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
+    text(0.7,0.8*max(n1),[num2str(round(100*(1-less_than_06_fraction))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
+    set(gca,'fontsize',16)
+end
 subplot(2,2,1)
 [n1,~]=hist(NN_distances_temp,ctrs{1});
 [n2,~]=hist(NNN_distances_temp,ctrs{1});
@@ -2437,40 +2472,42 @@ text(8,0.9*max(n1),[num2str(round(100*(1-less_than_7_fraction))) '%'],'fontsize'
 text(6,0.8*max(n1),[num2str(round(100*(1-more_than_7_fraction))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
 text(8,0.8*max(n1),[num2str(round(100*more_than_7_fraction)) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
 set(gca,'fontsize',16)
-subplot(2,2,4)
-bar(ctrs{2},n_corr,'FaceColor','b','EdgeColor','none','barwidth',1);
-hold on
-plot(ctrs{2},paramEsts(1)*p_corr_marg_same,'--','linewidth',3,'color','g');
-hold on
-plot(ctrs{2},(1-paramEsts(1))*p_corr_marg_diff,'--','linewidth',3,'color','r');
-hold on
-plot(ctrs{2},p_corr_marg_both,'linewidth',3,'color','k');
-hold on
-plot(ctrs{2},paramEsts(1)*p_corr_marg_same,'--','linewidth',3,'color','g');
-hold on
-plot(ctrs{2},(1-paramEsts(1))*p_corr_marg_diff,'--','linewidth',3,'color','r');
-hold on
-plot([thresh_corr_from_intersection thresh_corr_from_intersection],[0 max(n_corr)],'--','linewidth',2,'color','k')
-xlim([0 1])
-xlabel('Spatial correlation','fontsize',18,'fontweight','bold')
-ylabel('Probability density','fontsize',18,'fontweight','bold')
-hold on
-x_label=linspace(0,1,6);
-x=linspace(0,1,6);
-set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',16)
-legend('Observed data','Same cell model','Different cells model','Overall model','location','northwest')
-legend('boxoff')
-xlim([0 1])
-set(gca,'fontsize',16)
-normalized_same=p_corr_marg_same./sum(p_corr_marg_same);
-normalized_diff=p_corr_marg_diff./sum(p_corr_marg_diff);
-same_more_than_thresh=sum(normalized_same(ctrs{2}>thresh_corr_from_intersection));
-diff_more_than_thresh=sum(normalized_diff(ctrs{2}>thresh_corr_from_intersection));
-text(thresh_corr_from_intersection+0.1,0.9*max(n_corr),[num2str(round(100*same_more_than_thresh)) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','g')
-text(thresh_corr_from_intersection-0.1,0.9*max(n_corr),[num2str(round(100*(1-same_more_than_thresh))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','g')
-text(thresh_corr_from_intersection+0.1,0.8*max(n_corr),[num2str(round(100*(diff_more_than_thresh))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
-text(thresh_corr_from_intersection-0.1,0.8*max(n_corr),[num2str(round(100*(1-diff_more_than_thresh))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
+if strcmp(imaging_technique,'one_photon');
+    subplot(2,2,4)
+    bar(ctrs{2},n_corr,'FaceColor','b','EdgeColor','none','barwidth',1);
+    hold on
+    plot(ctrs{2},paramEsts(1)*p_corr_marg_same,'--','linewidth',3,'color','g');
+    hold on
+    plot(ctrs{2},(1-paramEsts(1))*p_corr_marg_diff,'--','linewidth',3,'color','r');
+    hold on
+    plot(ctrs{2},p_corr_marg_both,'linewidth',3,'color','k');
+    hold on
+    plot(ctrs{2},paramEsts(1)*p_corr_marg_same,'--','linewidth',3,'color','g');
+    hold on
+    plot(ctrs{2},(1-paramEsts(1))*p_corr_marg_diff,'--','linewidth',3,'color','r');
+    hold on
+    plot([thresh_corr_from_intersection thresh_corr_from_intersection],[0 max(n_corr)],'--','linewidth',2,'color','k')
+    xlim([0 1])
+    xlabel('Spatial correlation','fontsize',18,'fontweight','bold')
+    ylabel('Probability density','fontsize',18,'fontweight','bold')
+    hold on
+    x_label=linspace(0,1,6);
+    x=linspace(0,1,6);
+    set(gca,'XTick',x)
+    set(gca,'XTickLabel',x_label,'fontsize',16)
+    legend('Observed data','Same cell model','Different cells model','Overall model','location','northwest')
+    legend('boxoff')
+    xlim([0 1])
+    set(gca,'fontsize',16)
+    normalized_same=p_corr_marg_same./sum(p_corr_marg_same);
+    normalized_diff=p_corr_marg_diff./sum(p_corr_marg_diff);
+    same_more_than_thresh=sum(normalized_same(ctrs{2}>thresh_corr_from_intersection));
+    diff_more_than_thresh=sum(normalized_diff(ctrs{2}>thresh_corr_from_intersection));
+    text(thresh_corr_from_intersection+0.1,0.9*max(n_corr),[num2str(round(100*same_more_than_thresh)) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','g')
+    text(thresh_corr_from_intersection-0.1,0.9*max(n_corr),[num2str(round(100*(1-same_more_than_thresh))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','g')
+    text(thresh_corr_from_intersection+0.1,0.8*max(n_corr),[num2str(round(100*(diff_more_than_thresh))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
+    text(thresh_corr_from_intersection-0.1,0.8*max(n_corr),[num2str(round(100*(1-diff_more_than_thresh))) '%'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center','color','r')
+end
 subplot(2,2,3)
 bar(pixel_to_mic*ctrs{1},normalized_distance,'FaceColor','b','EdgeColor','none','barwidth',1);
 hold on
@@ -2510,22 +2547,28 @@ num_p_values=1000;
 p_thresh=0.05;
 p_val_vec_temp=linspace(0,1,2*num_p_values+1);
 p_val_vec=p_val_vec_temp(2:2:end);
-true_merge_corr=zeros(1,length(p_val_vec));
-false_merge_corr=zeros(1,length(p_val_vec));
-num_pairs_corr=zeros(1,length(p_val_vec));
+if strcmp(imaging_technique,'one_photon');
+    true_merge_corr=zeros(1,length(p_val_vec));
+    false_merge_corr=zeros(1,length(p_val_vec));
+    num_pairs_corr=zeros(1,length(p_val_vec));
+end
 true_merge_dist=zeros(1,length(p_val_vec));
 false_merge_dist=zeros(1,length(p_val_vec));
 num_pairs_dist=zeros(1,length(p_val_vec));
 
 step=p_val_vec(2)-p_val_vec(1);
-[n1_corr,~]=hist(all_neighbor_correlations_temp,ctrs{2});
+if strcmp(imaging_technique,'one_photon');
+    [n1_corr,~]=hist(all_neighbor_correlations_temp,ctrs{2});
+end
 [n1_dist,~]=hist(all_neighbor_distances_temp,ctrs{1});
 for n=1:length(p_val_vec)
-    p_corr_marg_same_for_ROC=p_corr_marg_same./sum(p_corr_marg_same);
-    p_corr_marg_diff_for_ROC=p_corr_marg_diff./sum(p_corr_marg_diff);
-    true_merge_corr(n)=sum(p_corr_marg_same_for_ROC(p_value_corr<=p_val_vec(n)+step/2 & p_value_corr>=p_val_vec(n)-step/2));
-    false_merge_corr(n)=sum(p_corr_marg_diff_for_ROC(p_value_corr<=p_val_vec(n)+step/2 & p_value_corr>=p_val_vec(n)-step/2));
-    num_pairs_corr(n)=sum(n1_corr(1-p_value_corr<=p_val_vec(n)+step/2 & 1-p_value_corr>=p_val_vec(n)-step/2));
+    if strcmp(imaging_technique,'one_photon');        
+        p_corr_marg_same_for_ROC=p_corr_marg_same./sum(p_corr_marg_same);
+        p_corr_marg_diff_for_ROC=p_corr_marg_diff./sum(p_corr_marg_diff);
+        true_merge_corr(n)=sum(p_corr_marg_same_for_ROC(p_value_corr<=p_val_vec(n)+step/2 & p_value_corr>=p_val_vec(n)-step/2));
+        false_merge_corr(n)=sum(p_corr_marg_diff_for_ROC(p_value_corr<=p_val_vec(n)+step/2 & p_value_corr>=p_val_vec(n)-step/2));
+        num_pairs_corr(n)=sum(n1_corr(1-p_value_corr<=p_val_vec(n)+step/2 & 1-p_value_corr>=p_val_vec(n)-step/2));
+    end
     p_dist_marg_same_for_ROC=p_dist_marg_same./sum(p_dist_marg_same);
     p_dist_marg_diff_for_ROC=p_dist_marg_diff./sum(p_dist_marg_diff);
     true_merge_dist(n)=sum(p_dist_marg_same_for_ROC(p_value_dist<=p_val_vec(n)+step/2 & p_value_dist>=p_val_vec(n)-step/2));
@@ -2533,12 +2576,14 @@ for n=1:length(p_val_vec)
     num_pairs_dist(n)=sum(n1_dist(1-p_value_dist<=p_val_vec(n)+step/2 & 1-p_value_dist>=p_val_vec(n)-step/2));
 end
 
-uncertain_corr=(sum(num_pairs_corr(1-p_val_vec>p_thresh & 1-p_val_vec<1-p_thresh)))/sum(num_pairs_corr);
-[~,best_ind]=min(cumsum(false_merge_corr).^2+(1-cumsum(true_merge_corr)).^2);
-cumsum_false_merge_corr=cumsum(false_merge_corr);
-cumsum_false_split_corr=1-cumsum(true_merge_corr);
-false_positive_corr=cumsum_false_merge_corr(best_ind);
-false_negative_corr=cumsum_false_split_corr(best_ind);
+if strcmp(imaging_technique,'one_photon');
+    uncertain_corr=(sum(num_pairs_corr(1-p_val_vec>p_thresh & 1-p_val_vec<1-p_thresh)))/sum(num_pairs_corr);
+    [~,best_ind]=min(cumsum(false_merge_corr).^2+(1-cumsum(true_merge_corr)).^2);
+    cumsum_false_merge_corr=cumsum(false_merge_corr);
+    cumsum_false_split_corr=1-cumsum(true_merge_corr);
+    false_positive_corr=cumsum_false_merge_corr(best_ind);
+    false_negative_corr=cumsum_false_split_corr(best_ind);
+end
 uncertain_dist=(sum(num_pairs_dist(1-p_val_vec>p_thresh & 1-p_val_vec<1-p_thresh)))/sum(num_pairs_dist);
 [~,best_ind]=min(cumsum(false_merge_dist).^2+(1-cumsum(true_merge_dist)).^2);
 cumsum_false_merge_dist=cumsum(false_merge_dist);
@@ -2548,11 +2593,13 @@ false_negative_dist=cumsum_false_split_dist(best_ind);
 
 % Estimating the correlation distributions of same cell and different cells given a distance:
 joint_flag=get(handles.use_joint_model,'Value');
-% Not implemented in this version.
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
+end
 
 figure('units','normalized','outerposition',[0.2 0.04 0.6 0.96]);
 size_x=0.78;
 size_y=0.78;
+if strcmp(imaging_technique,'one_photon');
 axes('position',[0.08 0.58 size_x/2.3 size_y/2.85/2.3])
 start_x=0;
 end_x=1;
@@ -2588,6 +2635,7 @@ plot([p_095 p_095],[0 max(n_corr)],'--','linewidth',3,'color','k')
 text(p_005,1.1*max(n_corr),'0.05','fontsize',14,'fontweight','bold','HorizontalAlignment','Center')
 text(p_095,1.1*max(n_corr),'0.95','fontsize',14,'fontweight','bold','HorizontalAlignment','Center')
 text(p_05,1.1*max(n_corr),'0.5','fontsize',14,'fontweight','bold','HorizontalAlignment','Center')
+end
 
 axes('position',[0.08 0.8 size_x/2.3 size_y/2.85/2.3])
 start_x=0;
@@ -2641,7 +2689,7 @@ text(1.5,1,'1','fontsize',18,'fontweight','bold','HorizontalAlignment','Left')
 text(-31.5,0.5,'Probability density','fontsize',18,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
 plot([0 1 1 0 0],[0 0 1 1 0],'color','k')
 
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     axes('position',[0.59 0.58 size_x/2.3 size_y/2.3])
     norm_factor_grid=1;
     log_grid=log(1+grid/norm_factor_grid);
@@ -2699,15 +2747,17 @@ end
 axes('position',[0.08 0.08 size_x/2.3 size_y/2.3])
 plot([0,cumsum(num_pairs_dist)/sum(num_pairs_dist),1],[0,p_val_vec,1],'linewidth',2,'color','r')
 hold on
-plot([0,cumsum(num_pairs_corr)/sum(num_pairs_corr),1],[0,p_val_vec,1],'linewidth',2,'color','b')
-hold on
-if joint_flag==1    
+if strcmp(imaging_technique,'one_photon');
+    plot([0,cumsum(num_pairs_corr)/sum(num_pairs_corr),1],[0,p_val_vec,1],'linewidth',2,'color','b')
+    hold on
+end
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;  
     plot([0,cumsum(num_pairs)/sum(num_pairs),1],[0,p_val_vec,1],'linewidth',2,'color',[0.1 0.7 0.1])
     hold on
     plot([1-sum(num_pairs(1-p_val_vec<p_thresh))/sum(num_pairs),1-sum(num_pairs(1-p_val_vec<p_thresh))/sum(num_pairs)],[0,1],'--','linewidth',2,'color','k')
     hold on
     plot([sum(num_pairs(1-p_val_vec>1-p_thresh))/sum(num_pairs),sum(num_pairs(1-p_val_vec>1-p_thresh))/sum(num_pairs)],[0,1],'--','linewidth',2,'color','k')
-else    
+elseif strcmp(imaging_technique,'one_photon');
     plot([1-sum(num_pairs_corr(1-p_val_vec<p_thresh))/sum(num_pairs_corr),1-sum(num_pairs_corr(1-p_val_vec<p_thresh))/sum(num_pairs_corr)],[0,1],'--','linewidth',2,'color','k')
     hold on
     plot([sum(num_pairs_corr(1-p_val_vec>1-p_thresh))/sum(num_pairs_corr),sum(num_pairs_corr(1-p_val_vec>1-p_thresh))/sum(num_pairs_corr)],[0,1],'--','linewidth',2,'color','k')
@@ -2718,9 +2768,9 @@ hold on
 plot([0 1],[p_thresh p_thresh],'--','linewidth',2,'color','k')
 hold on
 plot([0 1],[1-p_thresh 1-p_thresh],'--','linewidth',2,'color','k')
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     legend('Dist.','Corr.','Joint','Location','Northeast')
-else
+elseif strcmp(imaging_technique,'one_photon');
     legend('Dist.','Corr.','Location','Northeast')
 end
 legend('boxoff')
@@ -2736,13 +2786,16 @@ axes('position',[0.3 0.15 size_x/2.3/3 size_y/2.3/3.5])
 labels=cell(1,3);
 labels{1}='Dist.';
 labels{2}='Corr.';
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     labels{3}='Joint';
     bar([1 2 3],[uncertain_dist; uncertain_corr ; uncertain],0.8,'FaceColor','none','EdgeColor','k')
     xtick_vec=1:3;
-else    
+elseif strcmp(imaging_technique,'one_photon');    
     bar([1 2],[uncertain_dist; uncertain_corr],0.8,'FaceColor','none','EdgeColor','k')
     xtick_vec=1:2;
+else
+    bar(1,uncertain_dist,0.8,'FaceColor','none','EdgeColor','k')
+    xtick_vec=1;
 end
 box off
 ylabel('Uncertain fraction ','FontSize',10,'fontweight','bold')
@@ -2750,11 +2803,13 @@ set(gca,'XTick',xtick_vec)
 set(gca,'XTickLabel',labels,'FontSize',10,'fontweight','bold')
 
 axes('position',[0.59 0.08 size_x/2.3 size_y/2.3])
-plot(cumsum(false_merge_corr),cumsum(true_merge_corr),'linewidth',2,'color','b')
-hold on
+if strcmp(imaging_technique,'one_photon');
+    plot(cumsum(false_merge_corr),cumsum(true_merge_corr),'linewidth',2,'color','b')
+    hold on
+end
 plot([0,cumsum(false_merge_dist)],[0,cumsum(true_merge_dist)],'linewidth',2,'color','r')
 hold on
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     plot(cumsum(false_merge),cumsum(true_merge),'linewidth',2,'color',[0.1 0.7 0.1])
     hold on
 end
@@ -2777,9 +2832,11 @@ set(gca,'XTick',x)
 set(gca,'XTickLabel',x_label,'fontsize',16,'fontweight','bold')
 axes('position',[0.682 0.125 size_x/2.3/2 size_y/2.3/2])
 plot([0,cumsum(false_merge_dist)],[0,cumsum(true_merge_dist)],'linewidth',2,'color','r')
-hold on
-plot(cumsum(false_merge_corr),cumsum(true_merge_corr),'linewidth',2,'color','b')
-if joint_flag==1
+if strcmp(imaging_technique,'one_photon');
+    hold on
+    plot(cumsum(false_merge_corr),cumsum(true_merge_corr),'linewidth',2,'color','b')
+end
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     hold on
     plot(cumsum(false_merge),cumsum(true_merge),'linewidth',2,'color',[0.1 0.7 0.1])
 end
@@ -2787,16 +2844,19 @@ hold on
 cum_sum_temp=[0,cumsum(false_merge_dist)];
 cum_sum_temp_2=[0,cumsum(true_merge_dist)];
 plot(cum_sum_temp(500),cum_sum_temp_2(500),'*','markersize',8,'linewidth',2,'color','k')
-hold on
-cum_sum_temp=[0,cumsum(false_merge_corr)];
-cum_sum_temp_2=[0,cumsum(true_merge_corr)];
-plot(cum_sum_temp(500),cum_sum_temp_2(500),'*','markersize',8,'linewidth',2,'color','k')
-if joint_flag==1
+if strcmp(imaging_technique,'one_photon');
+    hold on
+    cum_sum_temp=[0,cumsum(false_merge_corr)];
+    cum_sum_temp_2=[0,cumsum(true_merge_corr)];
+    plot(cum_sum_temp(500),cum_sum_temp_2(500),'*','markersize',8,'linewidth',2,'color','k')
+end
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     hold on
     cum_sum_temp=[0,cumsum(false_merge)];
     cum_sum_temp_2=[0,cumsum(true_merge)];
     plot(cum_sum_temp(500),cum_sum_temp_2(500),'*','markersize',8,'linewidth',2,'color','k')
 end
+
 xlim([0 0.1])
 ylim([0.9 1])
 x_label=0:0.1:0.1;
@@ -2849,43 +2909,45 @@ text(p_005,1.1*max(normalized_distance),'0.05','fontsize',10,'fontweight','bold'
 text(p_095,1.1*max(normalized_distance),'0.95','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
 text(p_05,1.1*max(normalized_distance),'0.5','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
 
-axes(handles.axes4)
-start_x=0;
-end_x=1;
-y_vec=repmat(n_corr,[2 1]);
-y_vec=y_vec(:);
-x_vec=(ctrs{2}(2:end)+ctrs{2}(1:end-1))/2;
-x_vec=repmat(x_vec,[2 1]);
-x_vec=[start_x; x_vec(:); end_x];
-for run_bins=1:length(x_vec)/2
-    current_color=p_value_corr(run_bins)*[1 1 1];
-    patch(x_vec([1 1 2 2]+2*(run_bins-1)),[0 [1 1]*n_corr(run_bins) 0],current_color,'EdgeColor',current_color)
+if strcmp(imaging_technique,'one_photon');
+    axes(handles.axes4)
+    start_x=0;
+    end_x=1;
+    y_vec=repmat(n_corr,[2 1]);
+    y_vec=y_vec(:);
+    x_vec=(ctrs{2}(2:end)+ctrs{2}(1:end-1))/2;
+    x_vec=repmat(x_vec,[2 1]);
+    x_vec=[start_x; x_vec(:); end_x];
+    for run_bins=1:length(x_vec)/2
+        current_color=p_value_corr(run_bins)*[1 1 1];
+        patch(x_vec([1 1 2 2]+2*(run_bins-1)),[0 [1 1]*n_corr(run_bins) 0],current_color,'EdgeColor',current_color)
+        hold on
+    end
+    plot(x_vec,y_vec,'k-','linewidth',2)
+    xlabel('Spatial correlation','fontsize',12,'fontweight','bold')
+    x_label=linspace(0,1,6);
+    x=linspace(0,1,6);
+    set(gca,'XTick',x)
+    set(gca,'XTickLabel',x_label,'fontsize',12,'fontweight','bold')
+    xlim([0 1])
+    [~,ind_005]=min(abs(0.05-(1-p_value_corr)));
+    p_005=ctrs{2}(ind_005);
+    [~,ind_05]=min(abs(0.5-(1-p_value_corr)));
+    p_05=ctrs{2}(ind_05);
+    [~,ind_095]=min(abs(0.95-(1-p_value_corr)));
+    p_095=ctrs{2}(ind_095);
     hold on
+    plot([p_005 p_005],[0 max(n_corr)],'--','linewidth',3,'color','k')
+    hold on
+    plot([p_05 p_05],[0 max(n_corr)],'--','linewidth',3,'color','k')
+    hold on
+    plot([p_095 p_095],[0 max(n_corr)],'--','linewidth',3,'color','k')
+    text(p_005,1.1*max(n_corr),'0.05','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
+    text(p_095,1.1*max(n_corr),'0.95','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
+    text(p_05,1.1*max(n_corr),'0.5','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
 end
-plot(x_vec,y_vec,'k-','linewidth',2)
-xlabel('Spatial correlation','fontsize',12,'fontweight','bold')
-x_label=linspace(0,1,6);
-x=linspace(0,1,6);
-set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',12,'fontweight','bold')
-xlim([0 1])
-[~,ind_005]=min(abs(0.05-(1-p_value_corr)));
-p_005=ctrs{2}(ind_005);
-[~,ind_05]=min(abs(0.5-(1-p_value_corr)));
-p_05=ctrs{2}(ind_05);
-[~,ind_095]=min(abs(0.95-(1-p_value_corr)));
-p_095=ctrs{2}(ind_095);
-hold on
-plot([p_005 p_005],[0 max(n_corr)],'--','linewidth',3,'color','k')
-hold on
-plot([p_05 p_05],[0 max(n_corr)],'--','linewidth',3,'color','k')
-hold on
-plot([p_095 p_095],[0 max(n_corr)],'--','linewidth',3,'color','k')
-text(p_005,1.1*max(n_corr),'0.05','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
-text(p_095,1.1*max(n_corr),'0.95','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
-text(p_05,1.1*max(n_corr),'0.5','fontsize',10,'fontweight','bold','HorizontalAlignment','Center')
 
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     axes(handles.axes5)
     imagesc(log_grid)
     colormap('jet')
@@ -2950,12 +3012,14 @@ else
     axes(handles.axes5)
     cla;
     plot([0,cumsum(num_pairs_dist)/sum(num_pairs_dist),1],[0,p_val_vec,1],'linewidth',2,'color','r')
-    hold on
-    plot([0,cumsum(num_pairs_corr)/sum(num_pairs_corr),1],[0,p_val_vec,1],'linewidth',2,'color','b')
-    hold on
-    plot([1-sum(num_pairs_corr(1-p_val_vec<p_thresh))/sum(num_pairs_corr),1-sum(num_pairs_corr(1-p_val_vec<p_thresh))/sum(num_pairs_corr)],[0,1],'--','linewidth',2,'color','k')
-    hold on
-    plot([sum(num_pairs_corr(1-p_val_vec>1-p_thresh))/sum(num_pairs_corr),sum(num_pairs_corr(1-p_val_vec>1-p_thresh))/sum(num_pairs_corr)],[0,1],'--','linewidth',2,'color','k')
+    if strcmp(imaging_technique,'one_photon');
+        hold on
+        plot([0,cumsum(num_pairs_corr)/sum(num_pairs_corr),1],[0,p_val_vec,1],'linewidth',2,'color','b')
+        hold on
+        plot([1-sum(num_pairs_corr(1-p_val_vec<p_thresh))/sum(num_pairs_corr),1-sum(num_pairs_corr(1-p_val_vec<p_thresh))/sum(num_pairs_corr)],[0,1],'--','linewidth',2,'color','k')
+        hold on
+        plot([sum(num_pairs_corr(1-p_val_vec>1-p_thresh))/sum(num_pairs_corr),sum(num_pairs_corr(1-p_val_vec>1-p_thresh))/sum(num_pairs_corr)],[0,1],'--','linewidth',2,'color','k')
+    end
     xlabel('Fraction of cell pairs ','fontsize',14,'fontweight','bold')
     ylabel('P_s_a_m_e','fontsize',14,'fontweight','bold')
     hold on
@@ -2970,22 +3034,31 @@ else
     set(gca,'YTickLabel',y_label,'fontsize',14)
     set(gca,'XTick',x)
     set(gca,'XTickLabel',x_label,'fontsize',14)
-    legend('Dist.','Corr.','Location',[0.72 0.32 0.01 0.01])
-    legend('boxoff')
+    if strcmp(imaging_technique,'one_photon');
+        legend('Dist.','Corr.','Location',[0.72 0.32 0.01 0.01])
+        legend('boxoff')
+    end
     axes('position',[0.72 0.2 0.04 0.05])
     labels=cell(1,3);
     labels{1}='Dist.';
     labels{2}='Corr.';
-    bar([1 2],100*[uncertain_dist; uncertain_corr],0.8,'FaceColor','none','EdgeColor','k')
-    xtick_vec=1:2;
+    if strcmp(imaging_technique,'one_photon');
+        bar([1 2],100*[uncertain_dist; uncertain_corr],0.8,'FaceColor','none','EdgeColor','k')
+        xtick_vec=1:2;
+    else
+        bar(1,100*uncertain_dist,0.8,'FaceColor','none','EdgeColor','k')
+        xtick_vec=1;
+    end
     box off
     ylabel('Uncertain %','FontSize',10,'fontweight','bold')
     set(gca,'XTick',xtick_vec)
     set(gca,'XTickLabel',labels,'FontSize',6,'fontweight','bold')
     
     axes(handles.axes6)
-    plot(cumsum(false_merge_corr),cumsum(true_merge_corr),'linewidth',2,'color','b')
-    hold on
+    if strcmp(imaging_technique,'one_photon');
+        plot(cumsum(false_merge_corr),cumsum(true_merge_corr),'linewidth',2,'color','b')
+        hold on
+    end
     plot([0,cumsum(false_merge_dist)],[0,cumsum(true_merge_dist)],'linewidth',2,'color','r')
     ylabel('True positive rate','fontsize',16,'fontweight','bold')
     xlabel('False positive rate','fontsize',16,'fontweight','bold')
@@ -2995,19 +3068,21 @@ else
     set(gcf,'PaperPositionMode','auto')
 end
 
-data_struct.false_merge_corr=false_merge_corr;
-data_struct.true_merge_corr=true_merge_corr;
-data_struct.num_pairs_corr=num_pairs_corr;
-data_struct.uncertain_corr=uncertain_corr;
-data_struct.false_positive_corr=false_positive_corr;
-data_struct.false_negative_corr=false_negative_corr;
-data_struct.all_neighbor_correlations_temp=all_neighbor_correlations_temp;
-data_struct.MSE_corr_model=MSE_corr_model;
-data_struct.p_same_corr_model=p_same_corr_model;
-data_struct.p_value_corr=p_value_corr;
-data_struct.more_than_06_fraction=more_than_06_fraction;
-data_struct.less_than_06_fraction=less_than_06_fraction;
-data_struct.n_corr=n_corr;
+if strcmp(imaging_technique,'one_photon');
+    data_struct.false_merge_corr=false_merge_corr;
+    data_struct.true_merge_corr=true_merge_corr;
+    data_struct.num_pairs_corr=num_pairs_corr;
+    data_struct.uncertain_corr=uncertain_corr;
+    data_struct.false_positive_corr=false_positive_corr;
+    data_struct.false_negative_corr=false_negative_corr;
+    data_struct.all_neighbor_correlations_temp=all_neighbor_correlations_temp;
+    data_struct.MSE_corr_model=MSE_corr_model;
+    data_struct.p_same_corr_model=p_same_corr_model;
+    data_struct.p_value_corr=p_value_corr;
+    data_struct.more_than_06_fraction=more_than_06_fraction;
+    data_struct.less_than_06_fraction=less_than_06_fraction;
+    data_struct.n_corr=n_corr;
+end
 
 data_struct.false_merge_dist=false_merge_dist;
 data_struct.true_merge_dist=true_merge_dist;
@@ -3023,7 +3098,7 @@ data_struct.less_than_7_fraction=less_than_7_fraction;
 data_struct.more_than_7_fraction=more_than_7_fraction;
 data_struct.normalized_distance=normalized_distance;
 
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     data_struct.false_merge=false_merge;
     data_struct.true_merge=true_merge;
     data_struct.num_pairs=num_pairs;
@@ -3037,9 +3112,11 @@ end
 data_struct.ctrs=ctrs;
 
 % Saving the pairwise correlations, distances, and P_same:
-all_to_all_p_value_corr_multi=cell(1,num_sessions);
+if strcmp(imaging_technique,'one_photon');
+    all_to_all_p_value_corr_multi=cell(1,num_sessions);
+end
 all_to_all_p_value_dist_multi=cell(1,num_sessions);
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     all_to_all_p_value_multi=cell(1,num_sessions);
 end
 
@@ -3047,9 +3124,11 @@ h = waitbar(0,'Computing P_s_a_m_e for all cell-pairs','Units', 'normalized', 'P
 for n=1:num_sessions
     waitbar((n)/num_sessions,h,['Computing P_s_a_m_e - session number ' num2str(n) '/' num2str(num_sessions)])
     num_cells=size(all_to_all_distance_multi{n},1);
-    all_to_all_p_value_corr_multi{n}=cell(num_cells,num_sessions);
+    if strcmp(imaging_technique,'one_photon');
+        all_to_all_p_value_corr_multi{n}=cell(num_cells,num_sessions);
+    end
     all_to_all_p_value_dist_multi{n}=cell(num_cells,num_sessions);
-    if joint_flag==1
+    if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
         all_to_all_p_value_multi{n}=cell(num_cells,num_sessions);
     end
     sessions_to_compare=1:num_sessions;
@@ -3059,34 +3138,41 @@ for n=1:num_sessions
         waitbar((k)/num_cells,h2,['Computing P_s_a_m_e - cell number ' num2str(k) '/' num2str(num_cells)]);
         for m=1:length(sessions_to_compare)
             this_session=sessions_to_compare(m);
-            temp_corr_vec=all_to_all_correlation_multi{n}{k,this_session};
+            if strcmp(imaging_technique,'one_photon');
+                temp_corr_vec=all_to_all_correlation_multi{n}{k,this_session};
+            end
             temp_dist_vec=all_to_all_distance_multi{n}{k,this_session};
-            length_vec=length(temp_corr_vec);
+            length_vec=length(temp_dist_vec);
             if length_vec>0
-                p_value_corr_vec=zeros(1,length(temp_corr_vec));
+                if strcmp(imaging_technique,'one_photon');                    
+                    p_value_corr_vec=zeros(1,length(temp_corr_vec));
+                end
                 p_value_dist_vec=zeros(1,length(temp_dist_vec));
                 if joint_flag==1
                     p_value_vec=zeros(1,length(temp_corr_vec));
                 end
                 for p=1:length_vec
-                    [~,this_corr_ind]=min(abs(ctrs{2}-temp_corr_vec(p)));
-                    this_p_value_corr=p_value_corr(this_corr_ind);
-                    p_value_corr_vec(p)=this_p_value_corr;
-                    
+                    if strcmp(imaging_technique,'one_photon');                        
+                        [~,this_corr_ind]=min(abs(ctrs{2}-temp_corr_vec(p)));
+                        this_p_value_corr=p_value_corr(this_corr_ind);
+                        p_value_corr_vec(p)=this_p_value_corr;
+                    end
                     [~,this_dist_ind]=min(abs(ctrs{1}-temp_dist_vec(p)));
                     this_p_value_dist=p_value_dist(this_dist_ind);
                     p_value_dist_vec(p)=this_p_value_dist;
                     
-                    if joint_flag==1
+                    if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
                         [~,this_dist_ind]=min(abs(ctrs{1}-temp_dist_vec(p)));
                         [~,this_corr_ind]=min(abs(ctrs{2}-temp_corr_vec(p)));
                         this_p_value=p_value(num_bins+1-this_dist_ind,this_corr_ind);
                         p_value_vec(p)=this_p_value;
                     end
                 end
-                all_to_all_p_value_corr_multi{n}{k,this_session}=1-p_value_corr_vec;
+                if strcmp(imaging_technique,'one_photon');                    
+                    all_to_all_p_value_corr_multi{n}{k,this_session}=1-p_value_corr_vec;
+                end
                 all_to_all_p_value_dist_multi{n}{k,this_session}=1-p_value_dist_vec;
-                if joint_flag==1
+                if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
                     all_to_all_p_value_multi{n}{k,this_session}=1-p_value_vec;
                 end
             end
@@ -3096,22 +3182,26 @@ for n=1:num_sessions
 end
 close(h);
 
-data_struct.all_to_all_p_value_corr_multi=all_to_all_p_value_corr_multi;
-data_struct.all_to_all_correlation_multi=all_to_all_correlation_multi;
+if strcmp(imaging_technique,'one_photon');
+    data_struct.all_to_all_p_value_corr_multi=all_to_all_p_value_corr_multi;
+    data_struct.all_to_all_correlation_multi=all_to_all_correlation_multi;
+end
 data_struct.all_to_all_p_value_dist_multi=all_to_all_p_value_dist_multi;
 data_struct.all_to_all_distance_multi=all_to_all_distance_multi;
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     data_struct.all_to_all_p_value_multi=all_to_all_p_value_multi;
 end
 data_struct.all_to_all_matrix_multi=all_to_all_matrix_multi;
 
-if joint_flag==1
+if joint_flag==1 & strcmp(imaging_technique,'one_photon')==1;
     if MSE_2d_model>0.25
         warndlg('There is large discrepancy between the joint model and the data')
     end
 end
+if strcmp(imaging_technique,'one_photon');
 if MSE_corr_model>0.1
     warndlg('There is large discrepancy between the spatial correlations model and the data')
+end
 end
 if MSE_dist_model>0.1
     warndlg('There is large discrepancy between the centroid distances model and the data')
@@ -3164,18 +3254,22 @@ else
 end
 
 results_dir=data_struct.results_dir;
-cd(results_dir);
-if isfield(data_struct,'figures_dir')
-    figures_dir=data_struct.figures_dir;
-else
-    mkdir('Figures');
-    figures_dir=fullfile(data_struct.results_dir,'Figures');
-    data_struct.figures_dir=figures_dir;
-end
+
+mkdir('Figures');
+figures_dir=fullfile(data_struct.results_dir,'Figures');
+data_struct.figures_dir=figures_dir;
 
 if get(handles.spatial_correlations,'Value')==1 % if spatial correlations are used the function "initial_clustering_corr" is called
-    [cell_to_index_map,~,all_neighbor_correlations,all_neighbor_distances,all_assigned_correlations,non_assigned_correlations,~,~]=initial_clustering_corr(maximal_distance_thresh,correlation_thresh,all_filters_corrected,all_centroids_corrected,num_sessions);
-        
+    if ~isfield(data_struct,'all_to_all_p_value_corr_multi')
+        if get(handles.one_photon,'value')==1
+            errordlg('Please compute the spatial correlations probability model before performing final cell registration')
+            error_variable=non_existing_variable;
+        else
+            errordlg('The spatial correlations model is only applied for 1-photon imaging data')
+            error_variable=non_existing_variable;
+        end
+    else
+    [cell_to_index_map,~,all_neighbor_correlations,all_neighbor_distances,all_assigned_correlations,non_assigned_correlations,~,~]=initial_clustering_corr(maximal_distance_thresh,correlation_thresh,all_filters_corrected,all_centroids_corrected,num_sessions);        
     figure
     xout=linspace(0,1,num_bins);
     [n1,~]=hist(all_assigned_correlations,xout);
@@ -3194,6 +3288,7 @@ if get(handles.spatial_correlations,'Value')==1 % if spatial correlations are us
     set(gca,'fontsize',16)
     legend('Same Cell','Different Cells','location','northwest')
     legend('boxoff')   
+    end
 else % if centroid distances are used it is performed here:
     initial_cell_num=size(all_filters_corrected{1},1);
     cell_to_index_map=zeros(initial_cell_num,num_sessions);
@@ -3415,13 +3510,10 @@ decision_type='Maximal correlation';
 data_struct.decision_type=decision_type;
 
 cd(results_dir);
-if isfield(data_struct,'figures_dir')
-    figures_dir=data_struct.figures_dir;
-else
-    mkdir('Figures');
-    figures_dir=fullfile(data_struct.results_dir,'Figures');
-    data_struct.figures_dir=figures_dir;
-end
+
+mkdir('Figures');
+figures_dir=fullfile(data_struct.results_dir,'Figures');
+data_struct.figures_dir=figures_dir;
 
 if ~isfield(data_struct,'cell_to_index_map')
     errordlg('Final registration cannot be performed before initial registration')
@@ -3445,7 +3537,11 @@ elseif  get(handles.spatial_correlations_2,'Value')==1
         all_to_all_matrix_multi=data_struct.all_to_all_matrix_multi;
         all_to_all_correlation_multi=data_struct.all_to_all_correlation_multi;
     else
-        errordlg('Please compute the spatial correlations probability model before performing final cell registration')
+        if get(handles.one_photon,'value')==1
+            errordlg('Please compute the spatial correlations probability model before performing final cell registration')
+        else
+            errordlg('The spatial correlations model is only applied for 1-photon imaging data')
+        end
     end
 elseif get(handles.centroid_distances_2,'Value')==1
     if isfield(data_struct,'all_to_all_p_value_dist_multi')
@@ -3470,8 +3566,8 @@ cd(results_dir);
 if get(handles.spatial_correlations_2,'Value')==1 && get(handles.use_model,'Value')==1;
     [optimal_cell_to_index_map,~,~,~,~,register_scores,~,~,~,~,~,~,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,all_clusters_centroids]=find_optimal_clustering(cell_to_index_map,all_to_all_p_value_corr_multi,all_to_all_matrix_multi,max_iterations,cluster_distance_thresh,p_value_thresh,all_centroids_corrected,num_sessions,decision_type,pixel_to_mic,is_figure,results_dir,figures_dir);
 elseif get(handles.p_value,'Value')==1 && get(handles.use_model,'Value')==1;
-  errordlg('The joint model is not implemented in this version. Please choose a different model')
-%     [optimal_cell_to_index_map,~,~,~,~,register_scores,~,~,~,~,~,~,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,all_clusters_centroids]=find_optimal_clustering(cell_to_index_map,all_to_all_p_value_multi,all_to_all_matrix_multi,max_iterations,cluster_distance_thresh,p_value_thresh,all_centroids_corrected,num_sessions,decision_type,pixel_to_mic,is_figure,results_dir,figures_dir);
+    errordlg('The joint model is not implemented in this version. Please choose a different model')
+    [optimal_cell_to_index_map,~,~,~,~,register_scores,~,~,~,~,~,~,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,all_clusters_centroids]=find_optimal_clustering(cell_to_index_map,all_to_all_p_value_multi,all_to_all_matrix_multi,max_iterations,cluster_distance_thresh,p_value_thresh,all_centroids_corrected,num_sessions,decision_type,pixel_to_mic,is_figure,results_dir,figures_dir);
 elseif get(handles.centroid_distances_2,'Value')==1 && get(handles.use_model,'Value')==1;
     [optimal_cell_to_index_map,~,~,~,~,register_scores,~,~,~,~,~,~,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,all_clusters_centroids]=find_optimal_clustering(cell_to_index_map,all_to_all_p_value_dist_multi,all_to_all_matrix_multi,max_iterations,cluster_distance_thresh,p_value_thresh,all_centroids_corrected,num_sessions,decision_type,pixel_to_mic,is_figure,results_dir,figures_dir);
 elseif get(handles.spatial_correlations_2,'Value')==1 && get(handles.use_simple_threshold,'Value')==1;
@@ -3606,6 +3702,11 @@ for n=1:num_sessions+1
     end
 end
 fprintf(logFile,'\n\nGeneral data parameters:\n------------------------\n');
+if strcmp(data_struct.imaging_technique,'one_photon')
+    fprintf(logFile,'Imaging technique - 1-photon\n');
+else
+    fprintf(logFile,'Imaging technique - 2-photon\n');
+end
 fprintf(logFile,['Number of sessions - ' num2str(num_sessions) '\n']);
 FOV_size=[data_struct.x_scale data_struct.y_scale];
 fprintf(logFile,['FOV size - ' num2str(FOV_size(1)) 'X' num2str(FOV_size(2)) ' [mic] ; (x,y)\n']);
@@ -3644,7 +3745,7 @@ else
 end
 
 % Final alignment parameters:
-num_bins_p_same=length(data_struct.true_merge_corr);
+num_bins_p_same=length(data_struct.true_merge_dist);
 if get(handles.use_model,'Value')==1;
     decision_thresh=str2double(get(handles.decision_thresh,'string'));
     fprintf(logFile,'Registration approach - Probabilistic modeling\n');
@@ -3795,6 +3896,7 @@ set(handles.final_p_same_slider,'value',0.5);
 set(handles.model_maximal_distance,'string','12')
 set(handles.distance_threshold,'string','5')
 set(handles.correlation_threshold,'string','0.65')
+set(handles.one_photon,'Value',1);
 set(handles.translations_rotations,'Value',1);
 set(handles.spatial_correlations_2,'Value',1);
 set(handles.use_model,'Value',1);
@@ -5242,5 +5344,21 @@ function use_joint_model_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of use_joint_model
 
 if get(handles.use_joint_model,'value')==1
-    errordlg('The joint model is not implemented in this version. Please uncheck this checkbox')
+    errordlg('The joint model is not implemented in this version. Please uncheck this radio button')
+end
+
+
+% --- Executes when selected object is changed in imaging_technique_select.
+function imaging_technique_select_SelectionChangedFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in imaging_technique_select 
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(handles.one_photon,'Value')==1;
+    set(handles.spatial_correlations,'Value',1);
+    set(handles.spatial_correlations_2,'Value',1);
+else
+    set(handles.use_joint_model,'Value',0);
+    set(handles.centroid_distances,'Value',1);
+    set(handles.centroid_distances_2,'Value',1);
 end
