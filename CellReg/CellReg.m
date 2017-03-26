@@ -5347,7 +5347,6 @@ if get(handles.use_joint_model,'value')==1
     errordlg('The joint model is not implemented in this version. Please uncheck this radio button')
 end
 
-
 % --- Executes when selected object is changed in imaging_technique_select.
 function imaging_technique_select_SelectionChangedFcn(hObject, eventdata, handles)
 % hObject    handle to the selected object in imaging_technique_select 
