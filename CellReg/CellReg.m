@@ -216,7 +216,8 @@ if isempty(tifFilesIdx)
     errordlg('This folder does not contain data with the required format')
 else
     num_sessions=length(tifFilesIdx);
-    
+    tifFilesIdx_order=zeros(1,length(tifFilesIdx));
+
     button_cent = questdlg('Does your data include centroid locations?','title','Yes','No','Yes');
     
     button = questdlg('Does your data include the events?','title','Yes','No','Yes');
@@ -234,10 +235,12 @@ else
             if isempty(tifFilesIdx)
                 errordlg('This folder does not contain spatial footprints with the required format')
             else
-                is_data=1;
+                is_data=1;                
+                tifFilesIdx_order(n)=tifFilesIdx(1);
             end
         else
             is_data=1;
+            tifFilesIdx_order(n)=tifFilesIdx(1);
         end
         if is_data==1;
             data_string=namesOfFiles(tifFilesIdx);
@@ -360,7 +363,7 @@ else
     data_struct.sessions_list{1}='List of sessions:';
     tifFilesIdx = find(cellfun (@(x) ~isempty(strfind(x,'Filters')) ,namesOfFiles));
     for n=1:num_sessions
-        this_file_name=namesOfFiles{tifFilesIdx(n)};
+        this_file_name=namesOfFiles{tifFilesIdx_order(n)};
         data_struct.sessions_list{n+1}=['Session ' num2str(n) ' - ' this_file_name];
     end
     
@@ -386,7 +389,7 @@ else
             set(gca,'xtick',[])
             set(gca,'ytick',[])
             colormap('gray')
-            this_file_name=namesOfFiles{tifFilesIdx(n)};
+            this_file_name=namesOfFiles{tifFilesIdx_order(n)};
             title(['Session ' num2str(n) ' - ' strrep(this_file_name,'_','\_')],'fontsize',14,'fontweight','bold')
         end
     else
@@ -397,11 +400,10 @@ else
             set(gca,'xtick',[])
             set(gca,'ytick',[])
             colormap('gray')
-            this_file_name=namesOfFiles{tifFilesIdx(n)};
+            this_file_name=namesOfFiles{tifFilesIdx_order(n)};
             title(['Session ' num2str(n) ' - ' strrep(this_file_name,'_','\_')],'fontsize',14,'fontweight','bold')
         end
-    end
-    
+    end    
     data_struct.button_cent=button_cent;
     set(handles.list_of_sessions,'string',data_struct.sessions_list);
     handles.data_struct=data_struct;
