@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 26-Mar-2017 13:36:20
+% Last Modified by GUIDE v2.5 25-Apr-2017 11:50:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -5363,3 +5363,11 @@ else
     set(handles.centroid_distances,'Value',1);
     set(handles.centroid_distances_2,'Value',1);
 end
+
+
+% --- Executes when selected object is changed in probability_model_select.
+function probability_model_select_SelectionChangedFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in probability_model_select 
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
