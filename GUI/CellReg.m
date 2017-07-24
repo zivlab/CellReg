@@ -1545,11 +1545,15 @@ else
     else
         figures_visibility='Off';
     end
-    
+    number_of_sessions=data_struct.number_of_sessions;
     red_session=str2num(get(handles.red_session,'string'));
     green_session=str2num(get(handles.green_session,'string'));
-    blue_session=str2num(get(handles.blue_session,'string'));
-    RGB_indexes=[red_session green_session blue_session];
+    if number_of_sessions>2
+        blue_session=str2num(get(handles.blue_session,'string'));
+        RGB_indexes=[red_session green_session blue_session];
+    else
+        RGB_indexes=[red_session green_session];
+    end
     axes(handles.axes1);
     plot_RGB_overlay(spatial_footprints_projections,RGB_indexes,overlapping_FOV)
     figure('Visible',figures_visibility)
