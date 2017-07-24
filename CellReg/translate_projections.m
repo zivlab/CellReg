@@ -1,11 +1,17 @@
-function [translated_image]=translate_projections(original_image,translation)
-% This function receives an image. It rotates the image according to the
-% angle theta and translates the image in xy plane according to translated. The
-% function returns the rotated and translated image.
+function [translated_image]=translate_projections(original_image,translations)
+% This function translates an image in (x,y) according to provided translations.
+
+% Inputs:
+% 1. original_image
+% 2. translations
+
+% Outputs:
+% 1. translated_image
+
 N=size(original_image,1);
 M=size(original_image,2);
-a=translation(2);
-b=translation(1);
+a=translations(2);
+b=translations(1);
 translated_image=zeros(size(original_image));
 for p=1:N
     for q=1:M
@@ -17,7 +23,7 @@ for p=1:N
         if wanted_coords(2)>M+1;
             wanted_coords(1)=M+1;
         end
-        translated_image(p,q)=coord_value(original_image,wanted_coords);
+        translated_image(p,q)=interpolate_pixel_value(original_image,wanted_coords);
     end
 end
 end

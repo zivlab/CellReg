@@ -261,14 +261,7 @@ nancolor = [nan nan nan];
 if nargs == 2,
     if strcmpi(args{end-1},'nancolor'),
         nancolor = args{end};
-        if ~all(size(nancolor)==[1 3]),
-            error('JRI:freezeColors:checkArgs:badColorArgument',...
-                'nancolor must be [r g b] vector');
-        end
         nancolor(nancolor>1) = 1; nancolor(nancolor<0) = 0;
-    else
-        error('JRI:freezeColors:checkArgs:unrecognizedOption',...
-            'Unrecognized option (%s). Only ''nancolor'' is valid.',args{end-1})
     end
 end
 

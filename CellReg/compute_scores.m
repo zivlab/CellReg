@@ -1,0 +1,92 @@
+function [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=compute_scores(cell_to_index_map,all_to_all_indexes,all_to_all_p_same,number_of_sessions)
+% This function computes the false postive, false negative,
+% exclusivity, and cell scores for all registered cells according to the
+% clustering procedure
+
+% Inputs:
+% 1. cell_to_index_map
+% 2. all_to_all_indexes
+% 3. all_to_all_p_same
+% 4. number_of_sessions
+
+% Outputs:
+% 1. cell_scores_positive
+% 2. cell_scores_negative
+% 3. cell_scores_exclusive
+% 4. cell_scores
+
+certainty_threshold=0.95;
+
+number_of_clusters=size(cell_to_index_map,1);
+cell_scores=zeros(1,number_of_clusters);
+cell_scores_positive=zeros(1,number_of_clusters);
+cell_scores_negative=zeros(1,number_of_clusters);
+cell_scores_exclusive=zeros(1,number_of_clusters);
+for n=1:number_of_clusters
+    % initialize score counts for each cell:
+    good_pairs=0;
+    good_pairs_positive=0;
+    good_pairs_negative=0;
+    good_pairs_exclusive=0;
+    num_comparisons=0; % the denominator in the calculation of the score
+    num_comparisons_positive=0;
+    num_comparisons_negative=0;
+    cells_in_cluster=cell_to_index_map(n,:);
+    for m=1:number_of_sessions
+        for k=1:number_of_sessions
+            if k~=m & cells_in_cluster(m)>0 % active cell in this session
+                this_cell=cell_to_index_map(n,m);
+                num_comparisons=num_comparisons+1; 
+                cells_to_check=all_to_all_indexes{m}{this_cell,k};
+                if cell_to_index_map(n,k)==0 % active-inactive comparison
+                    num_comparisons_negative=num_comparisons_negative+1; 
+                    if isempty(cells_to_check) % no candidate means true negative
+                        good_pairs=good_pairs+1;
+                        good_pairs_negative=good_pairs_negative+1;
+                    else
+                        this_p_same=all_to_all_p_same{m}{this_cell,k};
+                        if max(this_p_same)<1-certainty_threshold % all candidates with low P_same
+                            good_pairs=good_pairs+1;
+                            good_pairs_negative=good_pairs_negative+1;
+                        end
+                    end
+                else % active-active comparison
+                    num_comparisons_positive=num_comparisons_positive+1;
+                    this_p_same=all_to_all_p_same{m}{this_cell,k};
+                    clustered_cell=cell_to_index_map(n,k);
+                    clustered_ind=find(cells_to_check==clustered_cell);
+                    if this_p_same(clustered_ind)>certainty_threshold % true postive
+                        this_p_same(clustered_ind)=[];
+                        good_pairs_positive=good_pairs_positive+1;
+                        if isempty(this_p_same) % true positive and exclusive
+                            good_pairs=good_pairs+1;
+                            good_pairs_exclusive=good_pairs_exclusive+1;
+                        else
+                            if max(this_p_same)<1-certainty_threshold % all other candidates with low P_same
+                                good_pairs=good_pairs+1;
+                                good_pairs_exclusive=good_pairs_exclusive+1;
+                            end
+                        end
+                    else % not a true positve
+                        this_p_same(clustered_ind)=[];
+                        if isempty(this_p_same) % but still exclusive
+                            good_pairs_exclusive=good_pairs_exclusive+1;
+                        else
+                            if max(this_p_same)<1-certainty_threshold
+                                good_pairs_exclusive=good_pairs_exclusive+1;
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    % normalizing all the scores by the numbers of comparisons:
+    cell_scores_positive(n)=good_pairs_positive/num_comparisons_positive;
+    cell_scores_negative(n)=good_pairs_negative/num_comparisons_negative;
+    cell_scores_exclusive(n)=good_pairs_exclusive/num_comparisons_positive;
+    cell_scores(n)=good_pairs/num_comparisons;
+end
+
+end
+

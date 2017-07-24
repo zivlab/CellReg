@@ -58,12 +58,6 @@ if( s > 1.5 | s < 0.5 )
     y = y ./ s;
 end
 
-X = zeros( n, 3 );
-X(:,1) = 1;
-X(:,2) = x;
-X(:,3) = (x.*x);
-
-
 % try to estimate mean mu from the location of the maximum
 [ymax,index]=max(y);
 mu = x(index);
@@ -99,10 +93,8 @@ for i=1:Nmax
     mu = a(2);
     
     if( sigma < 0 )
-        sigma = abs( sigma );
         fprintf( 'Instability detected! Rerun with initial values sigma0 and mu0! \n\r' );
-        fprintf( 'Check if your data is properly scaled! p.d.f should approx. sum up to \n\r' );
-        exit;
+        warning( 'Check if your data is properly scaled! p.d.f should approx. sum up to \n\r' );        
     end
 end
 

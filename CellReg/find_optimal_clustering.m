@@ -1,256 +1,86 @@
-function [cell_to_index_map,mean_cell_scores,mean_cell_scores_positive,mean_cell_scores_negative,mean_cell_scores_exclusive,cell_scores,changes_count,switch_count,separation_count,move_count,delete_count,decision_type,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,all_clusters_centroids]=find_optimal_clustering(cell_to_index_map,all_to_all_p_value_multi,all_to_all_matrix_multi,max_iterations,cluster_distance_thresh,correlation_thresh,all_centroids_corrected,num_sessions,decision_type,~,is_figure,results_dir,figures_dir)
+function [cell_to_index_map,clusters_centroid_locations,varargout]=find_optimal_clustering(cell_to_index_map,all_to_all_p_same,all_to_all_indexes,maximal_distance,registration_threshold,centroid_locations,registration_approach,transform_data)
+% This function registers cells with a clustering procedure.
+% it uses either the P_same that were calculated for each cell-pair, or
+% alternatively their centroid distance or spatial similarity.
+% Each cell from a given session is registered to the cluster for which it
+% is most similar using one of the clustering criterions mentioned below.
 
-% Finding the optimal clustering with an iterative process:
+% Inputs:
+% 1. cell_to_index_map - list of initial registered cells and their index in each session
+% 2. all_to_all_p_same
+% 3. all_to_all_indexes
+% 4. maximal_distance
+% 5. registration_threshold
+% 6. centroid_locations
+% 7. registration_approach
+% 8. transform_data - 'true' to transformed distances to similarities
+
+% Outputs:
+% 1. cell_to_index_map - list of registered cells and indexes after clustering
+% 2. registered_cells_centroids
+% 3. varargout
+%   3{1}. cell_scores
+%   3{2}. cell_scores_positive
+%   3{3}. cell_scores_negative
+%   3{4}. cell_scores_exclusive
+
+maximal_number_of_iterations=10; % clustering usually convereges after 1 iteration
+cluster_distance_threshold=1.7*maximal_distance; % distance between clusters may be slightly larger than distance between cell-pairs
+number_of_sessions=size(centroid_locations,2);
+
+% Different options for clustering criterion:
+decision_type='Maximal similarity';
+% decision_type='Minimal dissimilarity';
+% decision_type='Average similarity';
 num_changes_thresh=10;
-num_clusters=size(cell_to_index_map,1);
-cell_scores=zeros(1,num_clusters);
-cell_scores_positive=zeros(1,num_clusters);
-cell_scores_negative=zeros(1,num_clusters);
-cell_scores_exclusive=zeros(1,num_clusters);
-active_sessions=zeros(1,num_clusters);
 iteration=1;
-for n=1:num_clusters
-    good_pairs=0;
-    good_pairs_positive=0;
-    good_pairs_negative=0;
-    good_pairs_exclusive=0;
-    num_comparisons=0;
-    num_comparisons_positive=0;
-    num_comparisons_negative=0;
-    cells_in_cluster=cell_to_index_map(n,:);
-    for m=1:num_sessions
-        for k=1:num_sessions
-            if k~=m && cells_in_cluster(m)>0
-                this_cell=cell_to_index_map(n,m);
-                num_comparisons=num_comparisons+1;
-                cells_to_check=all_to_all_matrix_multi{m}{this_cell,k};
-                if cell_to_index_map(n,k)==0
-                    num_comparisons_negative=num_comparisons_negative+1;
-                    if isempty(cells_to_check)
-                        good_pairs=good_pairs+1;
-                        good_pairs_negative=good_pairs_negative+1;
-                    else
-                        this_p_value=all_to_all_p_value_multi{m}{this_cell,k};
-                        if max(this_p_value)<0.05
-                            good_pairs=good_pairs+1;
-                            good_pairs_negative=good_pairs_negative+1;
-                        end
-                    end
-                else
-                    num_comparisons_positive=num_comparisons_positive+1;
-                    this_p_value=all_to_all_p_value_multi{m}{this_cell,k};
-                    clustered_cell=cell_to_index_map(n,k);
-                    clustered_ind=find(cells_to_check==clustered_cell);
-                    if this_p_value(clustered_ind)>0.95
-                        this_p_value(clustered_ind)=[];
-                        good_pairs_positive=good_pairs_positive+1;
-                        if isempty(this_p_value)
-                            good_pairs=good_pairs+1;
-                            good_pairs_exclusive=good_pairs_exclusive+1;
-                        else
-                            if max(this_p_value)<0.05
-                                good_pairs=good_pairs+1;
-                                good_pairs_exclusive=good_pairs_exclusive+1;
-                            end
-                        end
-                    else
-                        this_p_value(clustered_ind)=[];
-                        if isempty(this_p_value)
-                            good_pairs_exclusive=good_pairs_exclusive+1;
-                        else
-                            if max(this_p_value)<0.05
-                                good_pairs_exclusive=good_pairs_exclusive+1;
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    cell_scores_positive(n)=good_pairs_positive/num_comparisons_positive;
-    cell_scores_negative(n)=good_pairs_negative/num_comparisons_negative;
-    cell_scores_exclusive(n)=good_pairs_exclusive/num_comparisons_positive;
-    cell_scores(n)=good_pairs/num_comparisons;
-    active_sessions(n)=sum(cells_in_cluster>0);
-end
-if is_figure
-    xout_temp=linspace(0,1,num_sessions*2+1);
-    xout=xout_temp(2:2:end);
-    figure
-    fig_size_y=20;
-    fig_size_x=25;
-    set(gcf,'PaperUnits','centimeters','PaperPosition',[1 5 fig_size_x fig_size_y]);
-    set(gcf,'PaperOrientation','portrait');
-    set(gcf,'Units','centimeters','Position',get(gcf,'paperPosition')+[5 0 0 0]);
-    size_x=0.65;
-    size_y=0.65;
-    
-    axes('position',[0.6 0.1 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('Overall cell scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    h=axes('position',[0.68 0.25 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    
-    axes('position',[0.12 0.1 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores_exclusive,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('Exclusivity cell scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    h=axes('position',[0.2 0.25 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    
-    axes('position',[0.6 0.58 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores_positive,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('True positive scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    text(-0.25,1.2,['Iteration number ' num2str(iteration) ': ' num2str(num_clusters) ' registered cells'],'fontsize',24,'fontweight','bold','HorizontalAlignment','Center')
-    h=axes('position',[0.68 0.73 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    
-    axes('position',[0.12 0.58 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores_negative,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('True negative scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    h=axes('position',[0.2 0.73 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    set(gcf,'PaperPositionMode','auto')
-end
 
-mean_cell_scores=zeros(1,max_iterations);
-mean_cell_scores(1)=mean(cell_scores);
-mean_cell_scores_positive=zeros(1,max_iterations);
-mean_cell_scores_positive(1)=mean(cell_scores_positive(cell_scores_positive>=0));
-mean_cell_scores_negative=zeros(1,max_iterations);
-mean_cell_scores_negative(1)=mean(cell_scores_negative(cell_scores_negative>=0));
-mean_cell_scores_exclusive=zeros(1,max_iterations);
-mean_cell_scores_exclusive(1)=mean(cell_scores_exclusive(cell_scores_exclusive>=0));
 
-changes_count=zeros(1,max_iterations);
-switch_count=zeros(1,max_iterations);
-separation_count=zeros(1,max_iterations);
-move_count=zeros(1,max_iterations);
-delete_count=zeros(1,max_iterations);
+% the next variables indicate if clustering converges:
+changes_count=zeros(1,maximal_number_of_iterations);
+switch_count=zeros(1,maximal_number_of_iterations);
+separation_count=zeros(1,maximal_number_of_iterations);
+move_count=zeros(1,maximal_number_of_iterations);
+delete_count=zeros(1,maximal_number_of_iterations);
 changes_count(1)=-1;
 
-hbar = waitbar(0,'Clustering cells according to the probability model');
-while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==-1) && (iteration)<max_iterations
-    waitbar(iteration/max_iterations,hbar ,['Performing cell clustering - iteration number ' num2str(iteration) '/' num2str(max_iterations)])
+% Finding the optimal clustering with an iterative process:
+disp('Clustering cells:');
+display_progress_bar('Terminating previous progress bars',true)    
+while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==-1) && (iteration)<maximal_number_of_iterations    
+    display_progress_bar(['Performing clustering (interation #' num2str(iteration) ') - '],false)
     
     % Finding the center of mass of all clusters:
     iteration=iteration+1;
     num_clusters=size(cell_to_index_map,1);
-    all_clusters_centroids=zeros(2,num_clusters);
+    clusters_centroid_locations=zeros(2,num_clusters);
     for n=1:num_clusters
         cells_in_cluster=cell_to_index_map(n,:);
         sessions_ind=find(cells_in_cluster>0);
         N=length(sessions_ind);
         centroids_found=zeros(2,N);
         for k=1:N
-            centroids_found(:,k)=all_centroids_corrected{sessions_ind(k)}(cells_in_cluster(sessions_ind(k)),:);
+            centroids_found(:,k)=centroid_locations{sessions_ind(k)}(cells_in_cluster(sessions_ind(k)),:);
         end
-        all_clusters_centroids(:,n)=mean(centroids_found,2);
+        clusters_centroid_locations(:,n)=mean(centroids_found,2);
     end
     
     % Checking for each cell which cluster is the most correlated:
-    for n=1:num_sessions
+    for n=1:number_of_sessions % for each session
         num_cells=sum(cell_to_index_map(:,n)>0);
         cluster_ind=find(cell_to_index_map(:,n)>0);
-        for k=1:num_cells
+        for k=1:num_cells % for each cell
             this_cell=cell_to_index_map(cluster_ind(k),n);
-            this_cell_centroid=all_centroids_corrected{n}(this_cell,:);
+            this_cell_centroid=centroid_locations{n}(this_cell,:);
             centroid=repmat(this_cell_centroid,num_clusters,1)';
-            distance_vec=sqrt(sum((centroid-all_clusters_centroids).^2));
-            clusters_to_check=find(distance_vec<cluster_distance_thresh);
+            distance_vec=sqrt(sum((centroid-clusters_centroid_locations).^2));
+            clusters_to_check=find(distance_vec<cluster_distance_threshold);
             num_candidates=length(clusters_to_check);
-            total_correlation=zeros(1,num_candidates);
+            total_similarity=zeros(1,num_candidates);
             normalization_factor=zeros(1,num_candidates);
-            max_in_cluster_correlation=zeros(1,num_candidates);
-            min_in_cluster_correlation=ones(1,num_candidates);
-            for m=1:num_candidates
+            max_in_cluster_similarity=zeros(1,num_candidates);
+            min_in_cluster_similarity=ones(1,num_candidates);
+            for m=1:num_candidates % going over all candidates
                 this_cluster=clusters_to_check(m);
                 cells_in_cluster=cell_to_index_map(this_cluster,:);
                 % checking if cell from this session is already in the cluster
@@ -261,34 +91,40 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
                 if ~isempty(sessions_in_cluster)
                     for l=1:length(sessions_in_cluster)
                         in_cluster=cell_to_index_map(this_cluster,sessions_in_cluster(l));
-                        in_session=all_to_all_matrix_multi{n}{this_cell,sessions_in_cluster(l)};
+                        in_session=all_to_all_indexes{n}{this_cell,sessions_in_cluster(l)};
                         in_cluster_ind=find(in_session==in_cluster);
-                        if ~isempty(all_to_all_p_value_multi{n}{this_cell,sessions_in_cluster(l)}(in_cluster_ind))
-                            this_correlation=all_to_all_p_value_multi{n}{this_cell,sessions_in_cluster(l)}(in_cluster_ind);
-                            total_correlation(m)=total_correlation(m)+this_correlation;
+                        if ~isempty(all_to_all_p_same{n}{this_cell,sessions_in_cluster(l)}(in_cluster_ind))
+                            if transform_data
+                                temp_value=all_to_all_p_same{n}{this_cell,sessions_in_cluster(l)}(in_cluster_ind);
+                                this_similarity=transform_distance_to_similarity(temp_value,maximal_distance);
+                            else
+                                this_similarity=all_to_all_p_same{n}{this_cell,sessions_in_cluster(l)}(in_cluster_ind);
+                            end
+                            total_similarity(m)=total_similarity(m)+this_similarity;
                             normalization_factor(m)=normalization_factor(m)+1;
-                            max_in_cluster_correlation(m)=max(max_in_cluster_correlation(m),this_correlation);
-                            min_in_cluster_correlation(m)=min(min_in_cluster_correlation(m),this_correlation);
+                            max_in_cluster_similarity(m)=max(max_in_cluster_similarity(m),this_similarity);
+                            min_in_cluster_similarity(m)=min(min_in_cluster_similarity(m),this_similarity);
                         else
-                            min_in_cluster_correlation(m)=0;
+                            min_in_cluster_similarity(m)=0;
                         end
                     end
                 else
-                    min_in_cluster_correlation(m)=0;
+                    min_in_cluster_similarity(m)=0;
                 end
             end
             
-            if strcmp(decision_type,'Minimal correlation')
-                [max_correlation,max_correlation_ind]=max(min_in_cluster_correlation);
-            elseif strcmp(decision_type,'Average correlation')
-                normalized_correlation=total_correlation./(normalization_factor);
-                [max_correlation,max_correlation_ind]=max(normalized_correlation);
-                average_correlation=max_correlation;
-            elseif strcmp(decision_type,'Maximal correlation')
-                [max_correlation,max_correlation_ind]=max(max_in_cluster_correlation);
+            % different criterions that can be used for clustering
+            if strcmp(decision_type,'Minimal dissimilarity')
+                [max_similarity,max_similarity_ind]=max(min_in_cluster_similarity);
+            elseif strcmp(decision_type,'Average similarity')
+                normalized_similarity=total_similarity./(normalization_factor);
+                [max_similarity,max_similarity_ind]=max(normalized_similarity);
+                average_similarity=max_similarity;
+            elseif strcmp(decision_type,'Maximal similarity')
+                [max_similarity,max_similarity_ind]=max(max_in_cluster_similarity);
             end
             
-            max_cluster=clusters_to_check(max_correlation_ind);
+            max_cluster=clusters_to_check(max_similarity_ind);
             cells_in_max_cluster=cell_to_index_map(max_cluster,:);
             sessions_in_max_cluster=find(cells_in_max_cluster>0);
             if sum(sessions_in_max_cluster-n==0)>0 % cell from same session already in cluster
@@ -299,30 +135,30 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
                 cells_in_original_cluster=cell_to_index_map(cluster_ind(k),:);
                 num_cells_in_original_cluster=sum(cells_in_original_cluster>0);
                 
-                if strcmp(decision_type,'Minimal correlation')
-                    average_correlation=max_correlation;
-                elseif strcmp(decision_type,'Maximal correlation')
-                    average_correlation=max_correlation;
+                if strcmp(decision_type,'Minimal dissimilarity')
+                    average_similarity=max_similarity;
+                elseif strcmp(decision_type,'Maximal similarity')
+                    average_similarity=max_similarity;
                 end
                 
-                if average_correlation<correlation_thresh && num_cells_in_original_cluster>1 % split the cell to a new cluster
+                if average_similarity<registration_threshold && num_cells_in_original_cluster>1 % split the cell to a new cluster
                     num_clusters=num_clusters+1;
-                    cell_to_index_map(num_clusters,:)=zeros(1,num_sessions);
+                    cell_to_index_map(num_clusters,:)=zeros(1,number_of_sessions);
                     cell_to_index_map(num_clusters,n)=this_cell;
                     cell_to_index_map(cluster_ind(k),n)=0;
-                    all_clusters_centroids(:,num_clusters)=this_cell_centroid;
+                    clusters_centroid_locations(:,num_clusters)=this_cell_centroid;
                     changes_count(iteration)=changes_count(iteration)+1;
                     separation_count(iteration)=separation_count(iteration)+1;
-                elseif average_correlation>=correlation_thresh
-                    if (clusters_to_check(max_correlation_ind)~=cluster_ind(k)) % need to change clusters
-                        this_cluster=clusters_to_check(max_correlation_ind);
+                elseif average_similarity>=registration_threshold
+                    if (clusters_to_check(max_similarity_ind)~=cluster_ind(k)) % need to change clusters
+                        this_cluster=clusters_to_check(max_similarity_ind);
                         cells_in_cluster=cell_to_index_map(this_cluster,:);
                         % checking if cell from this session is already in the cluster
                         sessions_in_cluster=find(cells_in_cluster>0);
                         if sum(sessions_in_cluster-n==0)>0 % cell from same session already in cluster - switch
                             temp_cell=cell_to_index_map(this_cluster,n);
-                            temp_cell_centroid=all_centroids_corrected{n}(temp_cell,:);
-                            temp_correlation=0;
+                            temp_cell_centroid=centroid_locations{n}(temp_cell,:);
+                            temp_similarity=0;
                             % switch only if this cell is more correlated to the cluster
                             cells_in_cluster=cell_to_index_map(this_cluster,:);
                             % checking if cell from this session is already in the cluster
@@ -332,21 +168,27 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
                             end
                             for l=1:length(sessions_in_cluster)
                                 in_cluster=cell_to_index_map(this_cluster,sessions_in_cluster(l));
-                                in_session=all_to_all_matrix_multi{n}{temp_cell,sessions_in_cluster(l)};
+                                in_session=all_to_all_indexes{n}{temp_cell,sessions_in_cluster(l)};
                                 in_cluster_ind=find(in_session==in_cluster);
-                                if ~isempty(all_to_all_p_value_multi{n}{temp_cell,sessions_in_cluster(l)}(in_cluster_ind))
-                                    temp_correlation=temp_correlation+all_to_all_p_value_multi{n}{temp_cell,sessions_in_cluster(l)}(in_cluster_ind);
+                                if ~isempty(all_to_all_p_same{n}{temp_cell,sessions_in_cluster(l)}(in_cluster_ind))
+                                    if transform_data
+                                        temp_value=all_to_all_p_same{n}{temp_cell,sessions_in_cluster(l)}(in_cluster_ind);
+                                        this_similarity=transform_distance_to_similarity(temp_value,maximal_distance);
+                                        temp_similarity=temp_similarity+this_similarity;
+                                    else
+                                        temp_similarity=temp_similarity+all_to_all_p_same{n}{temp_cell,sessions_in_cluster(l)}(in_cluster_ind);
+                                    end
                                 end
                             end
-                            if max_correlation>temp_correlation
+                            if max_similarity>temp_similarity
                                 num_clusters=num_clusters+1;
                                 cell_to_index_map(this_cluster,n)=this_cell;
-                                cell_to_index_map(num_clusters,:)=zeros(1,num_sessions);
+                                cell_to_index_map(num_clusters,:)=zeros(1,number_of_sessions);
                                 cell_to_index_map(num_clusters,n)=temp_cell;
                                 changes_count(iteration)=changes_count(iteration)+1;
                                 switch_count(iteration)=switch_count(iteration)+1;
                                 cell_to_index_map(cluster_ind(k),n)=0;
-                                all_clusters_centroids(:,num_clusters)=temp_cell_centroid;
+                                clusters_centroid_locations(:,num_clusters)=temp_cell_centroid;
                             end
                         else % just need to add the cell to the cluster
                             cell_to_index_map(cluster_ind(k),n)=0;
@@ -371,76 +213,83 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
     end
     cell_to_index_map_temp=cell_to_index_map;
     
-    % Merging clusters if they cross threshold:
+    % Merging clusters if they cross the threshold:
     num_clusters=size(cell_to_index_map_temp,1);
-    all_clusters_centroids=zeros(2,num_clusters);
-    for n=1:num_clusters
+    clusters_centroid_locations=zeros(2,num_clusters);
+    for n=1:num_clusters % finding the centroid locations of the clusters
         cells_in_cluster=cell_to_index_map_temp(n,:);
         sessions_ind=find(cells_in_cluster>0);
         N=length(sessions_ind);
         centroids_found=zeros(2,N);
         for k=1:N
-            centroids_found(:,k)=all_centroids_corrected{sessions_ind(k)}(cells_in_cluster(sessions_ind(k)),:);
+            centroids_found(:,k)=centroid_locations{sessions_ind(k)}(cells_in_cluster(sessions_ind(k)),:);
         end
-        all_clusters_centroids(:,n)=mean(centroids_found,2);
-    end
-    
-    for n=1:num_clusters
+        clusters_centroid_locations(:,n)=mean(centroids_found,2);
+    end    
+    for n=1:num_clusters % going over each cluster to see if it should merge
         this_cluster_cells=cell_to_index_map_temp(n,:);
         this_cluster_sessions=find(this_cluster_cells>0);
-        centroid=repmat(all_clusters_centroids(:,n),1,num_clusters);
-        distance_vec=sqrt(sum((centroid-all_clusters_centroids).^2));
-        clusters_to_check=find(distance_vec<cluster_distance_thresh);
+        centroid=repmat(clusters_centroid_locations(:,n),1,num_clusters);
+        distance_vec=sqrt(sum((centroid-clusters_centroid_locations).^2));
+        clusters_to_check=find(distance_vec<cluster_distance_threshold);
         clusters_to_check=setdiff(clusters_to_check,n);
         num_candidates=length(clusters_to_check);
-        for k=1:num_candidates
+        for k=1:num_candidates % candidate clusters to merge with
             candidate_cells=cell_to_index_map_temp(clusters_to_check(k),:);
             candidate_sessions=find(candidate_cells>0);
             if isempty(intersect(find(this_cluster_cells>0),find(candidate_cells>0)))
                 all_to_all_temp=zeros(sum(this_cluster_cells>0),sum(candidate_cells>0));
                 for m=1:sum(this_cluster_cells>0);
                     for l=1:sum(candidate_cells>0)
-                        neigbor_cell=all_to_all_matrix_multi{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)};
+                        neigbor_cell=all_to_all_indexes{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)};
                         this_cell_ind=find(neigbor_cell==candidate_cells(candidate_sessions(l)));
-                        if ~isempty(all_to_all_p_value_multi{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)}(this_cell_ind))
-                            all_to_all_temp(m,l)=all_to_all_p_value_multi{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)}(this_cell_ind);
+                        if ~isempty(all_to_all_p_same{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)}(this_cell_ind))
+                            if transform_data
+                                temp_value=all_to_all_p_same{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)}(this_cell_ind);
+                                this_similarity=transform_distance_to_similarity(temp_value,maximal_distance);
+                                all_to_all_temp(m,l)=this_similarity;
+                            else
+                                all_to_all_temp(m,l)=all_to_all_p_same{this_cluster_sessions(m)}{this_cluster_cells(this_cluster_sessions(m)),candidate_sessions(l)}(this_cell_ind);
+                            end
                         end
                     end
                 end
-                if strcmp(decision_type,'Average correlation')
+                % the different criterions to merge clusters
+                if strcmp(decision_type,'Average similarity')
                     average_all_to_all_temp_1=mean(all_to_all_temp);
                     average_all_to_all_temp_2=mean(all_to_all_temp,2);
-                    over_thresh_1=sum(average_all_to_all_temp_1>correlation_thresh);
-                    over_thresh_2=sum(average_all_to_all_temp_2>correlation_thresh);
+                    over_thresh_1=sum(average_all_to_all_temp_1>registration_threshold);
+                    over_thresh_2=sum(average_all_to_all_temp_2>registration_threshold);
                     if over_thresh_2==sum(this_cluster_cells>0) && over_thresh_1==sum(candidate_cells>0)
                         cell_to_index_map_temp(n,candidate_sessions)=cell_to_index_map_temp(clusters_to_check(k),candidate_sessions);
-                        cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,num_sessions);
+                        cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,number_of_sessions);
                         changes_count(iteration)=changes_count(iteration)+1;
-                        all_clusters_centroids(:,clusters_to_check(k))=[1000 1000];
+                        clusters_centroid_locations(:,clusters_to_check(k))=[1000 1000];
                     end
-                elseif strcmp(decision_type,'Maximal correlation')
+                elseif strcmp(decision_type,'Maximal similarity')
                     max_all_to_all_temp=max(all_to_all_temp(:));
-                    if max_all_to_all_temp>correlation_thresh;
+                    if max_all_to_all_temp>registration_threshold;
                         cell_to_index_map_temp(n,candidate_sessions)=cell_to_index_map_temp(clusters_to_check(k),candidate_sessions);
-                        cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,num_sessions);
+                        cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,number_of_sessions);
                         changes_count(iteration)=changes_count(iteration)+1;
-                        all_clusters_centroids(:,clusters_to_check(k))=[1000 1000];
+                        clusters_centroid_locations(:,clusters_to_check(k))=[1000 1000];
                     end
-                elseif strcmp(decision_type,'Minimal correlation')
+                elseif strcmp(decision_type,'Minimal dissimilarity')
                     average_all_to_all_temp_1=min(all_to_all_temp);
                     average_all_to_all_temp_2=min(all_to_all_temp,2);
-                    over_thresh_1=sum(average_all_to_all_temp_1>correlation_thresh);
-                    over_thresh_2=sum(average_all_to_all_temp_2>correlation_thresh);
+                    over_thresh_1=sum(average_all_to_all_temp_1>registration_threshold);
+                    over_thresh_2=sum(average_all_to_all_temp_2>registration_threshold);
                     if over_thresh_2==sum(this_cluster_cells>0) && over_thresh_1==sum(candidate_cells>0)
                         cell_to_index_map_temp(n,candidate_sessions)=cell_to_index_map_temp(clusters_to_check(k),candidate_sessions);
-                        cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,num_sessions);
+                        cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,number_of_sessions);
                         changes_count(iteration)=changes_count(iteration)+1;
-                        all_clusters_centroids(:,clusters_to_check(k))=[1000 1000];
+                        clusters_centroid_locations(:,clusters_to_check(k))=[1000 1000];
                     end
                 end
             end
         end
     end
+    
     cell_to_index_map=cell_to_index_map_temp;
     num_clusters=size(cell_to_index_map_temp,1);
     temp_delete_count=0;
@@ -451,227 +300,30 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
         end
     end
     delete_count(iteration)=delete_count(iteration)+temp_delete_count;
-    
-    % Calculating the cell scores
-    num_clusters=size(cell_to_index_map,1);
-    cell_scores=zeros(1,num_clusters);
-    cell_scores_positive=zeros(1,num_clusters);
-    cell_scores_negative=zeros(1,num_clusters);
-    cell_scores_exclusive=zeros(1,num_clusters);
-    active_sessions=zeros(1,num_clusters);
-    for n=1:num_clusters
-        good_pairs=0;
-        good_pairs_positive=0;
-        good_pairs_negative=0;
-        good_pairs_exclusive=0;
-        num_comparisons=0;
-        num_comparisons_positive=0;
-        num_comparisons_negative=0;
-        cells_in_cluster=cell_to_index_map(n,:);
-        for m=1:num_sessions
-            for k=1:num_sessions
-                if k~=m && cells_in_cluster(m)>0
-                    this_cell=cell_to_index_map(n,m);
-                    num_comparisons=num_comparisons+1;
-                    cells_to_check=all_to_all_matrix_multi{m}{this_cell,k};
-                    if cell_to_index_map(n,k)==0
-                        num_comparisons_negative=num_comparisons_negative+1;
-                        if isempty(cells_to_check)
-                            good_pairs=good_pairs+1;
-                            good_pairs_negative=good_pairs_negative+1;
-                        else
-                            this_p_value=all_to_all_p_value_multi{m}{this_cell,k};
-                            if max(this_p_value)<0.05
-                                good_pairs=good_pairs+1;
-                                good_pairs_negative=good_pairs_negative+1;
-                            end
-                        end
-                    else
-                        num_comparisons_positive=num_comparisons_positive+1;
-                        this_p_value=all_to_all_p_value_multi{m}{this_cell,k};
-                        clustered_cell=cell_to_index_map(n,k);
-                        clustered_ind=find(cells_to_check==clustered_cell);
-                        if this_p_value(clustered_ind)>0.95
-                            this_p_value(clustered_ind)=[];
-                            good_pairs_positive=good_pairs_positive+1;
-                            if isempty(this_p_value)
-                                good_pairs=good_pairs+1;
-                                good_pairs_exclusive=good_pairs_exclusive+1;
-                            else
-                                if max(this_p_value)<0.05
-                                    good_pairs=good_pairs+1;
-                                    good_pairs_exclusive=good_pairs_exclusive+1;
-                                end
-                            end
-                        else
-                            this_p_value(clustered_ind)=[];
-                            if isempty(this_p_value)
-                                good_pairs_exclusive=good_pairs_exclusive+1;
-                            else
-                                if max(this_p_value)<0.05
-                                    good_pairs_exclusive=good_pairs_exclusive+1;
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        cell_scores_positive(n)=good_pairs_positive/num_comparisons_positive;
-        cell_scores_negative(n)=good_pairs_negative/num_comparisons_negative;
-        cell_scores_exclusive(n)=good_pairs_exclusive/num_comparisons_positive;
-        cell_scores(n)=good_pairs/num_comparisons;
-        active_sessions(n)=sum(cells_in_cluster>0);
-    end
-    
-    mean_cell_scores(iteration)=mean(cell_scores(cell_scores>=0));
-    mean_cell_scores_positive(iteration)=mean(cell_scores_positive(cell_scores_positive>=0));
-    mean_cell_scores_negative(iteration)=mean(cell_scores_negative(cell_scores_negative>=0));
-    mean_cell_scores_exclusive(iteration)=mean(cell_scores_exclusive(cell_scores_exclusive>=0));   
+    display_progress_bar(' done',false)
 end
-close(hbar);
 
-if is_figure
-    figure
-    fig_size_y=20;
-    fig_size_x=25;
-    set(gcf,'PaperUnits','centimeters','PaperPosition',[1 5 fig_size_x fig_size_y]);
-    set(gcf,'PaperOrientation','portrait');
-    set(gcf,'Units','centimeters','Position',get(gcf,'paperPosition')+[5 0 0 0]);
-    size_x=0.65;
-    size_y=0.65;
-    
-    axes('position',[0.6 0.1 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('Overall cell scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    h=axes('position',[0.68 0.25 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    
-    axes('position',[0.12 0.1 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores_exclusive,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('Exclusivity cell scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    h=axes('position',[0.2 0.25 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    
-    axes('position',[0.6 0.58 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores_positive,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('True positive scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    text(-0.25,1.2,['Final registration: ' num2str(num_clusters) ' registered cells'],'fontsize',24,'fontweight','bold','HorizontalAlignment','Center')
-    h=axes('position',[0.68 0.73 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    
-    axes('position',[0.12 0.58 size_x/2 size_y/2])
-    [n1,~]=hist(cell_scores_negative,xout);
-    n1=n1./sum(n1);
-    bar(xout,n1)
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('True negative scores','fontsize',16,'fontweight','bold')
-    ylabel('Probability','fontsize',16,'fontweight','bold')
-    x_label=linspace(0,1,6);
-    x=linspace(0,1,6);
-    set(gca,'fontsize',14)
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    h=axes('position',[0.2 0.73 size_x/6 size_y/6]);
-    plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
-    ylim([0 1])
-    x_label=linspace(0,1,3);
-    x=linspace(0,1,3);
-    y=linspace(0,1,3);
-    y_label=linspace(0,1,3);
-    set(gca,'YTick',y)
-    set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
-    set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-    set(h, 'Xdir', 'reverse')
-    xlabel('Score','fontsize',14,'fontweight','bold')
-    ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-    set(gcf,'PaperPositionMode','auto')
-    cd(figures_dir);
-    savefig('Stage 5 - Register scores')
-    saveas(gcf,'Stage 5 - Register scores','tif')
+% Calculating the final cell scores:
+if strcmp(registration_approach,'Probabilistic')
+    [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=compute_scores(cell_to_index_map,all_to_all_indexes,all_to_all_p_same,number_of_sessions);
+    varargout{1}=cell_scores;
+    varargout{2}=cell_scores_positive;
+    varargout{3}=cell_scores_negative;
+    varargout{4}=cell_scores_exclusive; 
 end
-cd(results_dir);
 
 % Calculating neighbor vs corr/distance curves
 num_clusters=size(cell_to_index_map,1);
-all_clusters_centroids=zeros(2,num_clusters);
+clusters_centroid_locations=zeros(2,num_clusters);
 for n=1:num_clusters
     cells_in_cluster=cell_to_index_map(n,:);
     sessions_ind=find(cells_in_cluster>0);
     N=length(sessions_ind);
     centroids_found=zeros(2,N);
     for k=1:N
-        centroids_found(:,k)=all_centroids_corrected{sessions_ind(k)}(cells_in_cluster(sessions_ind(k)),:);
+        centroids_found(:,k)=centroid_locations{sessions_ind(k)}(cells_in_cluster(sessions_ind(k)),:);
     end
-    all_clusters_centroids(:,n)=mean(centroids_found,2);
+    clusters_centroid_locations(:,n)=mean(centroids_found,2);
 end
 
 end
