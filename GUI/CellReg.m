@@ -296,19 +296,21 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     number_of_sessions=data_struct.number_of_sessions;
     file_names=data_struct.file_names;
     sessions_list=data_struct.sessions_list;
+    results_directory=data_struct.results_directory;
     
     % loading the session:
     msgbox('Please choose the file with the spatial footprints for this session: ')
     pause(1)
-    [file_name,file_path]=uigetfile('*.mat','MultiSelect','off');
+    [file_name,file_path]=uigetfile(results_directory,'*.mat','MultiSelect','off');
     number_of_sessions=number_of_sessions+1;
     file_names{number_of_sessions}=[file_path file_name];
     sessions_list{number_of_sessions}=['Session ' num2str(number_of_sessions) ' - ' file_path file_name];
     disp('Stage 1 - Loading sessions')
     [added_spatial_footprints]=load_single_session(file_names{number_of_sessions});
     spatial_footprints{number_of_sessions}=added_spatial_footprints;
-    [footprints_projection]=compute_footprints_projections({added_spatial_footprints});
-    plot_single_session_projections(footprints_projection,num2str(number_of_sessions),figures_visibility)
+    [added_footprints_projection]=compute_footprints_projections({added_spatial_footprints});
+    footprints_projections{number_of_sessions}=added_footprints_projection;
+    plot_single_session_projections(added_footprints_projection,num2str(number_of_sessions),figures_visibility)
 else % first loaded session
     data_struct=handles.data_struct;
     
@@ -361,7 +363,7 @@ end
 
 % saving the loaded data into the data struct for the GUI
 data_struct.spatial_footprints=spatial_footprints;
-data_struct.footprints_projections=footprints_projection;
+data_struct.footprints_projections=footprints_projections;
 data_struct.number_of_sessions=number_of_sessions;
 data_struct.sessions_list=sessions_list;
 data_struct.file_names=file_names;
