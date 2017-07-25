@@ -351,8 +351,8 @@ else % first loaded session
     % loading the spatial footprints:
     disp('Stage 1 - Loading sessions')
     [spatial_footprints]={load_single_session(file_names{1})};
-    [footprints_projection]=compute_footprints_projections(spatial_footprints);
-    plot_single_session_projections(footprints_projection,1,figures_visibility)
+    [footprints_projections]=compute_footprints_projections(spatial_footprints);
+    plot_single_session_projections(footprints_projections,1,figures_visibility)
     
     % saving the loaded data into the data struct for the GUI
     data_struct.results_directory=results_directory;
