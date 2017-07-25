@@ -820,7 +820,7 @@ plot_x_y_displacements_GUI(x_y_displacements,microns_per_pixel,centers_of_bins,n
 disp('Calculating a probabilistic model of the data')
 % Modeling the distribution of centroid distances:
 [centroid_distances_model_parameters,p_same_given_centroid_distance,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,MSE_centroid_distances_model,centroid_distance_intersection]=...
-    compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,number_of_bins,centers_of_bins);
+    compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,centers_of_bins);
 
 % Modeling the distribution of spatial correlations:
 if strcmp(imaging_technique,'one_photon');

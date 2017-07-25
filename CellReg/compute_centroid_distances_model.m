@@ -1,4 +1,4 @@
-function [centroid_distances_model_parameters,p_same_given_centroid_distance,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,MSE_centroid_distances_model,centroid_distance_intersection]=compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,number_of_bins,centers_of_bins)
+function [centroid_distances_model_parameters,p_same_given_centroid_distance,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,MSE_centroid_distances_model,centroid_distance_intersection]=compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,centers_of_bins)
 % This function recieves the distribution of centroid distances for all
 % neighboring cells-pairs across sessions, and computes a probabilistic
 % model by finding the weighted sum of same cells and different cells that
@@ -10,8 +10,7 @@ function [centroid_distances_model_parameters,p_same_given_centroid_distance,cen
 % 1. neighbors_centroid_distances - all neighboring cell-pairs
 % 2. microns_per_pixel
 % 3. maximal_distance
-% 4. number_of_bins - for the probability distributions
-% 5. centers_of_bins
+% 4. centers_of_bins
 
 % Outputs:
 % 1. centroid_distances_model_parameters
@@ -24,6 +23,7 @@ function [centroid_distances_model_parameters,p_same_given_centroid_distance,cen
 % 8. centroid_distance_intersection - the distance for which same cells are
 % equal to different cells (P_same=0.5)
 
+number_of_bins=length(centers_of_bins{1});
 centroid_distances_centers=centers_of_bins{1};
 
 [centroid_distances_distribution,~]=hist(neighbors_centroid_distances,centroid_distances_centers);

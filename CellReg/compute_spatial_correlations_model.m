@@ -20,7 +20,7 @@ function [spatial_correlations_model_parameters,p_same_given_spatial_correlation
 % 8. spatial_correlation_intersection - the correlation for which same cells are
 % equal to different cells (P_same=0.5)
 
-number_of_bins=length(centers_of_bins);
+number_of_bins=length(centers_of_bins{2});
 spatial_correlations_centers=centers_of_bins{2};
 
 % the maximal distance should be chosen in a way that neighboring cells
