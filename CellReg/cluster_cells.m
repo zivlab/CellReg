@@ -1,4 +1,4 @@
-function [cell_to_index_map,clusters_centroid_locations,varargout]=find_optimal_clustering(cell_to_index_map,all_to_all_p_same,all_to_all_indexes,maximal_distance,registration_threshold,centroid_locations,registration_approach,transform_data)
+function [cell_to_index_map,clusters_centroid_locations,varargout]=cluster_cells(cell_to_index_map,all_to_all_p_same,all_to_all_indexes,maximal_distance,registration_threshold,centroid_locations,registration_approach,transform_data)
 % This function registers cells with a clustering procedure.
 % it uses either the P_same that were calculated for each cell-pair, or
 % alternatively their centroid distance or spatial similarity.

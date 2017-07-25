@@ -246,19 +246,19 @@ disp('Stage 5 - Performing final registration')
 if strcmp(registration_approach,'Probabilistic')    
     if strcmp(model_type,'Spatial correlation')
         [optimal_cell_to_index_map,registered_cells_centroids,cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=...
-            find_optimal_clustering(cell_to_index_map,all_to_all_p_same_spatial_correlation_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+            cluster_cells(cell_to_index_map,all_to_all_p_same_spatial_correlation_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,trasform_data);
     elseif strcmp(model_type,'Centroid distance')
         [optimal_cell_to_index_map,registered_cells_centroids,cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=...
-            find_optimal_clustering(cell_to_index_map,all_to_all_p_same_centroid_distance_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+            cluster_cells(cell_to_index_map,all_to_all_p_same_centroid_distance_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,trasform_data);
     end
     plot_cell_scores(cell_scores_positive,cell_scores_negative,cell_scores_exclusive,cell_scores,number_of_sessions,figures_directory,figures_visibility)
 elseif strcmp(registration_approach,'Simple threshold')
     if strcmp(model_type,'Spatial correlation')
         [optimal_cell_to_index_map,registered_cells_centroids]=...
-            find_optimal_clustering(cell_to_index_map,all_to_all_correlation_multi,all_to_all_matrix_multi,normalized_maximal_distance,final_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+            cluster_cells(cell_to_index_map,all_to_all_correlation_multi,all_to_all_matrix_multi,normalized_maximal_distance,final_threshold,centroid_locations_corrected,registration_approach,trasform_data);
     elseif strcmp(model_type,'Centroid distance')
         [optimal_cell_to_index_map,registered_cells_centroids]=...
-            find_optimal_clustering(cell_to_index_map,all_to_all_distance_multi,all_to_all_matrix_multi,normalized_maximal_distance,normalized_distance_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+            cluster_cells(cell_to_index_map,all_to_all_distance_multi,all_to_all_matrix_multi,normalized_maximal_distance,normalized_distance_threshold,centroid_locations_corrected,registration_approach,trasform_data);
     end
 end
 [is_in_overlapping_FOV]=check_if_in_overlapping_FOV(registered_cells_centroids,overlapping_FOV);
