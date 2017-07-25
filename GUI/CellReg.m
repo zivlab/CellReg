@@ -1876,7 +1876,7 @@ if get(handles.use_model,'Value')==1;
     set(handles.final_p_same_slider,'value',final_p_same_slider_value);
     centers_of_bins=data_struct.centers_of_bins;
     
-    if get(handles.spatial_correlations,'Value')==1
+    if get(handles.spatial_correlations_2,'Value')==1
         spatial_correlations_distribution=data_struct.spatial_correlations_distribution;
         p_same_given_spatial_correlation=data_struct.p_same_given_spatial_correlation;
         [~,p_same_ind]=min(abs(final_p_same_slider_value-(p_same_given_spatial_correlation)));
