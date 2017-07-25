@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 23-Jul-2017 19:09:01
+% Last Modified by GUIDE v2.5 25-Jul-2017 15:25:41
 
 % reset figure properties to default
 reset(0); 
@@ -2037,3 +2037,20 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+
+function distance_threshold_Callback(hObject, eventdata, handles)
+% hObject    handle to distance_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of distance_threshold as text
+%        str2double(get(hObject,'String')) returns contents of distance_threshold as a double
+
+
+function correlation_threshold_Callback(hObject, eventdata, handles)
+% hObject    handle to correlation_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of correlation_threshold as text
+%        str2double(get(hObject,'String')) returns contents of correlation_threshold as a double
