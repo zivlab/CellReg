@@ -20,6 +20,7 @@ if max(RGB_indexes)<=number_of_sessions
     end
     spatial_footprints_projections_rgb(spatial_footprints_projections_rgb>1)=1;
     spatial_footprints_projections_rgb=spatial_footprints_projections_rgb+0.25*max(max(max(spatial_footprints_projections_rgb)))*repmat(overlapping_FOV,1,1,3);
+    spatial_footprints_projections_rgb(spatial_footprints_projections_rgb>1)=1;
     
     imagesc(spatial_footprints_projections_rgb)
     if number_of_sessions>2
