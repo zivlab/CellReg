@@ -58,8 +58,14 @@ function varargout = CellReg(varargin)
 
 % Last Modified by GUIDE v2.5 25-Jul-2017 15:25:41
 
-% reset figure properties to default
-reset(0); 
+% reset figure properties to default:
+if verLessThan('matlab','8.4')
+    % MATLAB R2014a and earlier
+    % if there are problems with GUI and figures change properties back to default
+else
+    % MATLAB R2014b and later 
+    reset(0); 
+end
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
