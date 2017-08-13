@@ -35,7 +35,6 @@ decision_type='Maximal similarity';
 num_changes_thresh=10;
 iteration=1;
 
-
 % the next variables indicate if clustering converges:
 changes_count=zeros(1,maximal_number_of_iterations);
 switch_count=zeros(1,maximal_number_of_iterations);

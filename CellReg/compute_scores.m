@@ -15,8 +15,6 @@ function [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_excl
 % 3. cell_scores_exclusive
 % 4. cell_scores
 
-certainty_threshold=0.95;
-
 number_of_clusters=size(cell_to_index_map,1);
 cell_scores=zeros(1,number_of_clusters);
 cell_scores_positive=zeros(1,number_of_clusters);
@@ -38,54 +36,63 @@ for n=1:number_of_clusters
                 this_cell=cell_to_index_map(n,m);
                 num_comparisons=num_comparisons+1; 
                 cells_to_check=all_to_all_indexes{m}{this_cell,k};
-                if cell_to_index_map(n,k)==0 % active-inactive comparison
+                if cell_to_index_map(n,k)==0 % active-inactive comparison:
                     num_comparisons_negative=num_comparisons_negative+1; 
                     if isempty(cells_to_check) % no candidate means true negative
                         good_pairs=good_pairs+1;
                         good_pairs_negative=good_pairs_negative+1;
                     else
-                        this_p_same=all_to_all_p_same{m}{this_cell,k};
-                        if max(this_p_same)<1-certainty_threshold % all candidates with low P_same
+                        this_p_same=all_to_all_p_same{m}{this_cell,k}; % true negative scores
+                        if ~isempty(this_p_same)
+                            good_pairs=good_pairs+1-sum(this_p_same);
+                            good_pairs_negative=good_pairs_negative+1-sum(this_p_same);
+                        else
                             good_pairs=good_pairs+1;
                             good_pairs_negative=good_pairs_negative+1;
                         end
                     end
-                else % active-active comparison
+                else % active-active comparison:
                     num_comparisons_positive=num_comparisons_positive+1;
                     this_p_same=all_to_all_p_same{m}{this_cell,k};
                     clustered_cell=cell_to_index_map(n,k);
                     clustered_ind=find(cells_to_check==clustered_cell);
-                    if this_p_same(clustered_ind)>certainty_threshold % true postive
+                    if ~isempty(this_p_same) & ~isempty(clustered_ind)
+                        temp_true_positive=this_p_same(clustered_ind);
+                        good_pairs_positive=good_pairs_positive+temp_true_positive;
                         this_p_same(clustered_ind)=[];
-                        good_pairs_positive=good_pairs_positive+1;
-                        if isempty(this_p_same) % true positive and exclusive
-                            good_pairs=good_pairs+1;
-                            good_pairs_exclusive=good_pairs_exclusive+1;
-                        else
-                            if max(this_p_same)<1-certainty_threshold % all other candidates with low P_same
-                                good_pairs=good_pairs+1;
-                                good_pairs_exclusive=good_pairs_exclusive+1;
-                            end
-                        end
-                    else % not a true positve
-                        this_p_same(clustered_ind)=[];
-                        if isempty(this_p_same) % but still exclusive
-                            good_pairs_exclusive=good_pairs_exclusive+1;
-                        else
-                            if max(this_p_same)<1-certainty_threshold
-                                good_pairs_exclusive=good_pairs_exclusive+1;
-                            end
-                        end
+                    else
+                        temp_true_positive=0;
+                        good_pairs_positive=good_pairs_positive+temp_true_positive;
+                    end
+                    if isempty(this_p_same) % cell score and exclusivity score
+                        good_pairs=good_pairs+temp_true_positive;
+                        good_pairs_exclusive=good_pairs_exclusive+1;
+                    else
+                        good_pairs=good_pairs+temp_true_positive-sum(this_p_same);
+                        good_pairs_exclusive=good_pairs_exclusive+1-sum(this_p_same);
                     end
                 end
             end
         end
     end
-    % normalizing all the scores by the numbers of comparisons:
-    cell_scores_positive(n)=good_pairs_positive/num_comparisons_positive;
-    cell_scores_negative(n)=good_pairs_negative/num_comparisons_negative;
-    cell_scores_exclusive(n)=good_pairs_exclusive/num_comparisons_positive;
-    cell_scores(n)=good_pairs/num_comparisons;
+    % normalizing all the scores by the numbers of comparisons:       
+    if num_comparisons_positive>0
+        cell_scores_positive(n)=good_pairs_positive/num_comparisons_positive;
+        cell_scores_exclusive(n)=good_pairs_exclusive/num_comparisons_positive;
+    else
+        cell_scores_positive(n)=nan;
+        cell_scores_exclusive(n)=nan;
+    end
+    if num_comparisons_negative>0
+        cell_scores_negative(n)=good_pairs_negative/num_comparisons_negative;
+    else
+        cell_scores_negative(n)=nan;
+    end
+    if num_comparisons>0
+        cell_scores(n)=good_pairs/num_comparisons;
+    else
+        cell_scores(n)=nan;
+    end
 end
 
 end

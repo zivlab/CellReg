@@ -1,4 +1,4 @@
-function plot_cell_scores(cell_scores_positive,cell_scores_negative,cell_scores_exclusive,cell_scores,number_of_sessions,figures_directory,figures_visibility)
+function plot_cell_scores(cell_scores_positive,cell_scores_negative,cell_scores_exclusive,cell_scores,figures_directory,figures_visibility)
 % This function plots the distributions of false postive, false negative,
 % exclusivity, and cell scores for all registered cells according to the
 % clustering procedure
@@ -8,13 +8,12 @@ function plot_cell_scores(cell_scores_positive,cell_scores_negative,cell_scores_
 % 2. cell_scores_negative
 % 3. cell_scores_exclusive
 % 4. cell_scores
-% 5. number_of_sessions
-% 6. figures_directory
-% 7. figures_visibility
+% 5. figures_directory
+% 6. figures_visibility
 
 number_of_clusters=size(cell_scores,2);
 
-xout_temp=linspace(0,1,number_of_sessions*2+1);
+xout_temp=linspace(0,1,21);
 xout=xout_temp(2:2:end);
 figure('units','normalized','outerposition',[0.25 0.2 0.5 0.6],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
