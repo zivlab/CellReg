@@ -12,7 +12,7 @@ function plot_all_registered_projections(spatial_footprints,cell_to_index_map,fi
 
 number_of_sessions=size(spatial_footprints,2);
 
-pixel_weight_threshold=0.2; % for better visualization of cells
+pixel_weight_threshold=0.5; % for better visualization of cells
 all_projections_partial=cell(1,number_of_sessions);
 mutual_projections_partial=cell(1,number_of_sessions);
 cells_in_all_days=find(sum(cell_to_index_map'>0)==number_of_sessions);

@@ -18,7 +18,7 @@ registered_cells=varargin{1};
 non_registered_cells=varargin{2};
 
 if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlations are used 
-    figure('Visible',figures_visibility)
+    figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
     xout=linspace(0,1,number_of_bins);
     [n1,~]=hist(registered_cells,xout);
@@ -40,7 +40,7 @@ if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlat
 else
     pixel_to_mic=varargin{3};
     maximal_distance=varargin{4};    
-    figure('Visible',figures_visibility)
+    figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
     xout=linspace(0,maximal_distance,number_of_bins);
     [n1,~]=hist(registered_cells,xout);

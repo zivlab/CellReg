@@ -21,7 +21,7 @@ x_y_displacements=hist3([neighbors_x_displacements;neighbors_y_displacements]',c
 x_y_displacements=flipud(x_y_displacements);
 x_y_displacements=fliplr(x_y_displacements);
 
-figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility)
+figure('units','normalized','outerposition',[0.35 0.25 0.3 0.5],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
 set(gcf,'PaperOrientation','portrait');
 size_x=0.75;
@@ -37,8 +37,8 @@ x_label=round(linspace(-microns_per_pixel*max(centers_of_bins{1}),microns_per_pi
 set(gca,'YTickLabel',y_label,'fontsize',18)
 set(gca,'XTick',x)
 set(gca,'XTickLabel',x_label,'fontsize',18)
-xlabel('x displacement (\mum)','FontWeight','Bold','fontsize',22)
-ylabel('y displacement (\mum)','FontWeight','Bold','fontsize',22)
+xlabel('x displacement (\mum)','FontWeight','Bold','fontsize',18)
+ylabel('y displacement (\mum)','FontWeight','Bold','fontsize',18)
 x_for_circle=0:0.01:2*pi;
 hold on
 plot(number_of_bins/2+number_of_bins/2*4/maximal_distance/microns_per_pixel*sin(x_for_circle),number_of_bins/2+number_of_bins/2*4/maximal_distance/microns_per_pixel*cos(x_for_circle),':','color',[1 1 1],'linewidth',4);
@@ -55,10 +55,10 @@ for n=1:num_colors
     p=patch([0 1 1 0],[n/num_colors n/num_colors (n-1)/num_colors (n-1)/num_colors],cmap_jet(n,:));
     set(p,'FaceAlpha',1,'EdgeColor','none');
 end
-text(3.5,0.5,'Number of cell-pairs (log)','fontsize',22,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
-text(1.5,0,'0','fontsize',18,'fontweight','bold','HorizontalAlignment','Left')
-text(1.5,1,'Max','fontsize',18,'fontweight','bold','HorizontalAlignment','Left')
-set(gca,'fontsize',18)
+text(3.5,0.5,'Number of cell-pairs (log)','fontsize',16,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
+text(1.5,0,'0','fontsize',16,'fontweight','bold','HorizontalAlignment','Left')
+text(1.5,1,'Max','fontsize',16,'fontweight','bold','HorizontalAlignment','Left')
+set(gca,'fontsize',16)
 set(gcf,'PaperPositionMode','auto')
 savefig(fullfile(figures_directory,'Stage 3 - x-y differences'))
 saveas(gcf,fullfile(figures_directory,'Stage 3 - x-y differences'),'png')
