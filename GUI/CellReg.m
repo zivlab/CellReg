@@ -492,7 +492,12 @@ else
         figures_visibility='Off';
     end
     plot_all_sessions_projections(footprints_projections_corrected,figures_directory,figures_visibility)
-    RGB_indexes=[1 2 3];
+    number_of_sessions=length(footprints_projections_corrected);
+    if number_of_sessions>2
+        RGB_indexes=[1 2 3];
+    else
+        RGB_indexes=[1 2];
+    end
     axes(handles.axes1);
     plot_RGB_overlay(footprints_projections_corrected,RGB_indexes,overlapping_FOV)
     figure('Visible',figures_visibility)    
@@ -561,7 +566,12 @@ else
         figures_visibility='Off';
     end
     plot_all_sessions_projections(footprints_projections_corrected,figures_directory,figures_visibility)
-    RGB_indexes=[1 2 3];
+    number_of_sessions=length(footprints_projections_corrected);
+    if number_of_sessions>2
+        RGB_indexes=[1 2 3];
+    else
+        RGB_indexes=[1 2];
+    end
     axes(handles.axes1);
     plot_RGB_overlay(footprints_projections_corrected,RGB_indexes,overlapping_FOV)
     figure('Visible',figures_visibility)    
