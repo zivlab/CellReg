@@ -28,7 +28,7 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 
 sufficient_correlation=0.15; % smaller correlation imply different optical section or high noise levels
 rotation_step=0.5; % check rotations every xx degrees
-minimal_rotation=0.3; % less than this rotaiton in degrees does not justify rotating the cells
+minimal_rotation=0.3; % less than this rotation in degrees does not justify rotating the cells
 typical_cell_size=10; % in micrometers - determines the radius that is used for gaussfit
 normalized_typical_cell_size=typical_cell_size/microns_per_pixel;
 
@@ -44,9 +44,6 @@ spatial_footprints_corrected=spatial_footprints;
 centroid_locations_corrected=centroid_locations;
 footprints_projections_corrected=footprints_projections;
 centroid_projections_corrected=centroid_projections;
-
-x_tanslations=zeros(1,number_of_sessions-1);
-y_tanslations=zeros(1,number_of_sessions-1);
 
 if strcmp(alignment_type,'Translations and Rotations') % if correcting for rotations as well
     maximal_rotation=varargin{1};
@@ -64,7 +61,6 @@ if strcmp(alignment_type,'Translations and Rotations')
 end
 best_x_translations=zeros(1,number_of_sessions-1);
 best_y_translations=zeros(1,number_of_sessions-1);
-cross_correlation_partial_FOV=cell(1,number_of_sessions-1);
 registration_order=setdiff(1:number_of_sessions,reference_session_index);
 overlapping_area=ones(adjusted_y_size,adjusted_x_size);
 overlapping_area=overlapping_area.*overlapping_area_all_sessions(:,:,reference_session_index);
@@ -164,39 +160,10 @@ for n=1:number_of_sessions-1
                 normalized_centroids(k,round(this_session_centroids(k,2)),round(this_session_centroids(k,1)))=1;
             end
         end
-        centroid_locations_rotated{registration_order(n)}=squeeze(sum(normalized_centroids,1));
-                
-        if abs(best_rotation)>minimal_rotation && max_correlation>sufficient_correlation;
-            if use_parallel_processing
-                disp('Rotating spatial footprints')
-                number_of_cells=size(centroid_locations_corrected{registration_order(n)},1);
-                temp_footprints_corrected=zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
-                temp_spatial_footprints_corrected=spatial_footprints_corrected{registration_order(n)};
-                temp_centroid_locations=centroid_locations{registration_order(n)};
-                parfor m=1:number_of_cells
-                    temp_spatial_footprint=squeeze(temp_spatial_footprints_corrected(m,:,:));
-                    temp_centroid=temp_centroid_locations(m,:);
-                    temp_spatial_footprint_rotated=rotate_spatial_footprint(temp_spatial_footprint',-best_rotation,[0 0],center_of_FOV,temp_centroid,microns_per_pixel);
-                    temp_footprints_corrected(m,:,:)=temp_spatial_footprint_rotated';                    
-                end
-                spatial_footprints_corrected{registration_order(n)}=temp_footprints_corrected;
-            else
-                display_progress_bar('Rotating spatial footprints: ',false)
-                for m=1:size(centroid_locations_corrected{registration_order(n)},1);
-                    display_progress_bar(100*(m/size(centroid_locations_corrected{registration_order(n)},1)),false)
-                    temp_spatial_footprint=squeeze(spatial_footprints_corrected{registration_order(n)}(m,:,:));
-                    temp_centroid=centroid_locations{registration_order(n)}(m,:);
-                    temp_spatial_footprint_rotated=rotate_spatial_footprint(temp_spatial_footprint',-best_rotation,[0 0],center_of_FOV,temp_centroid,microns_per_pixel);
-                    spatial_footprints_corrected{registration_order(n)}(m,:,:)=temp_spatial_footprint_rotated';
-                end
-                display_progress_bar(' done',false)                
-            end
-        else
-            disp('No rotations required')
-        end
+        centroid_locations_rotated{registration_order(n)}=squeeze(sum(normalized_centroids,1));                        
     end
     
-    % Translating sessions with subpixel resolution:
+    % Finding translations with subpixel resolution:
     if strcmp(alignment_type,'Translations and Rotations')
         cross_corr_cent=normxcorr2(centroid_locations_rotated{reference_session_index},centroid_locations_rotated{registration_order(n)});
     else
@@ -233,11 +200,10 @@ for n=1:number_of_sessions-1
     y_ind=y_ind+round(cross_corr_size(1)/2-cross_corr_size(1)/6)-1;
     x_ind_sub=x_ind+sub_x;
     y_ind_sub=y_ind+sub_y;
-    x_tanslations(n)=x_ind_sub;
-    y_tanslations(n)=y_ind_sub;
     best_x_translations(n)=(x_ind_sub-adjusted_x_size);
     best_y_translations(n)=(y_ind_sub-adjusted_y_size);        
-
+    
+    % aligning projections and centroid locations:
     if strcmp(alignment_type,'Translations and Rotations')
         projections_temp=all_rotated_projections{registration_order(n)};
         centroid_projections_temp=centroid_locations_rotated{registration_order(n)};
@@ -277,54 +243,88 @@ for n=1:number_of_sessions-1
     footprints_projections_corrected{registration_order(n)}=temp_projections';
     centroid_projections_corrected{registration_order(n)}=temp_centroid_projections';
     
-    if strcmp(alignment_type,'Translations and Rotations')
-        spatial_footprints_temp=spatial_footprints_corrected{registration_order(n)};
-    else
-        spatial_footprints_temp=spatial_footprints{registration_order(n)};
-    end
-    number_of_cells=size(spatial_footprints_temp,1);
-    if use_parallel_processing
-        temp_centroid_locations_corrected=centroid_locations_corrected{registration_order(n)};
-        disp('Translating spatial footprints')
-        parfor k=1:number_of_cells
-            footprints_temp=squeeze(spatial_footprints_temp(k,:,:));
-            new_spatial_footprint=zeros(adjusted_y_size,adjusted_x_size);
-            if y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size>=0
-                new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1:end-(x_ind-adjusted_x_size))=footprints_temp(1+(y_ind-adjusted_y_size):end,1+(x_ind-adjusted_x_size):end);
-            elseif y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size<0
-                new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1-(x_ind-adjusted_x_size):end)=footprints_temp(1+(y_ind-adjusted_y_size):end,1:end+(x_ind-adjusted_x_size));
-            elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size>=0
-                new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1:end-(x_ind-adjusted_x_size))=footprints_temp(1:end+(y_ind-adjusted_y_size),1+(x_ind-adjusted_x_size):end);
-            elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size<0
-                new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1-(x_ind-adjusted_x_size):end)=footprints_temp(1:end+(y_ind-adjusted_y_size),1:end+(x_ind-adjusted_x_size));
+    % Rotating/translating spatial footprints:    
+    spatial_footprints_temp=spatial_footprints{registration_order(n)};    
+    if maximal_cross_correlation(n)>sufficient_correlation;
+        if strcmp(alignment_type,'Translations and Rotations') % rotating cells           
+            if abs(best_rotation)>minimal_rotation
+                if use_parallel_processing
+                    disp('Rotating spatial footprints')
+                    number_of_cells=size(centroid_locations_corrected{registration_order(n)},1);
+                    temp_footprints_corrected=zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
+                    temp_spatial_footprints_corrected=spatial_footprints_corrected{registration_order(n)};
+                    temp_centroid_locations=centroid_locations{registration_order(n)};
+                    parfor m=1:number_of_cells
+                        temp_spatial_footprint=squeeze(temp_spatial_footprints_corrected(m,:,:));
+                        temp_centroid=temp_centroid_locations(m,:);
+                        temp_spatial_footprint_rotated=rotate_spatial_footprint(temp_spatial_footprint',-best_rotation,[0 0],center_of_FOV,temp_centroid,microns_per_pixel);
+                        temp_footprints_corrected(m,:,:)=temp_spatial_footprint_rotated';
+                    end
+                    spatial_footprints_corrected{registration_order(n)}=temp_footprints_corrected;
+                else
+                    display_progress_bar('Rotating spatial footprints: ',false)
+                    for m=1:size(centroid_locations_corrected{registration_order(n)},1);
+                        display_progress_bar(100*(m/size(centroid_locations_corrected{registration_order(n)},1)),false)
+                        temp_spatial_footprint=squeeze(spatial_footprints_corrected{registration_order(n)}(m,:,:));
+                        temp_centroid=centroid_locations{registration_order(n)}(m,:);
+                        temp_spatial_footprint_rotated=rotate_spatial_footprint(temp_spatial_footprint',-best_rotation,[0 0],center_of_FOV,temp_centroid,microns_per_pixel);
+                        spatial_footprints_corrected{registration_order(n)}(m,:,:)=temp_spatial_footprint_rotated';
+                    end
+                    display_progress_bar(' done',false)
+                end
+            else 
+                disp('No rotations required')                
             end
-            temp_centroid=temp_centroid_locations_corrected(k,:);
-            temp_spatial_footprint=translate_spatial_footprint(new_spatial_footprint',[sub_y sub_x],temp_centroid,microns_per_pixel);
-            spatial_footprints_temp(k,:,:)=temp_spatial_footprint';
+        end
+        
+        % Translating cells:
+        number_of_cells=size(spatial_footprints_temp,1);
+        if use_parallel_processing
+            temp_centroid_locations_corrected=centroid_locations_corrected{registration_order(n)};
+            disp('Translating spatial footprints')
+            parfor k=1:number_of_cells
+                footprints_temp=squeeze(spatial_footprints_temp(k,:,:));
+                new_spatial_footprint=zeros(adjusted_y_size,adjusted_x_size);
+                if y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size>=0
+                    new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1:end-(x_ind-adjusted_x_size))=footprints_temp(1+(y_ind-adjusted_y_size):end,1+(x_ind-adjusted_x_size):end);
+                elseif y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size<0
+                    new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1-(x_ind-adjusted_x_size):end)=footprints_temp(1+(y_ind-adjusted_y_size):end,1:end+(x_ind-adjusted_x_size));
+                elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size>=0
+                    new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1:end-(x_ind-adjusted_x_size))=footprints_temp(1:end+(y_ind-adjusted_y_size),1+(x_ind-adjusted_x_size):end);
+                elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size<0
+                    new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1-(x_ind-adjusted_x_size):end)=footprints_temp(1:end+(y_ind-adjusted_y_size),1:end+(x_ind-adjusted_x_size));
+                end
+                temp_centroid=temp_centroid_locations_corrected(k,:);
+                temp_spatial_footprint=translate_spatial_footprint(new_spatial_footprint',[sub_y sub_x],temp_centroid,microns_per_pixel);
+                spatial_footprints_temp(k,:,:)=temp_spatial_footprint';
+            end
+        else
+            display_progress_bar('Translating spatial footprints: ',false)
+            for k=1:number_of_cells
+                display_progress_bar(100*(k/size(centroid_locations_corrected{registration_order(n)},1)),false)
+                footprints_temp=squeeze(spatial_footprints_temp(k,:,:));
+                new_spatial_footprint=zeros(adjusted_y_size,adjusted_x_size);
+                if y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size>=0
+                    new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1:end-(x_ind-adjusted_x_size))=footprints_temp(1+(y_ind-adjusted_y_size):end,1+(x_ind-adjusted_x_size):end);
+                elseif y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size<0
+                    new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1-(x_ind-adjusted_x_size):end)=footprints_temp(1+(y_ind-adjusted_y_size):end,1:end+(x_ind-adjusted_x_size));
+                elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size>=0
+                    new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1:end-(x_ind-adjusted_x_size))=footprints_temp(1:end+(y_ind-adjusted_y_size),1+(x_ind-adjusted_x_size):end);
+                elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size<0
+                    new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1-(x_ind-adjusted_x_size):end)=footprints_temp(1:end+(y_ind-adjusted_y_size),1:end+(x_ind-adjusted_x_size));
+                end
+                temp_centroid=centroid_locations_corrected{registration_order(n)}(k,:);
+                temp_spatial_footprint=translate_spatial_footprint(new_spatial_footprint',[sub_y sub_x],temp_centroid,microns_per_pixel);
+                spatial_footprints_temp(k,:,:)=temp_spatial_footprint';
+            end
+            display_progress_bar(' done',false)
         end
     else
-        display_progress_bar('Translating spatial footprints: ',false)
-        for k=1:number_of_cells
-            display_progress_bar(100*(k/size(centroid_locations_corrected{registration_order(n)},1)),false)
-            footprints_temp=squeeze(spatial_footprints_temp(k,:,:));
-            new_spatial_footprint=zeros(adjusted_y_size,adjusted_x_size);
-            if y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size>=0
-                new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1:end-(x_ind-adjusted_x_size))=footprints_temp(1+(y_ind-adjusted_y_size):end,1+(x_ind-adjusted_x_size):end);
-            elseif y_ind-adjusted_y_size>=0 && x_ind-adjusted_x_size<0
-                new_spatial_footprint(1:end-(y_ind-adjusted_y_size),1-(x_ind-adjusted_x_size):end)=footprints_temp(1+(y_ind-adjusted_y_size):end,1:end+(x_ind-adjusted_x_size));
-            elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size>=0
-                new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1:end-(x_ind-adjusted_x_size))=footprints_temp(1:end+(y_ind-adjusted_y_size),1+(x_ind-adjusted_x_size):end);
-            elseif y_ind-adjusted_y_size<0 && x_ind-adjusted_x_size<0
-                new_spatial_footprint(1-(y_ind-adjusted_y_size):end,1-(x_ind-adjusted_x_size):end)=footprints_temp(1:end+(y_ind-adjusted_y_size),1:end+(x_ind-adjusted_x_size));
-            end
-            temp_centroid=centroid_locations_corrected{registration_order(n)}(k,:);
-            temp_spatial_footprint=translate_spatial_footprint(new_spatial_footprint',[sub_y sub_x],temp_centroid,microns_per_pixel);
-            spatial_footprints_temp(k,:,:)=temp_spatial_footprint';
-        end
-        display_progress_bar(' done',false)
+        warning(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - could not align session'])
+        warndlg(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - could not align session'])
+        spatial_footprints_corrected{registration_order(n)}=spatial_footprints_temp;
     end
     spatial_footprints_corrected{registration_order(n)}=spatial_footprints_temp;
-    cross_correlation_partial_FOV{n}=cross_corr_partial;
     overlapping_area=overlapping_area.*new_overlapping_area_temp;
 end
 
