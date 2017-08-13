@@ -468,7 +468,7 @@ aligned_data_struct=load(fullfile(file_path,file_name));
 if ~isstruct(aligned_data_struct)
     errordlg('This file does not contain data with the required format')
     error('This file does not contain data with the required format')
-elseif ~isfield(aligned_data_struct,'data_struct')
+elseif ~isfield(aligned_data_struct,'aligned_data_struct')
     errordlg('This file does not contain data with the required format')
     error('This file does not contain data with the required format')
 else
@@ -476,7 +476,7 @@ else
     msgbox('Please select the folder in which the results will be saved')
     pause(3)
     results_directory=uigetdir(file_path); % the directory which the final results will be saved
-    data_struct=aligned_data_struct.data_struct;
+    data_struct=aligned_data_struct.aligned_data_struct;
     data_struct.results_directory=results_directory;
     figures_directory=fullfile(results_directory,'Figures');
     if exist(figures_directory,'dir')~=7
@@ -542,7 +542,7 @@ modeled_data_struct=load(fullfile(file_path,file_name));
 if ~isstruct(modeled_data_struct)
     errordlg('This file does not contain data with the required format')
     error('This file does not contain data with the required format')
-elseif ~isfield(modeled_data_struct,'data_struct')
+elseif ~isfield(modeled_data_struct,'modeled_data_struct')
     errordlg('This file does not contain data with the required format')
     error('This file does not contain data with the required format')
 else
@@ -550,7 +550,7 @@ else
     msgbox('Please select the folder in which the results will be saved')
     pause(3)
     results_directory=uigetdir(file_path); % the directory which the final results will be saved
-    data_struct=modeled_data_struct.data_struct;
+    data_struct=modeled_data_struct.modeled_data_struct;
     data_struct.results_directory=results_directory;
     figures_directory=fullfile(results_directory,'Figures');
     if exist(figures_directory,'dir')~=7
@@ -626,6 +626,18 @@ spatial_footprints=data_struct.spatial_footprints;
 results_directory=data_struct.results_directory;
 figures_directory=data_struct.figures_directory;
 microns_per_pixel=data_struct.microns_per_pixel;
+
+% defining the aligned data structure:
+aligned_data_struct=struct;
+aligned_data_struct.number_of_sessions=number_of_sessions;
+aligned_data_struct.spatial_footprints=spatial_footprints;
+aligned_data_struct.results_directory=results_directory;
+aligned_data_struct.figures_directory=figures_directory;
+aligned_data_struct.microns_per_pixel=microns_per_pixel;
+aligned_data_struct.imaging_technique=data_struct.imaging_technique;
+aligned_data_struct.footprints_projections=data_struct.footprints_projections;
+aligned_data_struct.sessions_list=data_struct.sessions_list;
+aligned_data_struct.file_names=data_struct.file_names;
 
 if get(handles.figures_visibility_on,'Value');
     figures_visibility='On';
@@ -705,9 +717,23 @@ data_struct.overlapping_FOV=overlapping_FOV;
 data_struct.maximal_cross_correlation=maximal_cross_correlation;
 data_struct.best_translations=best_translations;
 
+% saving the results into the aligned data structure:
+aligned_data_struct.reference_session_index=reference_session_index;
+aligned_data_struct.alignment_type=alignment_type;
+aligned_data_struct.centroid_locations=centroid_locations;
+aligned_data_struct.spatial_footprints_corrected=spatial_footprints_corrected;
+aligned_data_struct.centroid_locations_corrected=centroid_locations_corrected;
+aligned_data_struct.adjusted_footprints_projections=adjusted_footprints_projections;
+aligned_data_struct.footprints_projections_corrected=footprints_projections_corrected;
+aligned_data_struct.adjusted_x_size=adjusted_x_size;
+aligned_data_struct.adjusted_y_size=adjusted_y_size;
+aligned_data_struct.overlapping_FOV=overlapping_FOV;
+aligned_data_struct.maximal_cross_correlation=maximal_cross_correlation;
+aligned_data_struct.best_translations=best_translations;
+
 handles.data_struct=data_struct;
 disp('Saving the aligned data structure')
-save(fullfile(results_directory,'aligned_data_struct.mat'),'data_struct','-v7.3')
+save(fullfile(results_directory,'aligned_data_struct.mat'),'aligned_data_struct','-v7.3')
 guidata(hObject,handles)
 if use_parallel_processing
     delete(gcp);
@@ -765,6 +791,31 @@ microns_per_pixel=data_struct.microns_per_pixel;
 results_directory=data_struct.results_directory;
 figures_directory=data_struct.figures_directory;
 
+% defining the modeled data structure:
+modeled_data_struct=struct;
+modeled_data_struct.number_of_sessions=data_struct.number_of_sessions;
+modeled_data_struct.spatial_footprints=data_struct.spatial_footprints;
+modeled_data_struct.results_directory=results_directory;
+modeled_data_struct.figures_directory=figures_directory;
+modeled_data_struct.microns_per_pixel=microns_per_pixel;
+modeled_data_struct.reference_session_index=data_struct.reference_session_index;
+modeled_data_struct.alignment_type=data_struct.alignment_type;
+modeled_data_struct.centroid_locations=data_struct.centroid_locations;
+modeled_data_struct.spatial_footprints_corrected=spatial_footprints_corrected;
+modeled_data_struct.centroid_locations_corrected=centroid_locations_corrected;
+modeled_data_struct.adjusted_footprints_projections=data_struct.adjusted_footprints_projections;
+modeled_data_struct.footprints_projections_corrected=data_struct.footprints_projections_corrected;
+modeled_data_struct.adjusted_x_size=data_struct.adjusted_x_size;
+modeled_data_struct.adjusted_y_size=data_struct.adjusted_y_size;
+modeled_data_struct.overlapping_FOV=data_struct.overlapping_FOV;
+modeled_data_struct.maximal_cross_correlation=data_struct.maximal_cross_correlation;
+modeled_data_struct.best_translations=data_struct.best_translations;
+modeled_data_struct.imaging_technique=data_struct.imaging_technique;
+modeled_data_struct.footprints_projections=data_struct.footprints_projections;
+modeled_data_struct.sessions_list=data_struct.sessions_list;
+modeled_data_struct.file_names=data_struct.file_names;
+
+
 if get(handles.one_photon,'value')==1
     imaging_technique='one_photon';
 else
@@ -782,7 +833,6 @@ maximal_distance=str2num(get(handles.model_maximal_distance,'string'));
 normalized_maximal_distance=maximal_distance/microns_per_pixel;
 p_same_certainty_threshold=0.95; % certain cells are those with p_same>threshld or <1-threshold
 [number_of_bins,centers_of_bins]=estimate_number_of_bins(spatial_footprints_corrected,normalized_maximal_distance);
-
 
 % Computing correlations and distances across days:
 compute_model_again=0;
@@ -812,6 +862,20 @@ if compute_model_again % If the distributions were not estiamted yet
     data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
     data_struct.NN_centroid_distances=NN_centroid_distances;
     data_struct.NNN_centroid_distances=NNN_centroid_distances;
+    
+    % saving the results into the modeled data structure:
+    modeled_data_struct.all_to_all_indexes=all_to_all_indexes;
+    modeled_data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
+    modeled_data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
+    modeled_data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
+    modeled_data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
+    modeled_data_struct.neighbors_x_displacements=neighbors_x_displacements;
+    modeled_data_struct.neighbors_y_displacements=neighbors_y_displacements;
+    modeled_data_struct.NN_spatial_correlations=NN_spatial_correlations;
+    modeled_data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
+    modeled_data_struct.NN_centroid_distances=NN_centroid_distances;
+    modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;
+    
     handles.data_struct=data_struct;
     guidata(hObject, handles)
 else % if the distributions were already estimated
@@ -826,6 +890,19 @@ else % if the distributions were already estimated
     NNN_spatial_correlations=data_struct.NNN_spatial_correlations;
     NN_centroid_distances=data_struct.NN_centroid_distances;
     NNN_centroid_distances=data_struct.NNN_centroid_distances;
+    
+    % saving the results into the modeled data structure:
+    modeled_data_struct.all_to_all_indexes=all_to_all_indexes;
+    modeled_data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
+    modeled_data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
+    modeled_data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
+    modeled_data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
+    modeled_data_struct.neighbors_x_displacements=neighbors_x_displacements;
+    modeled_data_struct.neighbors_y_displacements=neighbors_y_displacements;
+    modeled_data_struct.NN_spatial_correlations=NN_spatial_correlations;
+    modeled_data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
+    modeled_data_struct.NN_centroid_distances=NN_centroid_distances;
+    modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;
 end
 
 % Plotting the (x,y) displacements:
@@ -889,7 +966,7 @@ else
         compute_p_same(all_to_all_centroid_distances,p_same_given_centroid_distance,centers_of_bins,imaging_technique);
 end
 
-% saving the results into the data struct:
+% saving the results into the data struct for GUI:
 data_struct.best_model_string=best_model_string;
 data_struct.maximal_distance=maximal_distance;
 data_struct.number_of_bins=number_of_bins;
@@ -908,6 +985,25 @@ data_struct.centroid_distances_distribution=centroid_distances_distribution;
 data_struct.centroid_distance_intersection=centroid_distance_intersection;
 data_struct.all_to_all_p_same_centroid_distance_model=all_to_all_p_same_centroid_distance_model;
 
+% saving the results into the modeled data structure:
+modeled_data_struct.best_model_string=best_model_string;
+modeled_data_struct.maximal_distance=maximal_distance;
+modeled_data_struct.number_of_bins=number_of_bins;
+modeled_data_struct.centers_of_bins=centers_of_bins;
+modeled_data_struct.imaging_technique=imaging_technique;
+
+modeled_data_struct.false_positive_per_distance_threshold=false_positive_per_distance_threshold;
+modeled_data_struct.true_positive_per_distance_threshold=true_positive_per_distance_threshold;
+modeled_data_struct.cdf_p_same_centroid_distances=cdf_p_same_centroid_distances;
+modeled_data_struct.uncertain_fraction_centroid_distances=uncertain_fraction_centroid_distances;
+modeled_data_struct.p_same_given_centroid_distance=p_same_given_centroid_distance;
+modeled_data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
+modeled_data_struct.MSE_centroid_distances_model=MSE_centroid_distances_model;
+modeled_data_struct.centroid_distances_model_parameters=centroid_distances_model_parameters;
+modeled_data_struct.centroid_distances_distribution=centroid_distances_distribution;
+modeled_data_struct.centroid_distance_intersection=centroid_distance_intersection;
+modeled_data_struct.all_to_all_p_same_centroid_distance_model=all_to_all_p_same_centroid_distance_model;
+
 if strcmp(imaging_technique,'one_photon');
     data_struct.false_positive_per_correlation_threshold=false_positive_per_correlation_threshold;
     data_struct.true_positive_per_correlation_threshold=true_positive_per_correlation_threshold;
@@ -920,6 +1016,19 @@ if strcmp(imaging_technique,'one_photon');
     data_struct.spatial_correlations_distribution=spatial_correlations_distribution;
     data_struct.spatial_correlation_intersection=spatial_correlation_intersection;
     data_struct.all_to_all_p_same_spatial_correlation_model=all_to_all_p_same_spatial_correlation_model;
+    
+    % saving the results into the modeled data structure:
+    modeled_data_struct.false_positive_per_correlation_threshold=false_positive_per_correlation_threshold;
+    modeled_data_struct.true_positive_per_correlation_threshold=true_positive_per_correlation_threshold;
+    modeled_data_struct.cdf_p_same_spatial_correlations=cdf_p_same_spatial_correlations;
+    modeled_data_struct.uncertain_fraction_spatial_correlations=uncertain_fraction_spatial_correlations;
+    modeled_data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
+    modeled_data_struct.MSE_spatial_correlations_model=MSE_spatial_correlations_model;
+    modeled_data_struct.spatial_correlations_model_parameters=spatial_correlations_model_parameters;
+    modeled_data_struct.p_same_given_spatial_correlation=p_same_given_spatial_correlation;
+    modeled_data_struct.spatial_correlations_distribution=spatial_correlations_distribution;
+    modeled_data_struct.spatial_correlation_intersection=spatial_correlation_intersection;
+    modeled_data_struct.all_to_all_p_same_spatial_correlation_model=all_to_all_p_same_spatial_correlation_model;   
 end
 
 % setting the intersection point as the threshold
@@ -929,7 +1038,7 @@ end
 set(handles.distance_threshold,'string',num2str(centroid_distance_intersection))
 handles.data_struct=data_struct;
 disp('Saving the modeled data structure')
-save(fullfile(results_directory,'modeled_data_struct.mat'),'data_struct','-v7.3')
+save(fullfile(results_directory,'modeled_data_struct.mat'),'modeled_data_struct','-v7.3')
 guidata(hObject, handles)
 disp('Done')
 msgbox(['Finished computing probabilistic model - The ' best_model_string ' model is best suited for the data'])

@@ -11,6 +11,8 @@ function [translated_spatial_footprint]=translate_spatial_footprint(original_spa
 % Outputs:
 % 1.translated_spatial_footprint
 
+maximal_cell_radius=25; % in microns
+
 N=size(original_spatial_footprint,1);
 M=size(original_spatial_footprint,2);
 a=translations(2);
@@ -19,7 +21,7 @@ translated_spatial_footprint=zeros(size(original_spatial_footprint));
 for p=1:N
     for q=1:M
         wanted_coords=[p ;q]+[a; b];
-        if sqrt(sum(((wanted_coords-centroid_location').^2)))>25/microns_per_pixel
+        if sqrt(sum(((wanted_coords-centroid_location').^2)))>maximal_cell_radius/microns_per_pixel
             translated_spatial_footprint(p,q)=0;
         else
             wanted_coords(wanted_coords<0)=0;

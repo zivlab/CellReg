@@ -13,6 +13,8 @@ function [rotated_spatial_footprint]=rotate_spatial_footprint(original_spatial_f
 % Outputs:
 % 1. rotated_spatial_footprint
 
+maximal_cell_radius=25; % in microns
+
 theta=theta*pi/180;
 N=size(original_spatial_footprint,1);
 M=size(original_spatial_footprint,2);
@@ -24,7 +26,7 @@ rotated_spatial_footprint=zeros(size(original_spatial_footprint));
 for p=1:N
     for q=1:M
         wanted_coords=trans_inv*[p-center_of_FOV(1)-a ;q-center_of_FOV(2)-b]+[center_of_FOV(1) ;center_of_FOV(2)];
-        if sqrt(sum(((wanted_coords-centroid_location').^2)))>25/microns_per_pixel
+        if sqrt(sum(((wanted_coords-centroid_location').^2)))>maximal_cell_radius/microns_per_pixel
             rotated_spatial_footprint(p,q)=0;
         else
             wanted_coords(wanted_coords<0)=0;
