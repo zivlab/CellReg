@@ -6,7 +6,7 @@ number_of_p_same_bins=length(p_same_centers_of_bins);
 number_of_bins=length(centers_of_bins{1});
 p_same_certainty_threshold=1-p_same_certainty_threshold;
 
-figure('units','normalized','outerposition',[0.2 0.04 0.6 0.96],'Visible',figures_visibility)
+figure('units','normalized','outerposition',[0.2 0.1 0.6 0.8],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
 size_x=0.78;
 size_y=0.78;

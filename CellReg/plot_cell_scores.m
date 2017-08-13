@@ -16,13 +16,9 @@ number_of_clusters=size(cell_scores,2);
 
 xout_temp=linspace(0,1,number_of_sessions*2+1);
 xout=xout_temp(2:2:end);
-figure('Visible',figures_visibility)
+figure('units','normalized','outerposition',[0.25 0.2 0.5 0.6],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
-fig_size_y=20;
-fig_size_x=25;
-set(gcf,'PaperUnits','centimeters','PaperPosition',[1 5 fig_size_x fig_size_y]);
 set(gcf,'PaperOrientation','portrait');
-set(gcf,'Units','centimeters','Position',get(gcf,'paperPosition')+[5 0 0 0]);
 size_x=0.65;
 size_y=0.65;
 

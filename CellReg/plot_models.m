@@ -15,7 +15,7 @@ end
 
 number_of_bins=length(centers_of_bins{1});
 
-figure('units','normalized','outerposition',[0.15 0.04 0.7 0.96],'Visible',figures_visibility)
+figure('units','normalized','outerposition',[0.2 0.1 0.6 0.8],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
 if ~isempty(varargin)
     subplot(2,2,2)

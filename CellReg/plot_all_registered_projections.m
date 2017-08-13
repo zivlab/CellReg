@@ -52,7 +52,7 @@ end
 subx=4;
 suby=ceil(number_of_sessions/subx);
 if number_of_sessions>4
-    figure('units','normalized','outerposition',[0.1 0.04 0.8 0.96],'Visible',figures_visibility)
+    figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
     for n=1:number_of_sessions
         subplot(suby,subx,n)
@@ -67,7 +67,7 @@ if number_of_sessions>4
         end
     end
 else
-    figure('units','normalized','outerposition',[0.1 0.2 0.9 0.5],'Visible',figures_visibility)
+    figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
     for n=1:number_of_sessions
         subplot(1,number_of_sessions,n)

@@ -21,13 +21,9 @@ x_y_displacements=hist3([neighbors_x_displacements;neighbors_y_displacements]',c
 x_y_displacements=flipud(x_y_displacements);
 x_y_displacements=fliplr(x_y_displacements);
 
-figure('Visible',figures_visibility)
+figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
-fig_size_y=15;
-fig_size_x=18;
-set(gcf,'PaperUnits','centimeters','PaperPosition',[1 5 fig_size_x fig_size_y]);
 set(gcf,'PaperOrientation','portrait');
-set(gcf,'Units','centimeters','Position',get(gcf,'paperPosition')+[5 0 0 0]);
 size_x=0.75;
 size_y=0.75;
 axes('position',[0.12 0.15 size_x size_y])

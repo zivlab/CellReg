@@ -35,7 +35,7 @@ figures_directory=fullfile(results_directory,'Figures');
 if exist(figures_directory,'dir')~=7
     mkdir(figures_directory);
 end
-figures_visibility='off'; % either 'on' or 'off' (in any case figures are saved)
+figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
 
 % Defining the paths for the data:
 file_names={'D:\Liron\CellReg test\SampleData\spatial_footprints_01.mat' ,...

@@ -31,7 +31,7 @@ end
 footprints_projections_corrected_rgb(footprints_projections_corrected_rgb>1)=1;
 footprints_projections_corrected_rgb=footprints_projections_corrected_rgb+0.25*max(max(max(footprints_projections_corrected_rgb)))*repmat(overlapping_FOV,1,1,3);
 
-figure('units','normalized','outerposition',[0 0.04 1 0.96],'Visible',figures_visibility)
+figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
 subplot(2,2,1)
 imshow(footprints_projections_rgb)
@@ -165,7 +165,7 @@ if number_of_sessions>2
     saveas(gcf,fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations'),'png')
 end
 
-figure('units','normalized','outerposition',[0 0.04 1 0.96],'Visible',figures_visibility)
+figure('units','normalized','outerposition',[0 0.1 0.8 0.8],'Visible',figures_visibility)
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
 % plotting the translations for each session compared to the reference
 subplot(2,2,1)

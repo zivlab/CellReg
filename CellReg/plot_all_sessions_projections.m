@@ -11,7 +11,7 @@ num_sessions=size(footprints_projections,2);
 subx=4;
 suby=ceil(num_sessions/subx);
 if num_sessions>4
-    figure('units','normalized','outerposition',[0.1 0.04 0.8 0.96],'Visible',figures_visibility)
+    figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
     for n=1:num_sessions
         subplot(suby,subx,n)
