@@ -500,7 +500,7 @@ else
     end
     axes(handles.axes1);
     plot_RGB_overlay(footprints_projections_corrected,RGB_indexes,overlapping_FOV)
-    figure('Visible',figures_visibility)    
+    figure('units','normalized','outerposition',[0.325 0.25 0.35 0.5],'Visible',figures_visibility)
     plot_RGB_overlay(footprints_projections_corrected,RGB_indexes,overlapping_FOV)
 
     % loading configurations to GUI:
@@ -574,7 +574,7 @@ else
     end
     axes(handles.axes1);
     plot_RGB_overlay(footprints_projections_corrected,RGB_indexes,overlapping_FOV)
-    figure('Visible',figures_visibility)    
+    figure('units','normalized','outerposition',[0.325 0.25 0.35 0.5],'Visible',figures_visibility)
     plot_RGB_overlay(footprints_projections_corrected,RGB_indexes,overlapping_FOV)
 
     % loading configurations to GUI:
@@ -1681,7 +1681,7 @@ else
     end
     axes(handles.axes1);
     plot_RGB_overlay(spatial_footprints_projections,RGB_indexes,overlapping_FOV)
-    figure('Visible',figures_visibility)
+    figure('units','normalized','outerposition',[0.325 0.25 0.35 0.5],'Visible',figures_visibility)
     plot_RGB_overlay(spatial_footprints_projections,RGB_indexes,overlapping_FOV)
 end
 
