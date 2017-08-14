@@ -25,7 +25,7 @@ trans_inv=transformation^-1;
 rotated_spatial_footprint=zeros(size(original_spatial_footprint));
 for p=1:N
     for q=1:M
-        wanted_coords=trans_inv*[p-center_of_FOV(1)-a ;q-center_of_FOV(2)-b]+[center_of_FOV(1) ;center_of_FOV(2)];
+        wanted_coords=trans_inv*[p-center_of_FOV(1)+a ;q-center_of_FOV(2)+b]+[center_of_FOV(1) ; center_of_FOV(2)];
         if sqrt(sum(((wanted_coords-centroid_location').^2)))>maximal_cell_radius/microns_per_pixel
             rotated_spatial_footprint(p,q)=0;
         else
