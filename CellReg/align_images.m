@@ -246,7 +246,7 @@ for n=1:number_of_sessions-1
             else
                 display_progress_bar('Rotating spatial footprints: ',false)
                 for m=1:size(centroid_locations_corrected{registration_order(n)},1);
-                    display_progress_bar(100*(k/size(unrotated_centroid_locations,1)),false)
+                    display_progress_bar(100*(m/size(unrotated_centroid_locations,1)),false)
                     unrotated_spatial_footprint=squeeze(unrotated_spatial_footprints(m,:,:));
                     unrotated_centroid=unrotated_centroid_locations(m,:);
                     rotated_translated_spatial_footprint=rotate_spatial_footprint(unrotated_spatial_footprint',-best_rotation,[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size],center_of_FOV,unrotated_centroid,microns_per_pixel);
