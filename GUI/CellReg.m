@@ -1227,7 +1227,7 @@ if strcmp(registration_approach,'Probabilistic');
     cell_registered_struct.true_positive_scores=cell_scores_positive';
     cell_registered_struct.true_negative_scores=cell_scores_negative';
     cell_registered_struct.exclusivity_scores=cell_scores_exclusive';
-    cell_registered_struct.p_same_registered_pairs=p_same_registered_pairs;
+    cell_registered_struct.p_same_registered_pairs=p_same_registered_pairs';
 end
 cell_registered_struct.is_cell_in_overlapping_FOV=is_in_overlapping_FOV';
 cell_registered_struct.registered_cells_centroids=registered_cells_centroids';

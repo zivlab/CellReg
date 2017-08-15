@@ -173,7 +173,7 @@ for n=1:number_of_sessions
     plot(best_x_translation(n),best_y_translation(n),'*','markersize',8,'linewidth',2,'color',color(n,:));
     hold on
 end
-legend(legend_strings{registration_order},'Location','NorthWest')
+legend(legend_strings,'Location','NorthWest')
 legend('boxoff')
 x_for_circle=0:0.01:2*pi;
 plot(25*sin(x_for_circle),25*cos(x_for_circle),'--','color','k','linewidth',1);
