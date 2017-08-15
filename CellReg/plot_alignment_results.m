@@ -169,7 +169,7 @@ figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_
 set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
 % plotting the translations for each session compared to the reference
 subplot(2,2,1)
-for n=1:number_of_sessions-1
+for n=1:number_of_sessions
     plot(best_x_translation(n),best_y_translation(n),'*','markersize',8,'linewidth',2,'color',color(n,:));
     hold on
 end
@@ -212,7 +212,7 @@ end
 if strcmp(alignment_type,'Translations and Rotations')
     % plotting the rotations for each session compared to the reference
     subplot(2,2,2)
-    plot(registration_order,best_rotation,'*','linewidth',2,'markersize',8,'color','b')
+    plot(1:number_of_sessions,best_rotation,'*','linewidth',2,'markersize',8,'color','b')
     xlim([0 number_of_sessions+1])
     ylim([-30 30])
     hold on

@@ -57,10 +57,10 @@ end
 
 maximal_cross_correlation=zeros(1,number_of_sessions-1);
 if strcmp(alignment_type,'Translations and Rotations')
-    best_rotations=zeros(1,number_of_sessions-1);
+    best_rotations=zeros(1,number_of_sessions);
 end
-best_x_translations=zeros(1,number_of_sessions-1);
-best_y_translations=zeros(1,number_of_sessions-1);
+best_x_translations=zeros(1,number_of_sessions);
+best_y_translations=zeros(1,number_of_sessions);
 registration_order=setdiff(1:number_of_sessions,reference_session_index);
 overlapping_area=ones(adjusted_y_size,adjusted_x_size);
 overlapping_area=overlapping_area.*overlapping_area_all_sessions(:,:,reference_session_index);
@@ -174,7 +174,7 @@ for n=1:number_of_sessions-1
         ,round(cross_corr_size(2)/2-cross_corr_size(2)/6):round(cross_corr_size(2)/2+cross_corr_size(2)/6));
     [maximal_cross_correlation(n),x_ind]=max(max(cross_corr_partial));   
     if strcmp(alignment_type,'Translations and Rotations')
-        best_rotations(n)=best_rotation;
+        best_rotations(registration_order(n))=best_rotation;
     end
     [~,y_ind]=max(cross_corr_partial(:,x_ind));
     
@@ -203,8 +203,8 @@ for n=1:number_of_sessions-1
     y_ind=y_ind+round(cross_corr_size(1)/2-cross_corr_size(1)/6)-1;
     x_ind_sub=x_ind+sub_x;
     y_ind_sub=y_ind+sub_y;
-    best_x_translations(n)=(x_ind_sub-adjusted_x_size);
-    best_y_translations(n)=(y_ind_sub-adjusted_y_size);        
+    best_x_translations(registration_order(n))=(x_ind_sub-adjusted_x_size);
+    best_y_translations(registration_order(n))=(y_ind_sub-adjusted_y_size);        
     
     % aligning projections and centroid locations:
     if strcmp(alignment_type,'Translations and Rotations')
