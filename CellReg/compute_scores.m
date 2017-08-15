@@ -1,4 +1,4 @@
-function [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=compute_scores(cell_to_index_map,all_to_all_indexes,all_to_all_p_same,number_of_sessions)
+function [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,p_same_registered_pairs]=compute_scores(cell_to_index_map,all_to_all_indexes,all_to_all_p_same,number_of_sessions)
 % This function computes the false postive, false negative,
 % exclusivity, and cell scores for all registered cells according to the
 % clustering procedure
@@ -14,13 +14,16 @@ function [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_excl
 % 2. cell_scores_negative
 % 3. cell_scores_exclusive
 % 4. cell_scores
+% 5. p_same_registered_pairs
 
 number_of_clusters=size(cell_to_index_map,1);
 cell_scores=zeros(1,number_of_clusters);
 cell_scores_positive=zeros(1,number_of_clusters);
 cell_scores_negative=zeros(1,number_of_clusters);
 cell_scores_exclusive=zeros(1,number_of_clusters);
+p_same_registered_pairs=cell(1,number_of_clusters);
 for n=1:number_of_clusters
+    p_same_registered_pairs{n}=nan(number_of_sessions,number_of_sessions);
     % initialize score counts for each cell:
     good_pairs=0;
     good_pairs_positive=0;
@@ -58,6 +61,7 @@ for n=1:number_of_clusters
                     clustered_ind=find(cells_to_check==clustered_cell);
                     if ~isempty(this_p_same) & ~isempty(clustered_ind)
                         temp_true_positive=this_p_same(clustered_ind);
+                        p_same_registered_pairs{n}(m,k)=temp_true_positive;
                         good_pairs_positive=good_pairs_positive+temp_true_positive;
                         this_p_same(clustered_ind)=[];
                     else

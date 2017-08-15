@@ -304,11 +304,12 @@ end
 
 % Calculating the final cell scores:
 if strcmp(registration_approach,'Probabilistic')
-    [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=compute_scores(cell_to_index_map,all_to_all_indexes,all_to_all_p_same,number_of_sessions);
+    [cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,p_same_registered_pairs]=compute_scores(cell_to_index_map,all_to_all_indexes,all_to_all_p_same,number_of_sessions);
     varargout{1}=cell_scores;
     varargout{2}=cell_scores_positive;
     varargout{3}=cell_scores_negative;
     varargout{4}=cell_scores_exclusive; 
+    varargout{5}=p_same_registered_pairs; 
 end
 
 % Calculating neighbor vs corr/distance curves

@@ -1172,7 +1172,7 @@ else
     model_type='Centroid distance';
 end
 
-trasform_data=false;
+transform_data=false;
 if get(handles.use_model,'Value')==1;
     p_same_threshold=str2num(get(handles.decision_thresh,'string'));
     final_threshold=p_same_threshold;
@@ -1184,7 +1184,7 @@ else
     elseif strcmp(model_type,'Centroid distance')
         final_threshold=str2num(get(handles.simple_distance_threshold,'string'));
         centroid_distances_distribution_threshold=(maximal_distance-final_threshold)/maximal_distance;
-        trasform_data=true;
+        transform_data=true;
     end
 end
 
@@ -1196,20 +1196,20 @@ data_struct.model_type=model_type;
 disp('Stage 5 - Performing final registration')
 if strcmp(registration_approach,'Probabilistic')
     if strcmp(model_type,'Spatial correlation')
-        [optimal_cell_to_index_map,registered_cells_centroids,cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=...
-            cluster_cells(cell_to_index_map,all_to_all_p_same_spatial_correlation_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+        [optimal_cell_to_index_map,registered_cells_centroids,cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,p_same_registered_pairs]=...
+            cluster_cells(cell_to_index_map,all_to_all_p_same_spatial_correlation_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,transform_data);
     elseif strcmp(model_type,'Centroid distance')
-        [optimal_cell_to_index_map,registered_cells_centroids,cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive]=...
-            cluster_cells(cell_to_index_map,all_to_all_p_same_centroid_distance_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+        [optimal_cell_to_index_map,registered_cells_centroids,cell_scores,cell_scores_positive,cell_scores_negative,cell_scores_exclusive,p_same_registered_pairs]=...
+            cluster_cells(cell_to_index_map,all_to_all_p_same_centroid_distance_model,all_to_all_indexes,normalized_maximal_distance,p_same_threshold,centroid_locations_corrected,registration_approach,transform_data);
     end
-    plot_cell_scores(cell_scores_positive,cell_scores_negative,cell_scores_exclusive,cell_scores,figures_directory,figures_visibility)
+    plot_cell_scores(cell_scores_positive,cell_scores_negative,cell_scores_exclusive,cell_scores,p_same_registered_pairs,figures_directory,figures_visibility)
 elseif strcmp(registration_approach,'Simple threshold')
     if strcmp(model_type,'Spatial correlation')
         [optimal_cell_to_index_map,registered_cells_centroids]=...
-            cluster_cells(cell_to_index_map,all_to_all_spatial_correlations,all_to_all_indexes,normalized_maximal_distance,final_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+            cluster_cells(cell_to_index_map,all_to_all_spatial_correlations,all_to_all_indexes,normalized_maximal_distance,final_threshold,centroid_locations_corrected,registration_approach,transform_data);
     elseif strcmp(model_type,'Centroid distance')
         [optimal_cell_to_index_map,registered_cells_centroids]=...
-            cluster_cells(cell_to_index_map,all_to_all_centroid_distances,all_to_all_indexes,normalized_maximal_distance,centroid_distances_distribution_threshold,centroid_locations_corrected,registration_approach,trasform_data);
+            cluster_cells(cell_to_index_map,all_to_all_centroid_distances,all_to_all_indexes,normalized_maximal_distance,centroid_distances_distribution_threshold,centroid_locations_corrected,registration_approach,transform_data);
     end
 end
 [is_in_overlapping_FOV]=check_if_in_overlapping_FOV(registered_cells_centroids,overlapping_FOV);
@@ -1227,6 +1227,7 @@ if strcmp(registration_approach,'Probabilistic');
     cell_registered_struct.true_positive_scores=cell_scores_positive';
     cell_registered_struct.true_negative_scores=cell_scores_negative';
     cell_registered_struct.exclusivity_scores=cell_scores_exclusive';
+    cell_registered_struct.p_same_registered_pairs=p_same_registered_pairs;
 end
 cell_registered_struct.is_cell_in_overlapping_FOV=is_in_overlapping_FOV';
 cell_registered_struct.registered_cells_centroids=registered_cells_centroids';
