@@ -1,0 +1,53 @@
+Sessions list:
+-----------------
+Session 1 - D:\Liron\CellReg test\SampleData\spatial_footprints_01.mat
+Session 2 - D:\Liron\CellReg test\SampleData\spatial_footprints_02.mat
+Session 3 - D:\Liron\CellReg test\SampleData\spatial_footprints_03.mat
+Session 4 - D:\Liron\CellReg test\SampleData\spatial_footprints_04.mat
+Session 5 - D:\Liron\CellReg test\SampleData\spatial_footprints_05.mat
+
+
+General data parameters:
+------------------------
+Imaging technique - 1-photon
+Number of sessions - 5
+FOV size - 782.4X616.8 [microns] ; (x,y)
+Image size - 326X257 [pixels] ; (x,y)
+
+
+Session alignment parameters:
+----------------------------------
+Reference session - 1
+Alignment Type - Translations
+
+
+Cell registration parameters:
+-----------------------------
+Model maximal distance - 12 [microns]
+Number of bins - 60
+Initial registration type - Spatial correlation
+Initial threshold - 0.68
+Registration approach - Probabilistic modeling
+Final registration type - Spatial correlations
+P_same threshold - 0.5 
+
+
+General results:
+----------------
+Final number of cells - 784
+Average fraction of active cells - 0.71
+
+Fraction of false positives - 0.01
+Fraction of false negatives - 0.01
+Fraction of uncertain cell-pairs - 0.06
+
+Average register score - 0.96
+Average true positive score - 0.98
+Average true negative score - 0.94
+Average exclusivity score - 0.99
+
+Discrepancy of the model - 0.08
+
+
+Comments:
+---------
