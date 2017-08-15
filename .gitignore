@@ -94,7 +94,6 @@ ENV/
 *.tiff
 *.jpg
 *.bmp
-*.png
 
 # Matlab files
 *.asv
