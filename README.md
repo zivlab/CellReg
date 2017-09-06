@@ -6,7 +6,7 @@ in Ca2+ imaging data, developed by Sheintuch et al., 2017. The package includes 
 1. Cloning:
 `git clone https://github.com/zivlab/CellReg.git`
 2. Checkout version:
-`git checkout v<major>.<minor>.<bugfix> (e.g., v1.1.2)`
+`git checkout v<major>.<minor>.<bugfix> (e.g., v1.1.3)`
 3. Run `setup.m`
 
 ## Usage and documentation
