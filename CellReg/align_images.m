@@ -204,7 +204,7 @@ for n=1:number_of_sessions-1
     x_ind_sub=x_ind+sub_x;
     y_ind_sub=y_ind+sub_y;
     best_x_translations(registration_order(n))=(x_ind_sub-adjusted_x_size);
-    best_y_translations(registration_order(n))=(y_ind_sub-adjusted_y_size);        
+    best_y_translations(registration_order(n))=(y_ind_sub-adjusted_y_size);
     
     % aligning projections and centroid locations:
     if strcmp(alignment_type,'Translations and Rotations')
@@ -215,10 +215,10 @@ for n=1:number_of_sessions-1
         untranslated_footprints_projections=footprints_projections{registration_order(n)};
         untranslated_centroid_projections=centroid_projections_corrected{registration_order(n)};
         centroids_temp=centroid_locations{registration_order(n)};
-    end    
+    end
     centroids_temp(:,1)=centroids_temp(:,1)-(x_ind_sub-adjusted_x_size);
     centroids_temp(:,2)=centroids_temp(:,2)-(y_ind_sub-adjusted_y_size);
-    centroid_locations_corrected{registration_order(n)}=centroids_temp;        
+    centroid_locations_corrected{registration_order(n)}=centroids_temp;
     translated_projections=translate_projections(untranslated_footprints_projections',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size]);
     translated_centroid_projections=translate_projections(untranslated_centroid_projections',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size]);
     translated_overlapping_area=translate_projections(overlapping_area_temp',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size]);
@@ -226,11 +226,11 @@ for n=1:number_of_sessions-1
     footprints_projections_corrected{registration_order(n)}=translated_projections';
     centroid_projections_corrected{registration_order(n)}=translated_centroid_projections';
     
-    % Rotating/translating each spatial footprint:    
-    unaligned_spatial_footprints=spatial_footprints{registration_order(n)};    
+    % Rotating/translating each spatial footprint:
+    unaligned_spatial_footprints=spatial_footprints{registration_order(n)};
     number_of_cells=size(unaligned_spatial_footprints,1);
     if maximal_cross_correlation(n)>sufficient_correlation;
-        if strcmp(alignment_type,'Translations and Rotations') && abs(best_rotation)>minimal_rotation            
+        if strcmp(alignment_type,'Translations and Rotations') && abs(best_rotation)>minimal_rotation
             % rotating cells
             unrotated_spatial_footprints=unaligned_spatial_footprints;
             rotated_translated_spatial_footprints=zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
@@ -256,33 +256,35 @@ for n=1:number_of_sessions-1
             end
             aligned_spatial_footprints=rotated_translated_spatial_footprints;
         else % no rotations - translating cells
-            if strcmp(alignment_type,'Translations and Rotations') && abs(best_rotation)<=minimal_rotation            
+            if strcmp(alignment_type,'Translations and Rotations') && abs(best_rotation)<=minimal_rotation
                 disp('No rotations required') % less than the minimal rotation that justifies rotating each cell - translating cells
             end
             untranslated_spatial_footprints=unaligned_spatial_footprints;
             translated_spatial_footprints=zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
-                untranslated_centroid_locations=centroid_locations{registration_order(n)};
-                if use_parallel_processing
-                    disp('Translating spatial footprints')
-                    parfor k=1:number_of_cells
-                        untranslated_spatial_footprint=squeeze(untranslated_spatial_footprints(k,:,:));
-                        untranslated_centroid=untranslated_centroid_locations(k,:);
-                        translated_spatial_footprint=translate_spatial_footprint(untranslated_spatial_footprint',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size],untranslated_centroid,microns_per_pixel);
-                        translated_spatial_footprints(k,:,:)=translated_spatial_footprint';
-                    end
-                else
-                    display_progress_bar('Translating spatial footprints: ',false)
-                    for k=1:number_of_cells
-                        display_progress_bar(100*(k/size(untranslated_centroid_locations,1)),false)
-                        untranslated_spatial_footprint=squeeze(untranslated_spatial_footprints(k,:,:));
-                        untranslated_centroid=untranslated_centroid_locations(k,:);
-                        translated_spatial_footprint=translate_spatial_footprint(untranslated_spatial_footprint',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size],untranslated_centroid,microns_per_pixel);
-                        translated_spatial_footprints(k,:,:)=translated_spatial_footprint';
-                    end
-                    display_progress_bar(' done',false)
+            untranslated_centroid_locations=centroid_locations{registration_order(n)};
+            if use_parallel_processing
+                disp('Translating spatial footprints')
+                parfor k=1:number_of_cells
+                    untranslated_spatial_footprint=squeeze(untranslated_spatial_footprints(k,:,:));
+                    untranslated_centroid=untranslated_centroid_locations(k,:);
+                    translated_spatial_footprint=translate_spatial_footprint(untranslated_spatial_footprint',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size],untranslated_centroid,microns_per_pixel);
+                    translated_spatial_footprints(k,:,:)=translated_spatial_footprint';
                 end
-                aligned_spatial_footprints=translated_spatial_footprints;
+            else
+                display_progress_bar('Translating spatial footprints: ',false)
+                for k=1:number_of_cells
+                    display_progress_bar(100*(k/size(untranslated_centroid_locations,1)),false)
+                    untranslated_spatial_footprint=squeeze(untranslated_spatial_footprints(k,:,:));
+                    untranslated_centroid=untranslated_centroid_locations(k,:);
+                    translated_spatial_footprint=translate_spatial_footprint(untranslated_spatial_footprint',[y_ind_sub-adjusted_y_size x_ind_sub-adjusted_x_size],untranslated_centroid,microns_per_pixel);
+                    translated_spatial_footprints(k,:,:)=translated_spatial_footprint';
+                end
+                display_progress_bar(' done',false)
+            end
+            aligned_spatial_footprints=translated_spatial_footprints;
         end
+        spatial_footprints_corrected{registration_order(n)}=aligned_spatial_footprints;
+        overlapping_area=overlapping_area.*translated_overlapping_area;
     else % if no appropriate rotations/translations were found
         if strcmp(alignment_type,'Translations and Rotations') % rotating cells
             warning(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - could not align session'])
@@ -293,8 +295,6 @@ for n=1:number_of_sessions-1
         end
         spatial_footprints_corrected{registration_order(n)}=unaligned_spatial_footprints;
     end
-    spatial_footprints_corrected{registration_order(n)}=aligned_spatial_footprints;
-    overlapping_area=overlapping_area.*translated_overlapping_area;
 end
 
 best_translations=microns_per_pixel*[best_x_translations ; best_y_translations];
