@@ -1,4 +1,4 @@
-function [all_centroid_projections_correlations,number_of_cells_per_session]=evaluate_data_quality(spatial_footprints,centroid_projections_corrected,maximal_cross_correlation,best_translations,reference_session_index)
+function [all_centroid_projections_correlations,number_of_cells_per_session]=evaluate_data_quality(spatial_footprints,centroid_projections_corrected,maximal_cross_correlation,best_translations,reference_session_index,alignment_type)
 % This function assesses the quality of the data and its suitabilty for
 % longitudinal analysis.
 
@@ -9,6 +9,7 @@ function [all_centroid_projections_correlations,number_of_cells_per_session]=eva
 % 4. maximal_cross_correlation - between each session and the reference
 % 5. best_translations
 % 6. reference_session_index
+% 7. alignment_type
 
 % Outputs:
 % 1. all_centroid_projections_correlations - correlations for all pairs of sessions

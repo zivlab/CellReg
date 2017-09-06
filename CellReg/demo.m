@@ -92,7 +92,7 @@ end
 
 % Evaluating data quality:
 [all_centroid_projections_correlations,number_of_cells_per_session]=...
-    evaluate_data_quality(spatial_footprints_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,reference_session_index);
+    evaluate_data_quality(spatial_footprints_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,reference_session_index,alignment_type);
 plot_alignment_results(adjusted_spatial_footprints,centroid_locations,spatial_footprints_corrected,centroid_locations_corrected,adjusted_footprints_projections,footprints_projections_corrected,reference_session_index,all_centroid_projections_correlations,maximal_cross_correlation,alignment_translations,overlapping_FOV,alignment_type,number_of_cells_per_session,figures_directory,figures_visibility)
 
 if use_parallel_processing
@@ -132,13 +132,13 @@ disp('Calculating a probabilistic model of the data')
     compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,centers_of_bins);
 
 % Modeling the distribution of spatial correlations:
-if strcmp(imaging_technique,'one_photon');    
+if strcmp(imaging_technique,'one_photon')
     [spatial_correlations_model_parameters,p_same_given_spatial_correlation,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,MSE_spatial_correlations_model,spatial_correlation_intersection]=...
         compute_spatial_correlations_model(neighbors_spatial_correlations,centers_of_bins);
 end
 
 % estimating registration accuracy:
-if strcmp(imaging_technique,'one_photon');
+if strcmp(imaging_technique,'one_photon')
     [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,uncertain_fraction_spatial_correlations,cdf_p_same_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold]=...
         estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,neighbors_spatial_correlations,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
     % Checking which model is better according to a defined cost function:
@@ -150,7 +150,7 @@ else
 end
 
 % Plotting the probabilistic models and estimated registration accuracy:
-if strcmp(imaging_technique,'one_photon');
+if strcmp(imaging_technique,'one_photon')
     plot_models(centroid_distances_model_parameters,NN_centroid_distances,NNN_centroid_distances,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,centroid_distance_intersection,centers_of_bins,microns_per_pixel,normalized_maximal_distance,figures_directory,figures_visibility,spatial_correlations_model_parameters,NN_spatial_correlations,NNN_spatial_correlations,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,spatial_correlation_intersection)
     plot_estimated_registration_accuracy(p_same_centers_of_bins,p_same_certainty_threshold,p_same_given_centroid_distance,centroid_distances_distribution,cdf_p_same_centroid_distances,uncertain_fraction_centroid_distances,true_positive_per_distance_threshold,false_positive_per_distance_threshold,centers_of_bins,normalized_maximal_distance,microns_per_pixel,imaging_technique,figures_directory,figures_visibility,p_same_given_spatial_correlation,spatial_correlations_distribution,cdf_p_same_spatial_correlations,uncertain_fraction_spatial_correlations,true_positive_per_correlation_threshold,false_positive_per_correlation_threshold)
 else
@@ -159,7 +159,7 @@ else
 end
 
 % Computing the P_same for each neighboring cell-pair according to the different models:
-if strcmp(imaging_technique,'one_photon');
+if strcmp(imaging_technique,'one_photon')
     [all_to_all_p_same_centroid_distance_model,all_to_all_p_same_spatial_correlation_model]=...
         compute_p_same(all_to_all_centroid_distances,p_same_given_centroid_distance,centers_of_bins,imaging_technique,all_to_all_spatial_correlations,p_same_given_spatial_correlation);
 else
@@ -186,7 +186,7 @@ if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlat
     else
         initial_threshold=0.65; % a fixed correlation threshold not based on the model
     end
-    if strcmp(imaging_technique,'two_photon');
+    if strcmp(imaging_technique,'two_photon')
         error('The spatial correlations model is only applied for 1-photon imaging data')
     else
         [cell_to_index_map,registered_cells_spatial_correlations,non_registered_cells_spatial_correlations]=...
@@ -270,7 +270,7 @@ plot_all_registered_projections(spatial_footprints_corrected,optimal_cell_to_ind
 disp('Saving the results')
 cell_registered_struct=struct;
 cell_registered_struct.cell_to_index_map=optimal_cell_to_index_map;
-if strcmp(registration_approach,'Probabilistic');
+if strcmp(registration_approach,'Probabilistic')
     cell_registered_struct.cell_scores=cell_scores';
     cell_registered_struct.true_positive_scores=cell_scores_positive';
     cell_registered_struct.true_negative_scores=cell_scores_negative';

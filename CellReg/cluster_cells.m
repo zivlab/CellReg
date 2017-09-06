@@ -47,7 +47,7 @@ changes_count(1)=-1;
 disp('Clustering cells:');
 display_progress_bar('Terminating previous progress bars',true)    
 while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==-1) && (iteration)<maximal_number_of_iterations    
-    display_progress_bar(['Performing clustering (interation #' num2str(iteration) ') - '],false)
+    display_progress_bar(['Performing clustering (iteration #' num2str(iteration) ') - '],false)
     
     % Finding the center of mass of all clusters:
     iteration=iteration+1;
