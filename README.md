@@ -2,6 +2,8 @@
 This package is an implementation of a probabilistic approach for tracking the same neurons (cell registration) across multiple sessions 
 in Ca2+ imaging data, developed by Sheintuch et al., 2017. The package includes a GUI that supports the entire registration procedure. 
 
+For more information contact lironsheintuch@gmail.com or join our [slack channel](cellreg.slack.com).
+
 ## Setting up the repository
 1. Cloning:
 `git clone https://github.com/zivlab/CellReg.git`
