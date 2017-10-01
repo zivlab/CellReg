@@ -918,25 +918,25 @@ disp('Calculating a probabilistic model of the data')
     compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,centers_of_bins);
 
 % Modeling the distribution of spatial correlations:
-if strcmp(imaging_technique,'one_photon')
+if strcmp(imaging_technique,'one_photon');
     [spatial_correlations_model_parameters,p_same_given_spatial_correlation,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,MSE_spatial_correlations_model,spatial_correlation_intersection]=...
         compute_spatial_correlations_model(neighbors_spatial_correlations,centers_of_bins);
 end
 
 % estimating registration accuracy:
-if strcmp(imaging_technique,'one_photon')
+if strcmp(imaging_technique,'one_photon');
     [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,uncertain_fraction_spatial_correlations,cdf_p_same_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold]=...
-        estimate_registration_accuracy(centroid_distances_model_parameters,p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,spatial_correlations_model_parameters,neighbors_spatial_correlations,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
+        estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,neighbors_spatial_correlations,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
     % Checking which model is better according to a defined cost function:
     [best_model_string]=choose_best_model(uncertain_fraction_centroid_distances,MSE_centroid_distances_model,imaging_technique,uncertain_fraction_spatial_correlations,MSE_spatial_correlations_model);
 else
     [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold]=...
-        estimate_registration_accuracy(centroid_distances_model_parameters,p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins);
+        estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins);
     [best_model_string]=choose_best_model(uncertain_fraction_centroid_distances,MSE_centroid_distances_model,imaging_technique);
 end
 
 % change the initial and final registration according to the best model:
-if strcmp(best_model_string,'Spatial correlation')
+if strcmp(best_model_string,'Spatial correlation');
     set(handles.spatial_correlations,'Value',1);
     set(handles.spatial_correlations_2,'Value',1);
     set(handles.distance_threshold,'enable','off')
@@ -1675,7 +1675,7 @@ else
     spatial_footprints_projections=data_struct.footprints_projections_corrected;
     overlapping_FOV=data_struct.overlapping_FOV;
     
-    if get(handles.figures_visibility_on,'Value')
+    if get(handles.figures_visibility_on,'Value');
         figures_visibility='On';
     else
         figures_visibility='Off';

@@ -85,7 +85,7 @@ end
 % Final alignment parameters:
 if strcmp(registration_approach,'Probabilistic')
     num_bins_p_same=length(true_positive);
-    decision_threshold=round(100*final_threshold)/100;
+    decision_thresh=round(100*final_threshold)/100;
     fprintf(logFile,'Registration approach - Probabilistic modeling\n');
     if strcmp(model_type,'Spatial correlation')
         final_type='Spatial correlations';        
@@ -93,12 +93,12 @@ if strcmp(registration_approach,'Probabilistic')
         final_type='Centroid distances';        
     end
     fprintf(logFile,['Final registration type - ' final_type '\n']);
-    fprintf(logFile,['P_same threshold - ' num2str(decision_threshold) ' \n\n']);
+    fprintf(logFile,['P_same threshold - ' num2str(decision_thresh) ' \n\n']);
     uncertain_pairs_fraction=round(100*uncertain_fraction)/100;
     cumsum_false_positive=cumsum(false_positive);
     cumsum_false_split=1-cumsum(true_positive);
-    false_positives=round(100*cumsum_false_positive(round(num_bins_p_same*(1-decision_threshold))))/100;
-    false_negatives=round(100*cumsum_false_split(round(num_bins_p_same*(1-decision_threshold))))/100;
+    false_positives=round(100*cumsum_false_positive(round(num_bins_p_same*(1-decision_thresh))))/100;
+    false_negatives=round(100*cumsum_false_split(round(num_bins_p_same*(1-decision_thresh))))/100;
 else
     fprintf(logFile,'Registration approach - Simple threshold\n');
     if strcmp(model_type,'Spatial correlation')
