@@ -5,6 +5,8 @@ in Ca2+ imaging data, developed by Sheintuch et al., 2017. The package includes 
 For more information contact lironsheintuch@gmail.com or join our [slack channel](cellreg.slack.com).
 
 ## Setting up the repository
+We encourage the use of official versions (e.g., v1.1.5) for easier debugging processes. Switch to the releases tab on GitHub and checkout the latest version.
+
 1. Cloning:
 `git clone https://github.com/zivlab/CellReg.git`
 2. Checkout version:
