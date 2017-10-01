@@ -1675,7 +1675,7 @@ else
     spatial_footprints_projections=data_struct.footprints_projections_corrected;
     overlapping_FOV=data_struct.overlapping_FOV;
     
-    if get(handles.figures_visibility_on,'Value');
+    if get(handles.figures_visibility_on,'Value')
         figures_visibility='On';
     else
         figures_visibility='Off';
