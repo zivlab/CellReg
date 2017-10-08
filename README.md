@@ -45,3 +45,6 @@ distances and spatial correlations.
 4. Obtaining an initial cell registration according to an optimized registration threshold.
 
 5. Obtaining the final cell registration based on a clustering algorithm.
+
+## References
+Sheintuch, L., Rubin, A., Brande-Eilat, N., Geva, N., Sadeh, N., Pinchasof, O., Ziv, Y. (2017). Tracking the Same Neurons across Multiple Days in Ca2+ Imaging Data. *Cell Reports*, in press.
