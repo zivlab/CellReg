@@ -30,8 +30,8 @@ n1=n1./sum(n1);
 bar(xout,n1,1)
 xlim([0 1])
 ylim([0 1])
-xlabel('Overall cell scores','fontsize',16,'fontweight','bold')
-ylabel('Probability','fontsize',16,'fontweight','bold')
+xlabel('Overall cell scores','fontsize',14,'fontweight','bold')
+ylabel('Probability','fontsize',14,'fontweight','bold')
 x_label=linspace(0,1,6);
 x=linspace(0,1,6);
 set(gca,'fontsize',14)
@@ -59,8 +59,8 @@ n1=n1./sum(n1);
 bar(xout,n1,1)
 xlim([0 1])
 ylim([0 1])
-xlabel('Exclusivity cell scores','fontsize',16,'fontweight','bold')
-ylabel('Probability','fontsize',16,'fontweight','bold')
+xlabel('Exclusivity cell scores','fontsize',14,'fontweight','bold')
+ylabel('Probability','fontsize',14,'fontweight','bold')
 x_label=linspace(0,1,6);
 x=linspace(0,1,6);
 set(gca,'fontsize',14)
@@ -88,14 +88,14 @@ n1=n1./sum(n1);
 bar(xout,n1,1)
 xlim([0 1])
 ylim([0 1])
-xlabel('True positive scores','fontsize',16,'fontweight','bold')
-ylabel('Probability','fontsize',16,'fontweight','bold')
+xlabel('True positive scores','fontsize',14,'fontweight','bold')
+ylabel('Probability','fontsize',14,'fontweight','bold')
 x_label=linspace(0,1,6);
 x=linspace(0,1,6);
 set(gca,'fontsize',14)
 set(gca,'XTick',x)
 set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
-text(-0.25,1.2,[num2str(number_of_clusters) ' registered cells'],'fontsize',24,'fontweight','bold','HorizontalAlignment','Center')
+text(-0.25,1.2,[num2str(number_of_clusters) ' registered cells'],'fontsize',16,'fontweight','bold','HorizontalAlignment','Center')
 h=axes('position',[0.68 0.73 size_x/6 size_y/6]);
 plot(flip(xout),cumsum(flip(n1)),'linewidth',2)
 ylim([0 1])
@@ -118,8 +118,8 @@ n1=n1./sum(n1);
 bar(xout,n1,1)
 xlim([0 1])
 ylim([0 1])
-xlabel('True negative scores','fontsize',16,'fontweight','bold')
-ylabel('Probability','fontsize',16,'fontweight','bold')
+xlabel('True negative scores','fontsize',14,'fontweight','bold')
+ylabel('Probability','fontsize',14,'fontweight','bold')
 x_label=linspace(0,1,6);
 x=linspace(0,1,6);
 set(gca,'fontsize',14)
@@ -165,8 +165,8 @@ n1=n1./sum(n1);
 bar(xout,n1,1)
 xlim([0 1])
 ylim([0 1])
-xlabel('Registered pairs P_s_a_m_e','fontsize',16,'fontweight','bold')
-ylabel('Probability','fontsize',16,'fontweight','bold')
+xlabel('Registered pairs P_s_a_m_e','fontsize',14,'fontweight','bold')
+ylabel('Probability','fontsize',14,'fontweight','bold')
 x_label=linspace(0,1,6);
 x=linspace(0,1,6);
 set(gca,'fontsize',14)

@@ -28,8 +28,7 @@ if max(RGB_indexes)<=number_of_sessions
     else
         title_string=['RGB overlay - sessions ' num2str(RGB_indexes(1)) ' and ' num2str(RGB_indexes(2))];
     end
-    title(title_string,'FontWeight','Bold','fontsize',14)
-    title('RGB overlay: Post-transformation','FontWeight','Bold','fontsize',14)    
+    title(title_string,'FontWeight','Bold','fontsize',10)
     set(gca,'xtick',[])
     set(gca,'ytick',[])
 else

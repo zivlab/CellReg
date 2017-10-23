@@ -33,11 +33,11 @@ if strcmp(imaging_technique,'one_photon');
         hold on
     end
     plot(x_vec,y_vec,'k-','linewidth',2)
-    xlabel('Spatial correlation','fontsize',16,'fontweight','bold')
+    xlabel('Spatial correlation','fontsize',14,'fontweight','bold')
     x_label=linspace(0,1,6);
     x=linspace(0,1,6);
     set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',16,'fontweight','bold')
+    set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
     xlim([0 1])
     [~,ind_005]=min(abs(0.05-(p_same_given_spatial_correlation)));
     p_005=centers_of_bins{2}(ind_005);
@@ -72,11 +72,11 @@ for run_bins=1:length(x_vec)/2
 end
 plot(x_vec,y_vec,'k-','linewidth',2)
 xlim([0 microns_per_pixel*maximal_distance])
-xlabel('Centroids distance (\mum)','FontWeight','Bold','fontsize',16)
+xlabel('Centroids distance (\mum)','FontWeight','Bold','fontsize',14)
 x_label=0:3:microns_per_pixel*maximal_distance;
 x=0:3:microns_per_pixel*maximal_distance;
 set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',16,'fontweight','bold')
+set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 [~,ind_005]=min(abs(0.05-(p_same_given_centroid_distance)));
 p_005=microns_per_pixel*centers_of_bins{1}(ind_005);
 [~,ind_05]=min(abs(0.5-(p_same_given_centroid_distance)));
@@ -103,10 +103,10 @@ for n=1:number_of_bins
     p=patch([0 1 1 0],[n/number_of_bins n/number_of_bins (n-1)/number_of_bins (n-1)/number_of_bins],[color_vec(n) color_vec(n) color_vec(n)]);
     set(p,'FaceAlpha',1,'EdgeColor','none');
 end
-text(2.5,0.5,'P_s_a_m_e','fontsize',18,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
-text(1.5,0,'0','fontsize',18,'fontweight','bold','HorizontalAlignment','Left')
-text(1.5,1,'1','fontsize',18,'fontweight','bold','HorizontalAlignment','Left')
-text(-31.5,0.5,'Probability density','fontsize',18,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
+text(2.5,0.5,'P_s_a_m_e','fontsize',14,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
+text(1.5,0,'0','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
+text(1.5,1,'1','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
+text(-31.5,0.5,'Probability density','fontsize',14,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
 plot([0 1 1 0 0],[0 0 1 1 0],'color','k')
 
 % Cumulative distribution of P_same and uncertainty fraction:
@@ -122,8 +122,8 @@ if strcmp(imaging_technique,'one_photon');
     hold on
     plot([sum(cdf_p_same_spatial_correlations(1-p_same_centers_of_bins>1-p_same_certainty_threshold))/sum(cdf_p_same_spatial_correlations),sum(cdf_p_same_spatial_correlations(1-p_same_centers_of_bins>1-p_same_certainty_threshold))/sum(cdf_p_same_spatial_correlations)],[0,1],'--','linewidth',2,'color','k')
 end
-xlabel('Fraction of cell pairs ','fontsize',16,'fontweight','bold')
-ylabel('P_s_a_m_e','fontsize',16,'fontweight','bold')
+xlabel('Fraction of cell pairs ','fontsize',14,'fontweight','bold')
+ylabel('P_s_a_m_e','fontsize',14,'fontweight','bold')
 hold on
 plot([0 1],[p_same_certainty_threshold p_same_certainty_threshold],'--','linewidth',2,'color','k')
 hold on
@@ -137,9 +137,9 @@ y_label=linspace(0,1,6);
 x=linspace(0,1,6);
 x_label=linspace(0,1,6);
 set(gca,'YTick',y)
-set(gca,'YTickLabel',y_label,'fontsize',16,'fontweight','bold')
+set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
 set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',16,'fontweight','bold')
+set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 axes('position',[0.3 0.15 size_x/2.3/3 size_y/2.3/3.5])
 labels=cell(1,3);
 labels{1}='Dist.';
@@ -167,8 +167,8 @@ hold on
 plot([0 0.265],[0.9 0.14],'--','color',[0.8 0.8 0.8],'linewidth',2)
 hold on
 plot([0.1 0.77],[1 0.63],'--','color',[0.8 0.8 0.8],'linewidth',2)
-ylabel('True positive rate','fontsize',16,'fontweight','bold')
-xlabel('False positive rate','fontsize',16,'fontweight','bold')
+ylabel('True positive rate','fontsize',14,'fontweight','bold')
+xlabel('False positive rate','fontsize',14,'fontweight','bold')
 ylim([0 1])
 xlim([0 1])
 p=patch([0 0.1 0.1 0],[1 1 0.9 0.9],[0.8 0.8 0.8]);
@@ -178,9 +178,9 @@ y_label=linspace(0,1,6);
 x=linspace(0,1,6);
 x_label=linspace(0,1,6);
 set(gca,'YTick',y)
-set(gca,'YTickLabel',y_label,'fontsize',16,'fontweight','bold')
+set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
 set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',16,'fontweight','bold')
+set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 axes('position',[0.682 0.125 size_x/2.3/2 size_y/2.3/2])
 plot([0,cumsum(false_positive_per_distance_threshold)],[0,cumsum(true_positive_per_distance_threshold)],'linewidth',2,'color','r')
 if strcmp(imaging_technique,'one_photon');
@@ -205,9 +205,9 @@ x=0:0.1:0.2;
 y=0.9:0.1:1;
 y_label=0.9:0.1:1;
 set(gca,'YTick',y)
-set(gca,'YTickLabel',y_label,'fontsize',16,'fontweight','bold')
+set(gca,'YTickLabel',y_label,'fontsize',14,'fontweight','bold')
 set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',16,'fontweight','bold')
+set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 p=patch([0 1 1 0],[1 1 0 0],[0.8 0.8 0.8]);
 set(p,'FaceAlpha',0.3,'EdgeColor','none');
 set(gcf,'PaperPositionMode','auto')

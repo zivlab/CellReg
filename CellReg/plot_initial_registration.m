@@ -29,12 +29,12 @@ if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlat
     xlim([0 1])
     x_label=linspace(0,1,6);
     x=linspace(0,1,6);
-    set(gca,'fontsize',16)
+    set(gca,'fontsize',14)
     set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',16)
-    xlabel('Spatial correlation','FontWeight','Bold','fontsize',16)
-    ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',16)
-    set(gca,'fontsize',16)
+    set(gca,'XTickLabel',x_label,'fontsize',14)
+    xlabel('Spatial correlation','FontWeight','Bold','fontsize',14)
+    ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',14)
+    set(gca,'fontsize',14)
     legend('Same Cell','Different Cells','location','northwest')
     legend('boxoff')
 else
@@ -52,10 +52,10 @@ else
     x_label=0:3:pixel_to_mic*maximal_distance;
     x=0:3:pixel_to_mic*maximal_distance;
     set(gca,'XTick',x)
-    set(gca,'XTickLabel',x_label,'fontsize',16)
-    xlabel('Centroids distance (\mum)','FontWeight','Bold','fontsize',16)
-    ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',16)
-    set(gca,'fontsize',16)
+    set(gca,'XTickLabel',x_label,'fontsize',14)
+    xlabel('Centroids distance (\mum)','FontWeight','Bold','fontsize',14)
+    ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',14)
+    set(gca,'fontsize',14)
     legend('Same Cell','Different Cells','location','northwest')
     legend('boxoff')
 end

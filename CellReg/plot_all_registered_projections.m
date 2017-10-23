@@ -62,8 +62,8 @@ if number_of_sessions>4
         colormap('gray')
         title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
         if n==1
-            text(0.01*size(all_projections_partial{n},1),0.02*size(all_projections_partial{n},2),'Detected in','fontsize',16,'color','g','fontweight','bold')
-            text(0.01*size(all_projections_partial{n},1),0.06*size(all_projections_partial{n},2),'all sessions','fontsize',16,'color','g','fontweight','bold')
+            text(0.01*size(all_projections_partial{n},1),0.02*size(all_projections_partial{n},2),'Detected in','fontsize',14,'color','g','fontweight','bold')
+            text(0.01*size(all_projections_partial{n},1),0.06*size(all_projections_partial{n},2),'all sessions','fontsize',14,'color','g','fontweight','bold')
         end
     end
 else
@@ -77,8 +77,8 @@ else
         colormap('gray')
         title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
         if n==1
-            text(0.01*size(all_projections_partial{n},1),0.02*size(all_projections_partial{n},2),'Detected in','fontsize',16,'color','g','fontweight','bold')
-            text(0.01*size(all_projections_partial{n},1),0.06*size(all_projections_partial{n},2),'all sessions','fontsize',16,'color','g','fontweight','bold')
+            text(0.01*size(all_projections_partial{n},1),0.02*size(all_projections_partial{n},2),'Detected in','fontsize',14,'color','g','fontweight','bold')
+            text(0.01*size(all_projections_partial{n},1),0.06*size(all_projections_partial{n},2),'all sessions','fontsize',14,'color','g','fontweight','bold')
         end
     end
 end

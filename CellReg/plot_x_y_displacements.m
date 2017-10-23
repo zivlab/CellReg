@@ -34,11 +34,11 @@ y=round(linspace(1,number_of_bins,9));
 y_label=round(linspace(microns_per_pixel*max(centers_of_bins{1}),-microns_per_pixel*max(centers_of_bins{1}),9));
 x=round(linspace(1,number_of_bins,9));
 x_label=round(linspace(-microns_per_pixel*max(centers_of_bins{1}),microns_per_pixel*max(centers_of_bins{1}),9));set(gca,'YTick',y)
-set(gca,'YTickLabel',y_label,'fontsize',18)
+set(gca,'YTickLabel',y_label,'fontsize',14)
 set(gca,'XTick',x)
-set(gca,'XTickLabel',x_label,'fontsize',18)
-xlabel('x displacement (\mum)','FontWeight','Bold','fontsize',18)
-ylabel('y displacement (\mum)','FontWeight','Bold','fontsize',18)
+set(gca,'XTickLabel',x_label,'fontsize',14)
+xlabel('x displacement (\mum)','FontWeight','Bold','fontsize',14)
+ylabel('y displacement (\mum)','FontWeight','Bold','fontsize',14)
 x_for_circle=0:0.01:2*pi;
 hold on
 plot(number_of_bins/2+number_of_bins/2*4/maximal_distance/microns_per_pixel*sin(x_for_circle),number_of_bins/2+number_of_bins/2*4/maximal_distance/microns_per_pixel*cos(x_for_circle),':','color',[1 1 1],'linewidth',4);
@@ -55,10 +55,10 @@ for n=1:num_colors
     p=patch([0 1 1 0],[n/num_colors n/num_colors (n-1)/num_colors (n-1)/num_colors],cmap_jet(n,:));
     set(p,'FaceAlpha',1,'EdgeColor','none');
 end
-text(3.5,0.5,'Number of cell-pairs (log)','fontsize',16,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
-text(1.5,0,'0','fontsize',16,'fontweight','bold','HorizontalAlignment','Left')
-text(1.5,1,'Max','fontsize',16,'fontweight','bold','HorizontalAlignment','Left')
-set(gca,'fontsize',16)
+text(3.5,0.5,'Number of cell-pairs (log)','fontsize',14,'fontweight','bold','rotation',90,'HorizontalAlignment','Center')
+text(1.5,0,'0','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
+text(1.5,1,'Max','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
+set(gca,'fontsize',14)
 set(gcf,'PaperPositionMode','auto')
 savefig(fullfile(figures_directory,'Stage 3 - (x,y) displacements'))
 saveas(gcf,fullfile(figures_directory,'Stage 3 - (x,y) displacements'),'png')
