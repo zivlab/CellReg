@@ -22,9 +22,9 @@ for n=1:number_of_sessions
     number_of_cells=size(this_session_spatial_footprints,1);
     for k=1:number_of_cells
         display_progress_bar(100*(k)/(number_of_cells),false)
-        temp_spatial_footprint=squeeze(this_session_spatial_footprints(k,:,:));
+        temp_spatial_footprint=double(squeeze(this_session_spatial_footprints(k,:,:)));
         max_spatial_footprint=max(temp_spatial_footprint(:));
-        temp_spatial_footprint(temp_spatial_footprint<pixel_threshold*max_spatial_footprint)=0;
+        temp_spatial_footprint(temp_spatial_footprint<pixel_threshold*max_spatial_footprint)=0;        
         temp_spatial_footprint=temp_spatial_footprint./sum(sum(temp_spatial_footprint));
         normalized_spatial_footprints{n}(k,:,:)=temp_spatial_footprint;
     end
