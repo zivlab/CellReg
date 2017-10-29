@@ -51,7 +51,8 @@ spatial_correlations_model_same_cells=lognpdf(1-spatial_correlations_centers,spa
 spatial_correlations_model_same_cells=spatial_correlations_model_same_cells./sum(spatial_correlations_model_same_cells)*(number_of_bins/((spatial_correlations_centers(2)-spatial_correlations_centers(1))+(spatial_correlations_centers(end)-spatial_correlations_centers(1))));
 % the same cells model is multiplied by a sigmoid function because 
 %the lognormal ditribution goes to infinity but the correlation is bounded:
-smoothing_func=sigmf(spatial_correlations_centers,[20 min(spatial_correlations_centers)+0.25]);
+sigmoid_function=@(x,ac)1./(1+exp(-ac(1)*(x-ac(2)))); % defining the sigmoid function - (sigmf requires Fuzzy Logic Toolbox)
+smoothing_func=sigmoid_function(spatial_correlations_centers,[20 min(spatial_correlations_centers)+0.25]);
 spatial_correlations_model_same_cells=spatial_correlations_model_same_cells.*smoothing_func;
 spatial_correlations_model_same_cells(1:round(number_of_bins/10:end))=0;
 % calculating the distribution for different cells:
