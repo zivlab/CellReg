@@ -842,7 +842,7 @@ if ~isfield(data_struct,'all_to_all_indexes')
     compute_model_again=1;
 else % check if the previous maximal distance was as large as the new one - no new measurments required
     maximal_measured_distance=max(data_struct.neighbors_centroid_distances);
-    if maximal_measured_distance<0.99*normalized_maximal_distance
+    if maximal_measured_distance<0.99*normalized_maximal_distance || maximal_measured_distance>normalized_maximal_distance
         compute_model_again=1;
     end
 end
@@ -904,7 +904,7 @@ else % if the distributions were already estimated
     modeled_data_struct.NN_spatial_correlations=NN_spatial_correlations;
     modeled_data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
     modeled_data_struct.NN_centroid_distances=NN_centroid_distances;
-    modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;
+    modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;   
 end
 
 % Plotting the (x,y) displacements:
