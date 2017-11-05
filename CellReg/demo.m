@@ -255,10 +255,10 @@ if strcmp(registration_approach,'Probabilistic')
 elseif strcmp(registration_approach,'Simple threshold')
     if strcmp(model_type,'Spatial correlation')
         [optimal_cell_to_index_map,registered_cells_centroids]=...
-            cluster_cells(cell_to_index_map,all_to_all_correlation_multi,all_to_all_matrix_multi,normalized_maximal_distance,final_threshold,centroid_locations_corrected,registration_approach,transform_data);
+            cluster_cells(cell_to_index_map,all_to_all_spatial_correlations,all_to_all_indexes,normalized_maximal_distance,final_threshold,centroid_locations_corrected,registration_approach,transform_data);
     elseif strcmp(model_type,'Centroid distance')
         [optimal_cell_to_index_map,registered_cells_centroids]=...
-            cluster_cells(cell_to_index_map,all_to_all_distance_multi,all_to_all_matrix_multi,normalized_maximal_distance,normalized_distance_threshold,centroid_locations_corrected,registration_approach,transform_data);
+            cluster_cells(cell_to_index_map,all_to_all_centroid_distances,all_to_all_indexes,normalized_maximal_distance,normalized_distance_threshold,centroid_locations_corrected,registration_approach,transform_data);
     end
 end
 [is_in_overlapping_FOV]=check_if_in_overlapping_FOV(registered_cells_centroids,overlapping_FOV);

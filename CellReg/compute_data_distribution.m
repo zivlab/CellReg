@@ -157,7 +157,7 @@ NN_spatial_correlations=NN_spatial_correlations_temp;
 NNN_spatial_correlations=NNN_spatial_correlations_temp;
 
 if length(NNN_centroid_distances_temp)<0.1*length(NN_centroid_distances_temp);
-    warning('There is insufficient number of non-nearest neighboring cells to estimate the different cells distribution. This could occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large')
+    warning('There is insufficient number of non-nearest neighboring cells to estimate the different cells distribution. This could occur if the provided microns per pixel ratio is incorrect or the maximal distance is too small')
 end
 
 %(x,y) displacements distributions:
