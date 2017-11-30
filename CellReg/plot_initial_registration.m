@@ -60,7 +60,7 @@ else
     legend('boxoff')
 end
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 4 - same versus different cells'))
+savefig(fullfile(figures_directory,'Stage 4 - same versus different cells.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 4 - same versus different cells'),'png')
 
 % Plotting the registration results with the cell maps from all sessions:

@@ -34,7 +34,7 @@ else
     end
 end
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 1 - spatial footprints projections'))
+savefig(fullfile(figures_directory,'Stage 1 - spatial footprints projections.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 1 - spatial footprints projections'),'png')
 
 end

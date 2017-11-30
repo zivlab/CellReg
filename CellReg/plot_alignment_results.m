@@ -87,7 +87,7 @@ set(gca,'ytick',[])
 legend(legend_strings)
 legend('boxoff')
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 2 - pre vs post alignment'))
+savefig(fullfile(figures_directory,'Stage 2 - pre vs post alignment.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 2 - pre vs post alignment'),'png')
 
 % Plotting measurments of preparation stability:
@@ -163,7 +163,7 @@ if number_of_sessions>2
     xlabel('Session number','FontWeight','Bold','fontsize',14)
     ylabel('Maximal correlation','FontWeight','Bold','fontsize',14)
     set(gcf,'PaperPositionMode','auto')
-    savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations'))
+    savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations.fig'))
     saveas(gcf,fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations'),'png')
 end
 
@@ -297,7 +297,7 @@ set(gca,'XTick',x)
 set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 set(gca,'fontsize',14)
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - general'))
+savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - general.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 2 - abnormalities test - general'),'png')
 
 end

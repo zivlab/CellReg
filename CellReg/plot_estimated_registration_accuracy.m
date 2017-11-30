@@ -211,7 +211,7 @@ set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 p=patch([0 1 1 0],[1 1 0 0],[0.8 0.8 0.8]);
 set(p,'FaceAlpha',0.3,'EdgeColor','none');
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 3 - registration certainty'))
+savefig(fullfile(figures_directory,'Stage 3 - registration certainty.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 3 - registration certainty'),'png')
 
 end

@@ -140,7 +140,7 @@ set(h, 'Xdir', 'reverse')
 xlabel('Score','fontsize',14,'fontweight','bold')
 ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 5 - cell scores'))
+savefig(fullfile(figures_directory,'Stage 5 - cell scores.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 5 - cell scores'),'png')
 
 % plotting the distribution of P_same for all registered cell-pairs
@@ -187,7 +187,7 @@ set(h, 'Xdir', 'reverse')
 xlabel('P_s_a_m_e','fontsize',14,'fontweight','bold')
 ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 5 - Registered pairs P_same'))
+savefig(fullfile(figures_directory,'Stage 5 - Registered pairs P_same.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 5 - Registered pairs P_same'),'png')
 
 end

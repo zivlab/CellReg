@@ -60,7 +60,7 @@ text(1.5,0,'0','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
 text(1.5,1,'Max','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
 set(gca,'fontsize',14)
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 3 - (x,y) displacements'))
+savefig(fullfile(figures_directory,'Stage 3 - (x,y) displacements.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 3 - (x,y) displacements'),'png')
 
 end

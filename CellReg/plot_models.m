@@ -118,7 +118,7 @@ text(centroid_distance_intersection-1,0.9*max(centroid_distances_distribution),[
 text(centroid_distance_intersection+1,0.8*max(centroid_distances_distribution),[num2str(round(100*(diff_more_than_thresh))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','r')
 text(centroid_distance_intersection-1,0.8*max(centroid_distances_distribution),[num2str(round(100*(1-diff_more_than_thresh))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','r')
 set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 3 - model'))
+savefig(fullfile(figures_directory,'Stage 3 - model.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 3 - model'),'png')
 
 end

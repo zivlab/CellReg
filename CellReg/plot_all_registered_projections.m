@@ -92,10 +92,10 @@ if ~isempty(varargin)
 end
 
 if initial_stage
-    savefig(fullfile(figures_directory,'Stage 4 - projcetions - initial registration'))
+    savefig(fullfile(figures_directory,'Stage 4 - projcetions - initial registration.fig'))
     saveas(gcf,fullfile(figures_directory,'Stage 4 - projcetions - initial registration'),'png')
 else
-    savefig(fullfile(figures_directory,'Stage 5 - projcetions - final registration'))
+    savefig(fullfile(figures_directory,'Stage 5 - projcetions - final registration.fig'))
     saveas(gcf,fullfile(figures_directory,'Stage 5 - projcetions - final registration'),'png')    
 end
 
