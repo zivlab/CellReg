@@ -26,7 +26,7 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 % 6. best_translations
 % 7. overlapping_area
 
-sufficient_correlation=0.15; % smaller correlation imply different optical section or high noise levels
+sufficient_correlation=0.1; % smaller correlation imply different optical section or high noise levels
 rotation_step=0.5; % check rotations every xx degrees
 minimal_rotation=0.3; % less than this rotation in degrees does not justify rotating the cells
 typical_cell_size=10; % in micrometers - determines the radius that is used for gaussfit
@@ -75,13 +75,14 @@ for n=1:number_of_sessions-1
         if use_parallel_processing
             disp('Checking for rotations')
             temp_correlations_vector=zeros(1,length(possible_rotations));
-            reference_centroid_projections_corrected=centroid_projections_corrected{reference_session_index};
-            temp_centroid_projections_corrected=centroid_projections_corrected{registration_order(n)};
+            reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
+            temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};            
             parfor r=1:length(possible_rotations)
-                rotated_image=rotate_image_interp(temp_centroid_projections_corrected,possible_rotations(r),[0 0],center_of_FOV);
-                cross_corr=normxcorr2(reference_centroid_projections_corrected,rotated_image);
+                rotated_image=rotate_image_interp(temp_footprints_projections_corrected,possible_rotations(r),[0 0],center_of_FOV);
+                cross_corr=normxcorr2(reference_footprints_projections_corrected,rotated_image);
                 temp_correlations_vector(r)=max(max(cross_corr));
             end
+            
             % finding the best rotation with a gaussian fit:
             [~,ind_best_rotation]=max(temp_correlations_vector);
             rotation_range_to_check=5; % range in degrees to check for the gaussian fit
@@ -166,9 +167,9 @@ for n=1:number_of_sessions-1
     
     % Finding translations with subpixel resolution:
     if strcmp(alignment_type,'Translations and Rotations')
-        cross_corr_cent=normxcorr2(centroid_projections_rotated{reference_session_index},centroid_projections_rotated{registration_order(n)});
+            cross_corr_cent=normxcorr2(all_rotated_projections{reference_session_index},all_rotated_projections{registration_order(n)});
     else
-        cross_corr_cent=normxcorr2(centroid_projections_corrected{reference_session_index},centroid_projections_corrected{registration_order(n)});
+            cross_corr_cent=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
     end
     cross_corr_size=size(cross_corr_cent);
     cross_corr_partial=cross_corr_cent(round(cross_corr_size(1)/2-cross_corr_size(1)/6):round(cross_corr_size(1)/2+cross_corr_size(1)/6)...
