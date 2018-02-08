@@ -177,11 +177,13 @@ for n=1:number_of_sessions-1
     
     % Finding translations with subpixel resolution:
     if strcmp(alignment_type,'Translations and Rotations')
+        full_FOV_correlation=normxcorr2(all_rotated_projections{reference_session_index},all_rotated_projections{registration_order(n)});
         cross_corr_cent=normxcorr2(centroid_projections_rotated{reference_session_index},centroid_projections_rotated{registration_order(n)});
         if max(max(cross_corr_cent))<sufficient_correlation
             cross_corr_cent=normxcorr2(all_rotated_projections{reference_session_index},all_rotated_projections{registration_order(n)});
         end        
     else
+        full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
         cross_corr_cent=normxcorr2(centroid_projections_corrected{reference_session_index},centroid_projections_corrected{registration_order(n)});
         if max(max(cross_corr_cent))<sufficient_correlation
             cross_corr_cent=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
@@ -189,7 +191,6 @@ for n=1:number_of_sessions-1
     end
     
     cross_corr_size=size(cross_corr_cent);
-    full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
     partial_FOV_correlation=full_FOV_correlation(round(cross_corr_size(1)/2-cross_corr_size(1)/6):round(cross_corr_size(1)/2+cross_corr_size(1)/6)...
         ,round(cross_corr_size(2)/2-cross_corr_size(2)/6):round(cross_corr_size(2)/2+cross_corr_size(2)/6));
     maximal_cross_correlation(n)=max(max(partial_FOV_correlation));   
