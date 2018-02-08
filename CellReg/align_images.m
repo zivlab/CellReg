@@ -1,4 +1,4 @@
-function [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,best_translations,overlapping_area]=align_images(spatial_footprints,centroid_locations,footprints_projections,centroid_projections,overlapping_area_all_sessions,microns_per_pixel,reference_session_index,alignment_type,use_parallel_processing,varargin)
+function [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,best_translations,overlapping_area]=align_images(spatial_footprints,centroid_locations,footprints_projections,centroid_projections,overlapping_area_all_sessions,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation,use_parallel_processing,varargin)
 
 % This function recieves the spatial footprints from different sessions and
 % finds the optimal alignment between their FOV's. This is the first step
@@ -14,8 +14,10 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 % 6. microns_per_pixel
 % 7. reference_session_index
 % 8. alignment_type - 'Translations' or 'Translations and Rotations'
-% 9. varargin
-%   9{1}. maximal rotation -  if 'Translations and Rotations' is used
+% 9. sufficient_correlation % smaller correlation imply different optical section or high noise levels
+% 10. varargin
+%   10{1}. use_parallel_processing -  'true' for parallel processing
+%   10{2}. maximal rotation -  if 'Translations and Rotations' is used
 
 % Outputs:
 % 1. spatial_footprints_corrected
@@ -26,7 +28,6 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 % 6. best_translations
 % 7. overlapping_area
 
-sufficient_correlation=0.1; % smaller correlation imply different optical section or high noise levels
 rotation_step=0.5; % check rotations every xx degrees
 minimal_rotation=0.3; % less than this rotation in degrees does not justify rotating the cells
 typical_cell_size=10; % in micrometers - determines the radius that is used for gaussfit
@@ -75,16 +76,25 @@ for n=1:number_of_sessions-1
         if use_parallel_processing
             disp('Checking for rotations')
             temp_correlations_vector=zeros(1,length(possible_rotations));
-            reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
-            temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};            
+            reference_centroid_projections_corrected=centroid_projections_corrected{reference_session_index};
+            temp_centroid_projections_corrected=centroid_projections_corrected{registration_order(n)};            
             parfor r=1:length(possible_rotations)
-                rotated_image=rotate_image_interp(temp_footprints_projections_corrected,possible_rotations(r),[0 0],center_of_FOV);
-                cross_corr=normxcorr2(reference_footprints_projections_corrected,rotated_image);
+                rotated_image=rotate_image_interp(temp_centroid_projections_corrected,possible_rotations(r),[0 0],center_of_FOV);
+                cross_corr=normxcorr2(reference_centroid_projections_corrected,rotated_image);
                 temp_correlations_vector(r)=max(max(cross_corr));
+            end            
+            if max(temp_correlations_vector)<sufficient_correlation
+                reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
+                temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
+                parfor r=1:length(possible_rotations)
+                    rotated_image=rotate_image_interp(temp_footprints_projections_corrected,possible_rotations(r),[0 0],center_of_FOV);
+                    cross_corr=normxcorr2(reference_footprints_projections_corrected,rotated_image);
+                    temp_correlations_vector(r)=max(max(cross_corr));
+                end
             end
+            [~,ind_best_rotation]=max(temp_correlations_vector);
             
             % finding the best rotation with a gaussian fit:
-            [~,ind_best_rotation]=max(temp_correlations_vector);
             rotation_range_to_check=5; % range in degrees to check for the gaussian fit
             normalized_rotation_range_to_check=rotation_range_to_check/rotation_step;
             rotation_range=round(normalized_rotation_range_to_check);
@@ -167,14 +177,26 @@ for n=1:number_of_sessions-1
     
     % Finding translations with subpixel resolution:
     if strcmp(alignment_type,'Translations and Rotations')
+        cross_corr_cent=normxcorr2(centroid_projections_rotated{reference_session_index},centroid_projections_rotated{registration_order(n)});
+        if max(max(cross_corr_cent))<sufficient_correlation
             cross_corr_cent=normxcorr2(all_rotated_projections{reference_session_index},all_rotated_projections{registration_order(n)});
+        end        
     else
+        cross_corr_cent=normxcorr2(centroid_projections_corrected{reference_session_index},centroid_projections_corrected{registration_order(n)});
+        if max(max(cross_corr_cent))<sufficient_correlation
             cross_corr_cent=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
+        end
     end
+    
     cross_corr_size=size(cross_corr_cent);
+    full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
+    partial_FOV_correlation=full_FOV_correlation(round(cross_corr_size(1)/2-cross_corr_size(1)/6):round(cross_corr_size(1)/2+cross_corr_size(1)/6)...
+        ,round(cross_corr_size(2)/2-cross_corr_size(2)/6):round(cross_corr_size(2)/2+cross_corr_size(2)/6));
+    maximal_cross_correlation(n)=max(max(partial_FOV_correlation));   
+   
     cross_corr_partial=cross_corr_cent(round(cross_corr_size(1)/2-cross_corr_size(1)/6):round(cross_corr_size(1)/2+cross_corr_size(1)/6)...
         ,round(cross_corr_size(2)/2-cross_corr_size(2)/6):round(cross_corr_size(2)/2+cross_corr_size(2)/6));
-    [maximal_cross_correlation(n),x_ind]=max(max(cross_corr_partial));   
+    [~,x_ind]=max(max(cross_corr_partial));   
     if strcmp(alignment_type,'Translations and Rotations')
         best_rotations(registration_order(n))=best_rotation;
     end
@@ -213,7 +235,7 @@ for n=1:number_of_sessions-1
     best_y_translations(registration_order(n))=(y_ind_sub-adjusted_y_size);
     
     % aligning projections and centroid locations:
-    if maximal_cross_correlation(n)>median(temp_correlations_vector)+sufficient_correlation;
+    if maximal_cross_correlation(n)>median(partial_FOV_correlation(:))+sufficient_correlation
         if strcmp(alignment_type,'Translations and Rotations')
             untranslated_footprints_projections=all_rotated_projections{registration_order(n)};
             untranslated_centroid_projections=centroid_projections_rotated{registration_order(n)};
@@ -251,7 +273,7 @@ for n=1:number_of_sessions-1
                 end
             else
                 display_progress_bar('Rotating spatial footprints: ',false)
-                for m=1:size(centroid_locations_corrected{registration_order(n)},1);
+                for m=1:size(centroid_locations_corrected{registration_order(n)},1)
                     display_progress_bar(100*(m/size(unrotated_centroid_locations,1)),false)
                     unrotated_spatial_footprint=squeeze(unrotated_spatial_footprints(m,:,:));
                     unrotated_centroid=unrotated_centroid_locations(m,:);

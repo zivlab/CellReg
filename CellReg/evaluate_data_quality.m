@@ -1,4 +1,4 @@
-function [all_projections_correlations,number_of_cells_per_session]=evaluate_data_quality(spatial_footprints,centroid_projections_corrected,footprints_projections_corrected,maximal_cross_correlation,best_translations,reference_session_index,alignment_type)
+function [all_projections_correlations,number_of_cells_per_session]=evaluate_data_quality(spatial_footprints,centroid_projections_corrected,footprints_projections_corrected,maximal_cross_correlation,best_translations,reference_session_index,sufficient_correlation,alignment_type)
 % This function assesses the quality of the data and its suitabilty for
 % longitudinal analysis.
 
@@ -9,13 +9,13 @@ function [all_projections_correlations,number_of_cells_per_session]=evaluate_dat
 % 4. maximal_cross_correlation - between each session and the reference
 % 5. best_translations
 % 6. reference_session_index
-% 7. alignment_type
+% 7. sufficient_correlation % smaller correlation imply different optical section or high noise levels
+% 8. alignment_type
 
 % Outputs:
 % 1. all_projections_correlations - correlations for all pairs of sessions
 % 2. number_of_cells_per_session
 
-sufficient_correlation=0.15; % smaller correlation imply no similarity between sessions
 large_rotation=10; % in degrees
 large_translation=50; % in microns
 abnormal_number_of_cells_ratio=1.5;
@@ -28,7 +28,7 @@ if number_of_sessions>2
     for n=1:number_of_sessions
         all_projections_correlations(n,n)=1;
         for k=n+1:number_of_sessions
-            all_projections_correlations(n,k)=corr2(footprints_projections_corrected{n},footprints_projections_corrected{k});
+            all_projections_correlations(n,k)=corr2(footprints_projections_corrected{n},footprints_projections_corrected{k});            
             all_projections_correlations(k,n)=all_projections_correlations(n,k);
         end
     end
