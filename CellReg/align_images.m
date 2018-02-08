@@ -187,29 +187,33 @@ for n=1:number_of_sessions-1
     [~,mu_x_1]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_x(1,:)./sum(temp_corr_x(1,:)),sigma_0,0);
     [~,mu_x_2]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_x(2,:)./sum(temp_corr_x(2,:)),sigma_0,0);
     [~,mu_x_3]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_x(3,:)./sum(temp_corr_x(2,:)),sigma_0,0);
-    sub_x=mean([mu_x_1 , mu_x_2 , mu_x_2 , mu_x_3]);
-    if abs(sub_x)>1
-        warning(['X axis sub-pixel correction was ' num2str(round(100*sub_x)/100) ' for session ' num2str(registration_order(n))])
-        warndlg(['X axis sub-pixel correction was ' num2str(round(100*sub_x)/100) ' for session ' num2str(registration_order(n))])
-    end
+    sub_x=mean([mu_x_1 , mu_x_2 , mu_x_2 , mu_x_3]);    
     temp_corr_y=cross_corr_partial(y_ind-gaussian_radius:y_ind+gaussian_radius,x_ind-1:x_ind+1);
     [~,mu_y_1]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_y(:,1)./sum(temp_corr_y(:,1)),sigma_0,0);
     [~,mu_y_2]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_y(:,2)./sum(temp_corr_y(:,2)),sigma_0,0);
     [~,mu_y_3]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_y(:,3)./sum(temp_corr_y(:,3)),sigma_0,0);
-    sub_y=mean([mu_y_1 , mu_y_2 , mu_y_2 , mu_y_3]);
+    sub_y=mean([mu_y_1 , mu_y_2 , mu_y_2 , mu_y_3]);    
+    x_ind=x_ind+round(cross_corr_size(2)/2-cross_corr_size(2)/6)-1;
+    y_ind=y_ind+round(cross_corr_size(1)/2-cross_corr_size(1)/6)-1;
+    if abs(sub_x)>1
+        warning(['X axis sub-pixel correction was ' num2str(round(100*sub_x)/100) ' for session ' num2str(registration_order(n))])
+        warndlg(['X axis sub-pixel correction was ' num2str(round(100*sub_x)/100) ' for session ' num2str(registration_order(n))])
+        x_ind_sub=x_ind;
+    else
+        x_ind_sub=x_ind+sub_x;
+    end
     if abs(sub_y)>1
         warning(['Y axis sub-pixel correction was ' num2str(round(100*sub_y)/100) ' for session ' num2str(registration_order(n))])
         warndlg(['Y axis sub-pixel correction was ' num2str(round(100*sub_y)/100) ' for session ' num2str(registration_order(n))])
-    end
-    x_ind=x_ind+round(cross_corr_size(2)/2-cross_corr_size(2)/6)-1;
-    y_ind=y_ind+round(cross_corr_size(1)/2-cross_corr_size(1)/6)-1;
-    x_ind_sub=x_ind+sub_x;
-    y_ind_sub=y_ind+sub_y;
+        y_ind_sub=y_ind;
+    else
+        y_ind_sub=y_ind+sub_y;
+    end    
     best_x_translations(registration_order(n))=(x_ind_sub-adjusted_x_size);
     best_y_translations(registration_order(n))=(y_ind_sub-adjusted_y_size);
     
     % aligning projections and centroid locations:
-    if maximal_cross_correlation(n)>sufficient_correlation;
+    if maximal_cross_correlation(n)>median(temp_correlations_vector)+sufficient_correlation;
         if strcmp(alignment_type,'Translations and Rotations')
             untranslated_footprints_projections=all_rotated_projections{registration_order(n)};
             untranslated_centroid_projections=centroid_projections_rotated{registration_order(n)};
