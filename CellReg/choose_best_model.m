@@ -1,22 +1,36 @@
-function [best_model_string]=choose_best_model(uncertain_fraction_centroid_distances,MSE_centroid_distances_model,imaging_technique,varargin)
+function [best_model_string]=choose_best_model(MSE_centroid_distances_model,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,imaging_technique,varargin)
 % This function uses the registration uncertainty levels and mean squared
 % error for the fit of each model to choose the best model
 
 % Inputs:
-% 1. uncertain_fraction_centroid_distances
-% 2. MSE_centroid_distances_model
-% 3. imaging_technique
-% 4. varargin
-%   4{1}. uncertain_fraction_spatial_correlations
-%   4{2}. MSE_spatial_correlations_model
+% 1. MSE_centroid_distances_model
+% 2. imaging_technique
+% 3. centroid_distances_model_same_cells
+% 4. centroid_distances_model_different_cells
+% 5. p_same_given_centroid_distance
+% 6. varargin
+%   6{1}. MSE_spatial_correlations_model
+%   6{2}. spatial_correlations_model_same_cells
+%   6{3}. spatial_correlations_model_different_cells
+%   6{4}. p_same_given_spatial_correlation
  
 % Outputs:
 % 1. best_model_string
 
 if strcmp(imaging_technique,'one_photon');
-    uncertain_fraction_spatial_correlations=varargin{1};
-    MSE_spatial_correlations_model=varargin{2};
-    cost_vector=[uncertain_fraction_centroid_distances+MSE_centroid_distances_model,uncertain_fraction_spatial_correlations+MSE_spatial_correlations_model];
+    MSE_spatial_correlations_model=varargin{1};
+    spatial_correlations_model_same_cells=varargin{2};
+    spatial_correlations_model_different_cells=varargin{3};
+    p_same_given_spatial_correlation=varargin{4};
+    
+    [~,ind_05_correlation]=min(abs(0.5-(p_same_given_spatial_correlation)));
+    false_positive_correlation=sum(spatial_correlations_model_different_cells(ind_05_correlation:end))/sum(spatial_correlations_model_different_cells);
+    false_negative_correlation=sum(spatial_correlations_model_same_cells(1:ind_05_correlation))/sum(spatial_correlations_model_same_cells);    
+    [~,ind_05_distance]=min(abs(0.5-(p_same_given_centroid_distance)));
+    false_positive_distance=sum(centroid_distances_model_different_cells(1:ind_05_correlation))/sum(centroid_distances_model_different_cells);
+    false_negative_distance=sum(centroid_distances_model_same_cells(ind_05_correlation:end))/sum(centroid_distances_model_same_cells);    
+    
+    cost_vector=[false_positive_distance+false_negative_distance+MSE_centroid_distances_model,false_positive_correlation+false_negative_correlation+MSE_spatial_correlations_model];
     if MSE_centroid_distances_model>0.1
         warning('There is large discrepancy between the centroid distances model and the data')
     end
