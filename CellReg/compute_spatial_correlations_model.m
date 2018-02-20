@@ -63,16 +63,23 @@ spatial_correlations_model_weighted_sum=spatial_correlations_model_parameters(1)
 [spatial_correlations_distribution,~]=hist(neighbors_spatial_correlations,spatial_correlations_centers);
 spatial_correlations_distribution=spatial_correlations_distribution./sum(spatial_correlations_distribution)*(number_of_bins/((spatial_correlations_centers(2)-spatial_correlations_centers(1))+(spatial_correlations_centers(end)-spatial_correlations_centers(1))));
 
-% findind the intersection between same cells and different cells:
-index_range_of_intersection=find(spatial_correlations_centers>0.3 & spatial_correlations_centers<0.95);
-[~,index_of_intersection]=min(abs(spatial_correlations_model_parameters(1)*spatial_correlations_model_same_cells(index_range_of_intersection)-(1-spatial_correlations_model_parameters(1))*spatial_correlations_model_different_cells(index_range_of_intersection)));
-spatial_correlation_intersection=round(100*spatial_correlations_centers(index_of_intersection+index_range_of_intersection(1)-1))/100;
-
 % calculating the discrepancy of the model (normalized mean sqaured error)
 MSE_spatial_correlations_model=sum(abs(((spatial_correlations_distribution-spatial_correlations_model_weighted_sum))*((spatial_correlations_centers(2)-spatial_correlations_centers(1))+(spatial_correlations_centers(end)-spatial_correlations_centers(1)))/number_of_bins))/2;
 
 % calculating the P_same of the model:
+minimal_p_same_threshold=0.01;
 p_same_given_spatial_correlation=spatial_correlations_model_parameters(1).*spatial_correlations_model_same_cells./(spatial_correlations_model_parameters(1).*spatial_correlations_model_same_cells+(1-spatial_correlations_model_parameters(1)).*spatial_correlations_model_different_cells);
+indexes_to_smooth=find(spatial_correlations_model_same_cells<minimal_p_same_threshold*max(spatial_correlations_model_same_cells));
+sigmoid_function=@(x,ac)1./(1+exp(-ac(1)*(x-ac(2)))); % defining a sigmoid function
+smoothing_func=sigmoid_function(1:length(indexes_to_smooth),[0.05*length(indexes_to_smooth) 0.8*length(indexes_to_smooth)]);
+p_same_given_spatial_correlation(indexes_to_smooth)=p_same_given_spatial_correlation(indexes_to_smooth).*smoothing_func;
+
+% findind the intersection between same cells and different cells:
+index_range_of_intersection=find(spatial_correlations_model_same_cells>minimal_p_same_threshold*max(spatial_correlations_model_same_cells));
+[~,index_of_intersection]=min(abs(spatial_correlations_model_parameters(1)*spatial_correlations_model_same_cells(index_range_of_intersection)-(1-spatial_correlations_model_parameters(1))*spatial_correlations_model_different_cells(index_range_of_intersection)));
+spatial_correlation_intersection=round(100*spatial_correlations_centers(index_of_intersection+index_range_of_intersection(1)-1))/100;
+
+
 
 end
 
