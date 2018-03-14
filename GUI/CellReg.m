@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 25-Jul-2017 15:25:41
+% Last Modified by GUIDE v2.5 14-Mar-2018 18:58:35
 
 % reset figure properties to default:
 if verLessThan('matlab','8.4')
@@ -514,8 +514,10 @@ else
     end
     if strcmp(data_struct.alignment_type,'Translations')
         set(handles.translations,'Value',1);
-    else
+    elseif strcmp(data_struct.alignment_type,'Translations and Rotations')
         set(handles.translations_rotations,'Value',1);
+    else
+        set(handles.non_rigid,'Value',1);
     end
 end
 
@@ -589,8 +591,10 @@ else
     end
     if strcmp(data_struct.alignment_type,'Translations')
         set(handles.translations,'Value',1);
-    else
+    elseif strcmp(data_struct.alignment_type,'Translations and Rotations')
         set(handles.translations_rotations,'Value',1);
+    else
+        set(handles.non_rigid,'Value',1);
     end
 end
 
@@ -647,10 +651,13 @@ end
 
 % Defining the parameters for image alignment:
 translations_value=get(handles.translations,'Value');
+rotations_value=get(handles.translations_rotations,'Value');
 if translations_value==1
     alignment_type='Translations';
-else
+elseif rotations_value==1
     alignment_type='Translations and Rotations';
+else
+    alignment_type='Non-rigid';
 end
 
 if strcmp(alignment_type,'Translations and Rotations')
@@ -681,11 +688,11 @@ disp('Stage 2 - Aligning sessions')
 [centroid_projections]=compute_centroids_projections(centroid_locations,adjusted_spatial_footprints);
 
 % Aligning the cells according to the tranlations/rotations that maximize their similarity:
-sufficient_correlation=0.15; % smaller correlation imply no similarity between sessions
+sufficient_correlation=0.25; % smaller correlation imply no similarity between sessions
 if strcmp(alignment_type,'Translations and Rotations')
     [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,overlapping_FOV]=...
         align_images(adjusted_spatial_footprints,centroid_locations,adjusted_footprints_projections,centroid_projections,adjusted_FOV,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation,use_parallel_processing,maximal_rotation);
-elseif strcmp(alignment_type,'Translations')
+else
     [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,overlapping_FOV]=...
         align_images(adjusted_spatial_footprints,centroid_locations,adjusted_footprints_projections,centroid_projections,adjusted_FOV,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation,use_parallel_processing);
 end
@@ -2190,3 +2197,19 @@ function correlation_threshold_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of correlation_threshold as text
 %        str2double(get(hObject,'String')) returns contents of correlation_threshold as a double
+
+
+% --- Executes on button press in non_rigid.
+function non_rigid_Callback(hObject, eventdata, handles)
+% hObject    handle to non_rigid (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of non_rigid
+
+if get(handles.non_rigid,'Value')==1;
+    set(handles.maximal_rotation','enable','off')
+else
+    set(handles.maximal_rotation','enable','on')
+    set(handles.maximal_rotation','string','30')
+end

@@ -67,7 +67,16 @@ registration_order=setdiff(1:number_of_sessions,reference_session_index);
 overlapping_area=ones(adjusted_y_size,adjusted_x_size);
 overlapping_area=overlapping_area.*overlapping_area_all_sessions(:,:,reference_session_index);
 
-% Alining the images and cells:
+% Aligning the images and cells:
+if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
+    for n=1:number_of_sessions-1
+        reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
+        temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
+        [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected);
+        footprints_projections_corrected{registration_order(n)}=temp_footprints_projections_non_rigid_corrected;
+    end
+end
+
 display_progress_bar('Terminating previous progress bars',true) 
 for n=1:number_of_sessions-1
     overlapping_area_temp=overlapping_area_all_sessions(:,:,n);    
