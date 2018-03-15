@@ -151,10 +151,12 @@ NN_spatial_correlations_temp(NN_centroid_distances>maximal_distance)=[];
 NN_centroid_distances_temp(NN_centroid_distances>maximal_distance)=[];
 NNN_spatial_correlations_temp(NNN_centroid_distances>maximal_distance)=[];
 NNN_centroid_distances_temp(NNN_centroid_distances>maximal_distance)=[];
-NN_centroid_distances_temp(NN_spatial_correlations_temp<0)=[];
-NN_spatial_correlations_temp(NN_spatial_correlations_temp<0)=[];
-NNN_centroid_distances_temp(NNN_spatial_correlations_temp<0)=[];
-NNN_spatial_correlations_temp(NNN_spatial_correlations_temp<0)=[];
+if strcmp(imaging_technique,'one_photon');
+    NN_centroid_distances_temp(NN_spatial_correlations_temp<0)=[];
+    NN_spatial_correlations_temp(NN_spatial_correlations_temp<0)=[];
+    NNN_centroid_distances_temp(NNN_spatial_correlations_temp<0)=[];
+    NNN_spatial_correlations_temp(NNN_spatial_correlations_temp<0)=[];
+end
 NN_centroid_distances=NN_centroid_distances_temp;
 NNN_centroid_distances=NNN_centroid_distances_temp;
 NN_spatial_correlations=NN_spatial_correlations_temp;
