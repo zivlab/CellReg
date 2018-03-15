@@ -71,7 +71,7 @@ overlapping_area=overlapping_area.*overlapping_area_all_sessions(:,:,reference_s
 display_progress_bar('Terminating previous progress bars',true)
 if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
     for n=1:number_of_sessions-1
-        disp(['Performing non-rigid alignment for session #' num2str(registration_order(n)) ':'])
+        disp(['Performing non-rigid transformation for session #' num2str(registration_order(n)) ':'])
         reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
         temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
         [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected);
@@ -80,7 +80,7 @@ if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
         this_session_footprints_aligned=zeros(size(this_session_footprints_unaligned));
         number_of_cells=size(this_session_footprints_aligned,1);
         if use_parallel_processing
-            disp('Performing non-rigid alignment')
+            disp('Performing non-rigid transformation')
             parfor m=1:number_of_cells
                 unaligned_footprint=squeeze(this_session_footprints_unaligned(m,:,:));
                 aligned_footprint=imwarp(unaligned_footprint,displacement_field);
