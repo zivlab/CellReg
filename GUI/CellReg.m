@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 14-Mar-2018 18:58:35
+% Last Modified by GUIDE v2.5 15-Mar-2018 12:36:35
 
 % reset figure properties to default:
 if verLessThan('matlab','8.4')
@@ -858,7 +858,7 @@ end
 if compute_model_again % If the distributions were not estiamted yet
     disp('Stage 3 - Calculating a probabilistic model of the data')
     [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=...
-        compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance);
+        compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance,imaging_technique);
     
     % saving the results into the data struct for the GUI
     data_struct.all_to_all_indexes=all_to_all_indexes;
@@ -2212,4 +2212,20 @@ if get(handles.non_rigid,'Value')==1;
 else
     set(handles.maximal_rotation','enable','on')
     set(handles.maximal_rotation','string','30')
+end
+
+
+% --- Executes on button press in two_photon.
+function two_photon_Callback(hObject, eventdata, handles)
+% hObject    handle to two_photon (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of two_photon
+
+if get(handles.two_photon,'Value')==1;
+    set(handles.non_rigid','value',1)
+    set(handles.centroid_distances','value',1)
+    set(handles.centroid_distances_2','value',1)
+    set(handles.maximal_rotation','enable','off')
 end

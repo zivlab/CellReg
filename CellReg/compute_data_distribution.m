@@ -1,4 +1,4 @@
-function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=compute_data_distribution(spatial_footprints,centroid_locations,maximal_distance)
+function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=compute_data_distribution(spatial_footprints,centroid_locations,maximal_distance,imaging_technique)
 % This function computes the distributions of distances and correlations
 % for all the neighboring cells pairs acorss sessions with a distance <12 microns
 
@@ -6,6 +6,8 @@ function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid
 % 1. spatial_footprints
 % 2. centroid_locations
 % 3. maximal distance - in pixels 
+% 4. imaging_technique
+
 
 % Outputs:
 % 1. all_to_all_indexes - cell-pairs with centroid_distance<maximal distance
@@ -132,8 +134,10 @@ neighbors_centroid_distances_temp(neighbors_centroid_distances>maximal_distance)
 if sum(neighbors_spatial_correlations_temp<0)/length(neighbors_spatial_correlations_temp)>0.05
     warning('A good fit might not be attainable because some of the cells seem to be smaller than expected. This could also occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large')
 end
-neighbors_centroid_distances_temp(neighbors_spatial_correlations_temp<0)=[];
-neighbors_spatial_correlations_temp(neighbors_spatial_correlations_temp<0)=[];
+if strcmp(imaging_technique,'one_photon');
+    neighbors_centroid_distances_temp(neighbors_spatial_correlations_temp<0)=[];
+    neighbors_spatial_correlations_temp(neighbors_spatial_correlations_temp<0)=[];
+end
 
 neighbors_spatial_correlations=neighbors_spatial_correlations_temp;
 neighbors_centroid_distances=neighbors_centroid_distances_temp;

@@ -117,7 +117,7 @@ p_same_certainty_threshold=0.95; % certain cells are those with p_same>threshld 
 disp('Stage 3 - Calculating a probabilistic model of the data')
 [number_of_bins,centers_of_bins]=estimate_number_of_bins(spatial_footprints,normalized_maximal_distance);
 [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=...
-    compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance);
+    compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance,imaging_technique);
 
 % Plotting the (x,y) displacements:
 plot_x_y_displacements(neighbors_x_displacements,neighbors_y_displacements,microns_per_pixel,normalized_maximal_distance,number_of_bins,centers_of_bins,figures_directory,figures_visibility);
