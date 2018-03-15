@@ -68,12 +68,37 @@ overlapping_area=ones(adjusted_y_size,adjusted_x_size);
 overlapping_area=overlapping_area.*overlapping_area_all_sessions(:,:,reference_session_index);
 
 % Aligning the images and cells:
+display_progress_bar('Terminating previous progress bars',true)
 if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
     for n=1:number_of_sessions-1
+        disp(['Performing non-rigid alignment for session #' num2str(registration_order(n)) ':'])
         reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
         temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
         [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected);
         footprints_projections_corrected{registration_order(n)}=temp_footprints_projections_non_rigid_corrected;
+        this_session_footprints_unaligned=spatial_footprints_corrected{registration_order(n)};
+        this_session_footprints_aligned=zeros(size(this_session_footprints_unaligned));
+        number_of_cells=size(this_session_footprints_aligned,1);
+        if use_parallel_processing
+            disp('Performing non-rigid alignment')
+            parfor m=1:number_of_cells
+                unaligned_footprint=squeeze(this_session_footprints_unaligned(m,:,:));
+                aligned_footprint=imwarp(unaligned_footprint,displacement_field);
+                this_session_footprints_aligned(m,:,:)=aligned_footprint;
+            end
+        else
+            display_progress_bar('Aligning spatial footprints: ',false)
+            for m=1:number_of_cells
+                display_progress_bar(100*(m/number_of_cells),false)
+                unaligned_footprint=squeeze(this_session_footprints_unaligned(m,:,:));
+                aligned_footprint=imwarp(unaligned_footprint,displacement_field);
+                this_session_footprints_aligned(m,:,:)=aligned_footprint;
+            end
+            display_progress_bar(' done',false)
+        end
+        spatial_footprints_corrected{registration_order(n)}=this_session_footprints_aligned;
+        [centroid_locations_corrected(registration_order(n))]=compute_centroid_locations(spatial_footprints_corrected(registration_order(n)),microns_per_pixel);
+        [centroid_projections_corrected(registration_order(n))]=compute_centroids_projections(centroid_locations_corrected(registration_order(n)),spatial_footprints_corrected(registration_order(n)));
     end
 end
 
@@ -251,9 +276,9 @@ for n=1:number_of_sessions-1
             untranslated_centroid_projections=centroid_projections_rotated{registration_order(n)};
             centroids_temp=centroid_locations_rotated{registration_order(n)};
         else
-            untranslated_footprints_projections=footprints_projections{registration_order(n)};
+            untranslated_footprints_projections=footprints_projections_corrected{registration_order(n)};
             untranslated_centroid_projections=centroid_projections_corrected{registration_order(n)};
-            centroids_temp=centroid_locations{registration_order(n)};
+            centroids_temp=centroid_locations_corrected{registration_order(n)};
         end
         centroids_temp(:,1)=centroids_temp(:,1)-(x_ind_sub-adjusted_x_size);
         centroids_temp(:,2)=centroids_temp(:,2)-(y_ind_sub-adjusted_y_size);
@@ -266,7 +291,7 @@ for n=1:number_of_sessions-1
         centroid_projections_corrected{registration_order(n)}=translated_centroid_projections';
         
         % Rotating/translating each spatial footprint:
-        unaligned_spatial_footprints=spatial_footprints{registration_order(n)};
+        unaligned_spatial_footprints=spatial_footprints_corrected{registration_order(n)};
         number_of_cells=size(unaligned_spatial_footprints,1);
         if strcmp(alignment_type,'Translations and Rotations') && abs(best_rotation)>minimal_rotation
             % rotating cells
@@ -299,7 +324,7 @@ for n=1:number_of_sessions-1
             end
             untranslated_spatial_footprints=unaligned_spatial_footprints;
             translated_spatial_footprints=zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
-            untranslated_centroid_locations=centroid_locations{registration_order(n)};
+            untranslated_centroid_locations=centroid_locations_corrected{registration_order(n)};
             if use_parallel_processing
                 disp('Translating spatial footprints')
                 parfor k=1:number_of_cells
