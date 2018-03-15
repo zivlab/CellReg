@@ -844,76 +844,38 @@ normalized_maximal_distance=maximal_distance/microns_per_pixel;
 p_same_certainty_threshold=0.95; % certain cells are those with p_same>threshld or <1-threshold
 [number_of_bins,centers_of_bins]=estimate_number_of_bins(spatial_footprints_corrected,normalized_maximal_distance);
 
-% Computing correlations and distances across days:
-compute_model_again=0;
-if ~isfield(data_struct,'all_to_all_indexes')
-    compute_model_again=1;
-else % check if the previous maximal distance was as large as the new one - no new measurments required
-    maximal_measured_distance=max(data_struct.neighbors_centroid_distances);
-    if maximal_measured_distance<0.99*normalized_maximal_distance || maximal_measured_distance>normalized_maximal_distance
-        compute_model_again=1;
-    end
-end
+disp('Stage 3 - Calculating a probabilistic model of the data')
+[all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=...
+    compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance,imaging_technique);
 
-if compute_model_again % If the distributions were not estiamted yet
-    disp('Stage 3 - Calculating a probabilistic model of the data')
-    [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=...
-        compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance,imaging_technique);
-    
-    % saving the results into the data struct for the GUI
-    data_struct.all_to_all_indexes=all_to_all_indexes;
-    data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
-    data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
-    data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
-    data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
-    data_struct.neighbors_x_displacements=neighbors_x_displacements;
-    data_struct.neighbors_y_displacements=neighbors_y_displacements;
-    data_struct.NN_spatial_correlations=NN_spatial_correlations;
-    data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
-    data_struct.NN_centroid_distances=NN_centroid_distances;
-    data_struct.NNN_centroid_distances=NNN_centroid_distances;
-    
-    % saving the results into the modeled data structure:
-    modeled_data_struct.all_to_all_indexes=all_to_all_indexes;
-    modeled_data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
-    modeled_data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
-    modeled_data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
-    modeled_data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
-    modeled_data_struct.neighbors_x_displacements=neighbors_x_displacements;
-    modeled_data_struct.neighbors_y_displacements=neighbors_y_displacements;
-    modeled_data_struct.NN_spatial_correlations=NN_spatial_correlations;
-    modeled_data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
-    modeled_data_struct.NN_centroid_distances=NN_centroid_distances;
-    modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;
-    
-    handles.data_struct=data_struct;
-    guidata(hObject, handles)
-else % if the distributions were already estimated
-    all_to_all_indexes=data_struct.all_to_all_indexes;
-    all_to_all_spatial_correlations=data_struct.all_to_all_spatial_correlations;
-    all_to_all_centroid_distances=data_struct.all_to_all_centroid_distances;
-    neighbors_spatial_correlations=data_struct.neighbors_spatial_correlations;
-    neighbors_centroid_distances=data_struct.neighbors_centroid_distances;
-    neighbors_x_displacements=data_struct.neighbors_x_displacements;
-    neighbors_y_displacements=data_struct.neighbors_y_displacements;
-    NN_spatial_correlations=data_struct.NN_spatial_correlations;
-    NNN_spatial_correlations=data_struct.NNN_spatial_correlations;
-    NN_centroid_distances=data_struct.NN_centroid_distances;
-    NNN_centroid_distances=data_struct.NNN_centroid_distances;
-    
-    % saving the results into the modeled data structure:
-    modeled_data_struct.all_to_all_indexes=all_to_all_indexes;
-    modeled_data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
-    modeled_data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
-    modeled_data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
-    modeled_data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
-    modeled_data_struct.neighbors_x_displacements=neighbors_x_displacements;
-    modeled_data_struct.neighbors_y_displacements=neighbors_y_displacements;
-    modeled_data_struct.NN_spatial_correlations=NN_spatial_correlations;
-    modeled_data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
-    modeled_data_struct.NN_centroid_distances=NN_centroid_distances;
-    modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;   
-end
+% saving the results into the data struct for the GUI
+data_struct.all_to_all_indexes=all_to_all_indexes;
+data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
+data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
+data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
+data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
+data_struct.neighbors_x_displacements=neighbors_x_displacements;
+data_struct.neighbors_y_displacements=neighbors_y_displacements;
+data_struct.NN_spatial_correlations=NN_spatial_correlations;
+data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
+data_struct.NN_centroid_distances=NN_centroid_distances;
+data_struct.NNN_centroid_distances=NNN_centroid_distances;
+
+% saving the results into the modeled data structure:
+modeled_data_struct.all_to_all_indexes=all_to_all_indexes;
+modeled_data_struct.all_to_all_spatial_correlations=all_to_all_spatial_correlations;
+modeled_data_struct.all_to_all_centroid_distances=all_to_all_centroid_distances;
+modeled_data_struct.neighbors_spatial_correlations=neighbors_spatial_correlations;
+modeled_data_struct.neighbors_centroid_distances=neighbors_centroid_distances;
+modeled_data_struct.neighbors_x_displacements=neighbors_x_displacements;
+modeled_data_struct.neighbors_y_displacements=neighbors_y_displacements;
+modeled_data_struct.NN_spatial_correlations=NN_spatial_correlations;
+modeled_data_struct.NNN_spatial_correlations=NNN_spatial_correlations;
+modeled_data_struct.NN_centroid_distances=NN_centroid_distances;
+modeled_data_struct.NNN_centroid_distances=NNN_centroid_distances;
+
+handles.data_struct=data_struct;
+guidata(hObject, handles)
 
 % Plotting the (x,y) displacements:
 x_y_displacements=plot_x_y_displacements(neighbors_x_displacements,neighbors_y_displacements,microns_per_pixel,normalized_maximal_distance,number_of_bins,centers_of_bins,figures_directory,figures_visibility);

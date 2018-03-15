@@ -38,11 +38,16 @@ end
 figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
 
 % Defining the paths for the data:
-file_names={'D:\Liron\CellReg test\SampleData\spatial_footprints_01.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_02.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_03.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_04.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_05.mat'};
+file_names={'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 12 - exp_511510855\finalFiltersMat_1.mat',...
+    'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 12 - exp_511510855\finalFiltersMat_2.mat',...
+    'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 12 - exp_511510855\finalFiltersMat_3.mat'};
+    
+
+% file_names={'D:\Liron\CellReg test\SampleData\spatial_footprints_01.mat' ,...
+%             'D:\Liron\CellReg test\SampleData\spatial_footprints_02.mat' ,...
+%             'D:\Liron\CellReg test\SampleData\spatial_footprints_03.mat' ,...
+%             'D:\Liron\CellReg test\SampleData\spatial_footprints_04.mat' ,...
+%             'D:\Liron\CellReg test\SampleData\spatial_footprints_05.mat'};
         
 %% Stage 1 - Loading the spatial footprints of cellular activity:
 % This stage loads a new data set which includes several sessions with the
@@ -67,7 +72,7 @@ disp('Done')
 % 3. Evaluating how suitable the data is for longitudinal analysis
 
 % Defining the parameters for image alignment:
-alignment_type='Translations'; % either 'Translations', 'Translations and Rotations' or 'Non-rigid'
+alignment_type='Translations and Rotations'; % either 'Translations', 'Translations and Rotations' or 'Non-rigid'
 use_parallel_processing=true; % either true or false
 maximal_rotation=30; % in degrees - only relevant if 'Translations and Rotations' is used
 reference_session_index=1; 
@@ -101,7 +106,7 @@ if use_parallel_processing
 end
 disp('Done')
 
-%% Stage 3 (part a) - Calculating the similarities distributions form the data:
+%% Stage 3 (part a) - Calculating the similarities distributions from the data:
 % This stage uses the ditribtuions of centroid distance and spatial correlations
 % to compute the probabilities of neighboring cell-pairs to be the same cell (P_same).
 
@@ -139,7 +144,7 @@ if strcmp(imaging_technique,'one_photon')
 end
 
 % estimating registration accuracy:
-if strcmp(imaging_technique,'one_photon');
+if strcmp(imaging_technique,'one_photon')
     [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,uncertain_fraction_spatial_correlations,cdf_p_same_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold]=...
         estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,neighbors_spatial_correlations,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
     % Checking which model is better according to a defined cost function:
