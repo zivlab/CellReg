@@ -354,8 +354,8 @@ for n=1:number_of_sessions-1
         overlapping_area=overlapping_area.*translated_overlapping_area;
     else % if no appropriate rotations/translations were found
         if strcmp(alignment_type,'Translations and Rotations') % rotating cells
-            warning(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - try using non-rigid alignment'])
-            warndlg(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - try using non-rigid alignment'])
+            warning(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - try using non-rigid transformation'])
+            warndlg(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - try using non-rigid transformation'])
         elseif strcmp(alignment_type,'Translations') % rotating cells
             warning(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - try using rotations'])
             warndlg(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - try using rotations'])
