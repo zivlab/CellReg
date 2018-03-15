@@ -324,7 +324,11 @@ for n=1:number_of_sessions-1
             end
             untranslated_spatial_footprints=unaligned_spatial_footprints;
             translated_spatial_footprints=zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
-            untranslated_centroid_locations=centroid_locations_corrected{registration_order(n)};
+            if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:                
+                untranslated_centroid_locations=centroid_locations_corrected{registration_order(n)};
+            else
+                untranslated_centroid_locations=centroid_locations{registration_order(n)};
+            end
             if use_parallel_processing
                 disp('Translating spatial footprints')
                 parfor k=1:number_of_cells
