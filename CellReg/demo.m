@@ -55,7 +55,7 @@ file_names={'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 12 
 
 % Defining the parameters:
 imaging_technique='one_photon'; % either 'one_photon' or 'two_photon'
-microns_per_pixel=2.4;
+microns_per_pixel=2.35;
 
 % Loading the data:
 disp('Stage 1 - Loading sessions')
