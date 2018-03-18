@@ -64,9 +64,11 @@ for n=1:number_of_sessions-1
 end
     if maximal_cross_correlation(n)<sufficient_correlation
         if strcmp(alignment_type,'Translations and Rotations')
-            warning(['No appropriate translations/rotations were found for session number ' num2str(registration_order(n))])
-        else
+            warning(['No appropriate translations/rotations were found for session number ' num2str(registration_order(n)) ' - consider using non-rigid transformation'])
+        elseif strcmp(alignment_type,'Translations')
             warning(['No appropriate translations were found for session number ' num2str(registration_order(n)) ' - consider using rotations as well'])
+        else
+            warning(['No appropriate translations were found for session number ' num2str(registration_order(n))])
         end
     end
 end

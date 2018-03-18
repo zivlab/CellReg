@@ -1,4 +1,4 @@
-function [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,best_translations,overlapping_area]=align_images(spatial_footprints,centroid_locations,footprints_projections,centroid_projections,overlapping_area_all_sessions,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation,use_parallel_processing,varargin)
+function [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,best_translations,overlapping_area]=align_images(spatial_footprints,centroid_locations,footprints_projections,centroid_projections,overlapping_area_all_sessions,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing,varargin)
 
 % This function recieves the spatial footprints from different sessions and
 % finds the optimal alignment between their FOV's. This is the first step
@@ -14,10 +14,11 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 % 6. microns_per_pixel
 % 7. reference_session_index
 % 8. alignment_type - 'Translations' or 'Translations and Rotations'
-% 9. sufficient_correlation % smaller correlation imply different optical section or high noise levels
-% 10. varargin
-%   10{1}. use_parallel_processing -  'true' for parallel processing
-%   10{2}. maximal rotation -  if 'Translations and Rotations' is used
+% 9. sufficient_correlation_centroids % correlation between the centroid locations
+% 10. sufficient_correlation_footprints % correlation between the spatial footprints
+% 11. varargin
+%   11{1}. use_parallel_processing -  'true' for parallel processing
+%   11{2}. maximal rotation -  if 'Translations and Rotations' is used
 
 % Outputs:
 % 1. spatial_footprints_corrected
@@ -117,7 +118,7 @@ for n=1:number_of_sessions-1
                 cross_corr=normxcorr2(reference_centroid_projections_corrected,rotated_image);
                 temp_correlations_vector(r)=max(max(cross_corr));
             end            
-            if max(temp_correlations_vector)<sufficient_correlation
+            if max(temp_correlations_vector)<sufficient_correlation_centroids
                 reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
                 temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
                 parfor r=1:length(possible_rotations)
@@ -213,13 +214,13 @@ for n=1:number_of_sessions-1
     if strcmp(alignment_type,'Translations and Rotations')
         full_FOV_correlation=normxcorr2(all_rotated_projections{reference_session_index},all_rotated_projections{registration_order(n)});
         cross_corr_cent=normxcorr2(centroid_projections_rotated{reference_session_index},centroid_projections_rotated{registration_order(n)});
-        if max(max(cross_corr_cent))<sufficient_correlation
+        if max(max(cross_corr_cent))<sufficient_correlation_centroids
             cross_corr_cent=normxcorr2(all_rotated_projections{reference_session_index},all_rotated_projections{registration_order(n)});
         end        
     else
         full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
         cross_corr_cent=normxcorr2(centroid_projections_corrected{reference_session_index},centroid_projections_corrected{registration_order(n)});
-        if max(max(cross_corr_cent))<sufficient_correlation
+        if max(max(cross_corr_cent))<sufficient_correlation_centroids
             cross_corr_cent=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
         end
     end
@@ -270,7 +271,7 @@ for n=1:number_of_sessions-1
     best_y_translations(registration_order(n))=(y_ind_sub-adjusted_y_size);
     
     % aligning projections and centroid locations:
-    if maximal_cross_correlation(n)>median(partial_FOV_correlation(:))+sufficient_correlation
+    if maximal_cross_correlation(n)>median(partial_FOV_correlation(:))+sufficient_correlation_footprints
         if strcmp(alignment_type,'Translations and Rotations')
             untranslated_footprints_projections=all_rotated_projections{registration_order(n)};
             untranslated_centroid_projections=centroid_projections_rotated{registration_order(n)};
