@@ -52,7 +52,7 @@ spatial_correlations_model_same_cells=spatial_correlations_model_same_cells./sum
 % the same cells model is multiplied by a sigmoid function because 
 %the lognormal ditribution goes to infinity but the correlation is bounded:
 sigmoid_function=@(x,ac)1./(1+exp(-ac(1)*(x-ac(2)))); % defining the sigmoid function - (sigmf requires Fuzzy Logic Toolbox)
-smoothing_func=sigmoid_function(spatial_correlations_centers,[20 min(spatial_correlations_centers)+0.4]);
+smoothing_func=sigmoid_function(spatial_correlations_centers,[20 min(spatial_correlations_centers)+0.5]);
 spatial_correlations_model_same_cells=spatial_correlations_model_same_cells.*smoothing_func;
 spatial_correlations_model_same_cells(1:round(number_of_bins/10:end))=0;
 % calculating the distribution for different cells:
