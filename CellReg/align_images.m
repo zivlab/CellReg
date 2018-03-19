@@ -16,9 +16,10 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 % 8. alignment_type - 'Translations' or 'Translations and Rotations'
 % 9. sufficient_correlation_centroids % correlation between the centroid locations
 % 10. sufficient_correlation_footprints % correlation between the spatial footprints
-% 11. varargin
-%   11{1}. use_parallel_processing -  'true' for parallel processing
-%   11{2}. maximal rotation -  if 'Translations and Rotations' is used
+% 11. use_parallel_processing -  'true' for parallel processing
+% 12. varargin
+%   12{1}. maximal rotation/transformation_smoothness -  if 'Translations and
+%   Rotations'/'Non-rigid' is used
 
 % Outputs:
 % 1. spatial_footprints_corrected
@@ -71,11 +72,12 @@ overlapping_area=overlapping_area.*overlapping_area_all_sessions(:,:,reference_s
 % Aligning the images and cells:
 display_progress_bar('Terminating previous progress bars',true)
 if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
+    transformation_smoothness=varargin{1};
     for n=1:number_of_sessions-1
         disp(['Performing non-rigid transformation for session #' num2str(registration_order(n)) ':'])
         reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
         temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
-        [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected);
+        [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected,'AccumulatedFieldSmoothing',transformation_smoothness);
         footprints_projections_corrected{registration_order(n)}=temp_footprints_projections_non_rigid_corrected;
         this_session_footprints_unaligned=spatial_footprints_corrected{registration_order(n)};
         this_session_footprints_aligned=zeros(size(this_session_footprints_unaligned));

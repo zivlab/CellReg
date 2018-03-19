@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 19-Mar-2018 10:18:35
+% Last Modified by GUIDE v2.5 19-Mar-2018 16:23:43
 
 % reset figure properties to default:
 if verLessThan('matlab','8.4')
@@ -173,6 +173,8 @@ set(handles.microns_per_pixel,'backgroundColor',[1 1 1]);
 set(handles.reference_session_index,'string','1')
 set(handles.maximal_rotation','string','30')
 set(handles.maximal_rotation','enable','on')
+set(handles.transformation_smoothness,'string','2')
+set(handles.transformation_smoothness,'enable','off')
 set(handles.distance_threshold,'enable','off')
 set(handles.correlation_threshold,'enable','on')
 set(handles.decision_thresh,'enable','on')
@@ -663,6 +665,14 @@ end
 if strcmp(alignment_type,'Translations and Rotations')
     maximal_rotation=str2num(get(handles.maximal_rotation,'string'));
 end
+if strcmp(alignment_type,'Non-rigid')
+    transformation_smoothness=str2num(get(handles.transformation_smoothness,'string'));
+    if transformation_smoothness>3 || transformation_smoothness<0.5
+        errordlg('FOV smoothing parameter should be between 0.5-3')
+        error('FOV smoothing parameter should be between 0.5-3')
+    end
+end
+
 reference_session_index=str2num(get(handles.reference_session_index,'string'));
 reference_valid=1;
 if isempty(reference_session_index) || reference_session_index<1 || reference_session_index>number_of_sessions
@@ -693,6 +703,9 @@ sufficient_correlation_footprints=0.3; % smaller correlation imply no similarity
 if strcmp(alignment_type,'Translations and Rotations')
     [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,overlapping_FOV]=...
         align_images(adjusted_spatial_footprints,centroid_locations,adjusted_footprints_projections,centroid_projections,adjusted_FOV,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing,maximal_rotation);
+elseif strcmp(alignment_type,'Non-rigid')
+    [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,overlapping_FOV]=...
+        align_images(adjusted_spatial_footprints,centroid_locations,adjusted_footprints_projections,centroid_projections,adjusted_FOV,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing,transformation_smoothness);
 else
     [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,overlapping_FOV]=...
         align_images(adjusted_spatial_footprints,centroid_locations,adjusted_footprints_projections,centroid_projections,adjusted_FOV,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing);
@@ -1321,6 +1334,8 @@ set(handles.microns_per_pixel,'backgroundColor',[1 1 1]);
 set(handles.reference_session_index,'string','1')
 set(handles.maximal_rotation','string','30')
 set(handles.maximal_rotation','enable','on')
+set(handles.transformation_smoothness,'string','2')
+set(handles.transformation_smoothness,'enable','off')
 set(handles.distance_threshold,'enable','off')
 set(handles.correlation_threshold,'enable','on')
 set(handles.simple_distance_threshold,'enable','off')
@@ -2172,8 +2187,10 @@ function non_rigid_Callback(hObject, eventdata, handles)
 
 if get(handles.non_rigid,'Value')==1
     set(handles.maximal_rotation,'enable','off')
+    set(handles.transformation_smoothness,'enable','on')
 else
     set(handles.maximal_rotation,'enable','on')
+    set(handles.transformation_smoothness,'enable','off')
     set(handles.maximal_rotation,'string','30')
 end
 
@@ -2192,6 +2209,7 @@ if get(handles.two_photon,'Value')==1
     set(handles.centroid_distances_2,'value',1)
     set(handles.maximal_rotation,'enable','off')
     set(handles.model_maximal_distance,'string',num2str(15))    
+    set(handles.transformation_smoothness,'enable','on')
 end
 
 % --- Executes on button press in one_photon.
@@ -2207,5 +2225,34 @@ if get(handles.one_photon,'Value')==1
     set(handles.spatial_correlations,'value',1)
     set(handles.spatial_correlations_2,'value',1)
     set(handles.maximal_rotation,'enable','on')
-    set(handles.model_maximal_distance,'string',num2str(12))    
+    set(handles.transformation_smoothness,'enable','off')
+    set(handles.model_maximal_distance,'string',num2str(12))        
+end
+
+
+function transformation_smoothness_Callback(hObject, eventdata, handles)
+% hObject    handle to transformation_smoothness (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of transformation_smoothness as text
+%        str2double(get(hObject,'String')) returns contents of transformation_smoothness as a double
+
+transformation_smoothness=str2num(get(handles.transformation_smoothness,'string'));
+if transformation_smoothness>3 || transformation_smoothness<0.5
+    errordlg('FOV smoothing parameter should be between 0.5-3')
+    error('FOV smoothing parameter should be between 0.5-3')
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function transformation_smoothness_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to transformation_smoothness (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
