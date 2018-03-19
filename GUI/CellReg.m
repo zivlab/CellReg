@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 19-Mar-2018 16:23:43
+% Last Modified by GUIDE v2.5 19-Mar-2018 16:44:19
 
 % reset figure properties to default:
 if verLessThan('matlab','8.4')
@@ -2188,10 +2188,6 @@ function non_rigid_Callback(hObject, eventdata, handles)
 if get(handles.non_rigid,'Value')==1
     set(handles.maximal_rotation,'enable','off')
     set(handles.transformation_smoothness,'enable','on')
-else
-    set(handles.maximal_rotation,'enable','on')
-    set(handles.transformation_smoothness,'enable','off')
-    set(handles.maximal_rotation,'string','30')
 end
 
 
@@ -2255,4 +2251,32 @@ function transformation_smoothness_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in translations.
+function translations_Callback(hObject, eventdata, handles)
+% hObject    handle to translations (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of translations
+
+if get(handles.translations,'Value')==1
+    set(handles.maximal_rotation,'enable','off')
+    set(handles.transformation_smoothness,'enable','off')
+end
+
+
+% --- Executes on button press in translations_rotations.
+function translations_rotations_Callback(hObject, eventdata, handles)
+% hObject    handle to translations_rotations (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of translations_rotations
+
+if get(handles.translations_rotations,'Value')==1
+    set(handles.maximal_rotation,'enable','on')
+    set(handles.transformation_smoothness,'enable','off')
 end
