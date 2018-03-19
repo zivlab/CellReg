@@ -56,7 +56,7 @@ function varargout = CellReg(varargin)
 
 % Edit the above text to modify the response to help CellReg
 
-% Last Modified by GUIDE v2.5 15-Mar-2018 12:36:35
+% Last Modified by GUIDE v2.5 19-Mar-2018 10:18:35
 
 % reset figure properties to default:
 if verLessThan('matlab','8.4')
@@ -2170,11 +2170,11 @@ function non_rigid_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of non_rigid
 
-if get(handles.non_rigid,'Value')==1;
-    set(handles.maximal_rotation','enable','off')
+if get(handles.non_rigid,'Value')==1
+    set(handles.maximal_rotation,'enable','off')
 else
-    set(handles.maximal_rotation','enable','on')
-    set(handles.maximal_rotation','string','30')
+    set(handles.maximal_rotation,'enable','on')
+    set(handles.maximal_rotation,'string','30')
 end
 
 
@@ -2186,9 +2186,26 @@ function two_photon_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of two_photon
 
-if get(handles.two_photon,'Value')==1;
-    set(handles.non_rigid','value',1)
-    set(handles.centroid_distances','value',1)
-    set(handles.centroid_distances_2','value',1)
-    set(handles.maximal_rotation','enable','off')
+if get(handles.two_photon,'Value')==1
+    set(handles.non_rigid,'value',1)
+    set(handles.centroid_distances,'value',1)
+    set(handles.centroid_distances_2,'value',1)
+    set(handles.maximal_rotation,'enable','off')
+    set(handles.model_maximal_distance,'string',num2str(15))    
+end
+
+% --- Executes on button press in one_photon.
+function one_photon_Callback(hObject, eventdata, handles)
+% hObject    handle to one_photon (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of one_photon
+
+if get(handles.one_photon,'Value')==1
+    set(handles.translations_rotations,'value',1)
+    set(handles.spatial_correlations,'value',1)
+    set(handles.spatial_correlations_2,'value',1)
+    set(handles.maximal_rotation,'enable','on')
+    set(handles.model_maximal_distance,'string',num2str(12))    
 end
