@@ -103,9 +103,9 @@ if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
         spatial_footprints_corrected{registration_order(n)}=this_session_footprints_aligned;
         [centroid_locations_corrected(registration_order(n))]=compute_centroid_locations(spatial_footprints_corrected(registration_order(n)),microns_per_pixel);
         [centroid_projections_corrected(registration_order(n))]=compute_centroids_projections(centroid_locations_corrected(registration_order(n)),spatial_footprints_corrected(registration_order(n)));
-    end
-    full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
-    maximal_cross_correlation=max(max(full_FOV_correlation));
+        full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
+        maximal_cross_correlation(n)=max(max(full_FOV_correlation));
+    end    
 else
     display_progress_bar('Terminating previous progress bars',true)
     for n=1:number_of_sessions-1
