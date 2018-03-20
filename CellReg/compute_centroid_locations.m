@@ -21,7 +21,7 @@ for n=1:number_of_sessions
     if number_of_sessions>1
         display_progress_bar(['Calculating centroid locations for session #' num2str(n) ' - '],false)
     else
-        display_progress_bar(['Calculating centroid locations for this session'],false)
+        display_progress_bar('Calculating centroid locations for this session ',false)
     end
     this_session_spatial_footprints=spatial_footprints{n};
     num_spatial_footprints=size(this_session_spatial_footprints,1);
