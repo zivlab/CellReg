@@ -1,4 +1,4 @@
-function plot_alignment_results(spatial_footprints,centroid_locations,spatial_footprints_corrected,centroid_locations_corrected,footprints_projections,footprints_projections_corrected,reference_session_index,all_centroid_projections_correlations,maximal_cross_correlation,best_translations,overlapping_FOV,alignment_type,number_of_cells_per_session,figures_directory,figures_visibility)
+function plot_alignment_results(spatial_footprints,centroid_locations,spatial_footprints_corrected,centroid_locations_corrected,footprints_projections,footprints_projections_corrected,reference_session_index,all_centroid_projections_correlations,maximal_cross_correlation,best_translations,overlapping_FOV,alignment_type,number_of_cells_per_session,figures_directory,figures_visibility,varargin)
 % This function plots all the results for the image alignment step
 
 number_of_sessions=size(footprints_projections,2);
@@ -300,5 +300,44 @@ set(gcf,'PaperPositionMode','auto')
 savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - general.fig'))
 saveas(gcf,fullfile(figures_directory,'Stage 2 - abnormalities test - general'),'png')
 
+% if non-rigid transformation was used:
+if strcmp(alignment_type,'Non-rigid')
+    displacement_fields=varargin{1};
+    adjusted_x_size=size(displacement_fields,3);
+    adjusted_y_size=size(displacement_fields,2);
+    number_of_arrows=25;
+    x_vector=round(adjusted_x_size/number_of_arrows/2):round(adjusted_x_size/number_of_arrows):adjusted_x_size;
+    y_vector=round(adjusted_y_size/number_of_arrows/2):round(adjusted_y_size/number_of_arrows):adjusted_y_size;
+    [x,y]=meshgrid(x_vector,y_vector);
+    subx=4;
+    suby=ceil(number_of_sessions/subx);
+    if number_of_sessions>4
+        figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
+        set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+        for n=1:number_of_sessions
+            subplot(suby,subx,n)
+            quiver(x,y,displacement_fields(n,(x_vector),(y_vector),1),flipud(displacement_fields((x_vector),(y_vector),2)))
+            set(gca,'xtick',[])
+            set(gca,'ytick',[])
+            colormap('gray')
+            title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
+        end
+    else
+        figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility)
+        set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+        for n=1:number_of_sessions
+            subplot(1,number_of_sessions,n)
+            quiver(x,y,displacement_fields(n,(x_vector),(y_vector),1),flipud(displacement_fields((x_vector),(y_vector),2)))
+            set(gca,'xtick',[])
+            set(gca,'ytick',[])
+            colormap('gray')
+            title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
+        end
+    end
+    set(gcf,'PaperPositionMode','auto')
+    savefig(fullfile(figures_directory,'Stage 1 - Non-rigid transformations.fig'))
+    saveas(gcf,fullfile(figures_directory,'Stage 1 - Non-rigid transformations'),'png')    
+end
+    
 end
 

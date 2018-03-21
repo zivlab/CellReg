@@ -7,13 +7,13 @@ function plot_all_sessions_projections(footprints_projections,figures_directory,
 % 2. figures directory - where to save the figure
 % 3. figures_visibility
 
-num_sessions=size(footprints_projections,2);
+number_of_sessions=size(footprints_projections,2);
 subx=4;
-suby=ceil(num_sessions/subx);
-if num_sessions>4
+suby=ceil(number_of_sessions/subx);
+if number_of_sessions>4
     figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
-    for n=1:num_sessions
+    for n=1:number_of_sessions
         subplot(suby,subx,n)
         imagesc(footprints_projections{n},[0 2])
         set(gca,'xtick',[])
@@ -24,8 +24,8 @@ if num_sessions>4
 else
     figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility)
     set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
-    for n=1:num_sessions
-        subplot(1,num_sessions,n)
+    for n=1:number_of_sessions
+        subplot(1,number_of_sessions,n)
         imagesc(footprints_projections{n},[0 2])
         set(gca,'xtick',[])
         set(gca,'ytick',[])

@@ -76,7 +76,7 @@ display_progress_bar('Terminating previous progress bars',true)
 if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
     transformation_smoothness=varargin{1};
     best_translations=zeros(2,number_of_sessions);
-    displacement_fields=zeros(num_sessions,adjusted_x_size,adjusted_y_size,2);
+    displacement_fields=zeros(number_of_sessions,adjusted_y_size,adjusted_x_size,2);
     for n=1:number_of_sessions-1
         disp(['Performing non-rigid transformation for session #' num2str(registration_order(n)) ':'])
         reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
@@ -110,7 +110,8 @@ if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
         maximal_cross_correlation(n)=max(max(full_FOV_correlation));
         displacement_fields(registration_order(n),:,:,:)=displacement_field;
     end
-    varargout=displacement_fields;
+    varargout=cell(1,1);
+    varargout{1}=displacement_fields;
 else
     display_progress_bar('Terminating previous progress bars',true)
     for n=1:number_of_sessions-1
