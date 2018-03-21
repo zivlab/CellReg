@@ -1,4 +1,4 @@
-function [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,best_translations,overlapping_area]=align_images(spatial_footprints,centroid_locations,footprints_projections,centroid_projections,overlapping_area_all_sessions,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing,varargin)
+function [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,best_translations,overlapping_area,varargout]=align_images(spatial_footprints,centroid_locations,footprints_projections,centroid_projections,overlapping_area_all_sessions,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing,varargin)
 
 % This function recieves the spatial footprints from different sessions and
 % finds the optimal alignment between their FOV's. This is the first step
@@ -29,6 +29,8 @@ function [spatial_footprints_corrected,centroid_locations_corrected,footprints_p
 % 5. maximal_cross_correlation
 % 6. best_translations
 % 7. overlapping_area
+% 8. varargout
+% 8{1}. displacement_fields - for non-rigid transormation
 
 rotation_step=0.5; % check rotations every xx degrees
 minimal_rotation=0.3; % less than this rotation in degrees does not justify rotating the cells
@@ -74,11 +76,12 @@ display_progress_bar('Terminating previous progress bars',true)
 if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
     transformation_smoothness=varargin{1};
     best_translations=zeros(2,number_of_sessions);
+    displacement_fields=zeros(num_sessions,adjusted_x_size,adjusted_y_size,2);
     for n=1:number_of_sessions-1
         disp(['Performing non-rigid transformation for session #' num2str(registration_order(n)) ':'])
         reference_footprints_projections_corrected=footprints_projections_corrected{reference_session_index};
         temp_footprints_projections_corrected=footprints_projections_corrected{registration_order(n)};
-        [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected,'AccumulatedFieldSmoothing',transformation_smoothness);
+        [displacement_field,temp_footprints_projections_non_rigid_corrected]=imregdemons(temp_footprints_projections_corrected,reference_footprints_projections_corrected,'AccumulatedFieldSmoothing',transformation_smoothness);       
         footprints_projections_corrected{registration_order(n)}=temp_footprints_projections_non_rigid_corrected;
         this_session_footprints_unaligned=spatial_footprints_corrected{registration_order(n)};
         this_session_footprints_aligned=zeros(size(this_session_footprints_unaligned));
@@ -105,7 +108,9 @@ if strcmp(alignment_type,'Non-rigid') % Non-rigid alignment:
         [centroid_projections_corrected(registration_order(n))]=compute_centroids_projections(centroid_locations_corrected(registration_order(n)),spatial_footprints_corrected(registration_order(n)));
         full_FOV_correlation=normxcorr2(footprints_projections_corrected{reference_session_index},footprints_projections_corrected{registration_order(n)});
         maximal_cross_correlation(n)=max(max(full_FOV_correlation));
-    end    
+        displacement_fields(registration_order(n),:,:,:)=displacement_field;
+    end
+    varargout=displacement_fields;
 else
     display_progress_bar('Terminating previous progress bars',true)
     for n=1:number_of_sessions-1
