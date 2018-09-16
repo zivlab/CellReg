@@ -481,6 +481,7 @@ else
     data_struct=aligned_data_struct.aligned_data_struct;
     data_struct.results_directory=results_directory;
     figures_directory=fullfile(results_directory,'Figures');
+    data_struct.figures_directory=figures_directory;
     if exist(figures_directory,'dir')~=7
         mkdir(figures_directory);
     end
@@ -557,6 +558,7 @@ else
     data_struct=modeled_data_struct.modeled_data_struct;
     data_struct.results_directory=results_directory;
     figures_directory=fullfile(results_directory,'Figures');
+    data_struct.figures_directory=figures_directory;
     if exist(figures_directory,'dir')~=7
         mkdir(figures_directory);
     end
