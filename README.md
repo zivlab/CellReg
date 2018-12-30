@@ -5,12 +5,12 @@ in Ca2+ imaging data. The package includes a GUI that supports the entire regist
 For more information contact lironsheintuch@gmail.com or join our [slack channel](https://cellreg.slack.com).
 
 ## Setting up the repository
-We encourage the use of official versions (e.g., v1.3.5) for easier debugging processes. Switch to the releases tab on GitHub and checkout the latest version.
+We encourage the use of official versions (e.g., v1.3.6) for easier debugging processes. Switch to the releases tab on GitHub and checkout the latest version.
 
 1. Cloning:
 `git clone https://github.com/zivlab/CellReg.git`
 2. Checkout version:
-`git checkout v<major>.<minor>.<bugfix> (e.g., v1.3.5)`
+`git checkout v<major>.<minor>.<bugfix> (e.g., v1.3.6)`
 3. Run `setup.m`
 
 ## Usage and documentation
