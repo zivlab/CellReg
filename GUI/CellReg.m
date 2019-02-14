@@ -701,7 +701,7 @@ disp('Stage 2 - Aligning sessions')
 
 % Aligning the cells according to the tranlations/rotations that maximize their similarity:
 sufficient_correlation_centroids=0.2; % smaller correlation imply no similarity between sessions
-sufficient_correlation_footprints=0.3; % smaller correlation imply no similarity between sessions
+sufficient_correlation_footprints=0.2; % smaller correlation imply no similarity between sessions
 if strcmp(alignment_type,'Translations and Rotations')
     [spatial_footprints_corrected,centroid_locations_corrected,footprints_projections_corrected,centroid_projections_corrected,maximal_cross_correlation,alignment_translations,overlapping_FOV]=...
         align_images(adjusted_spatial_footprints,centroid_locations,adjusted_footprints_projections,centroid_projections,adjusted_FOV,microns_per_pixel,reference_session_index,alignment_type,sufficient_correlation_centroids,sufficient_correlation_footprints,use_parallel_processing,maximal_rotation);
