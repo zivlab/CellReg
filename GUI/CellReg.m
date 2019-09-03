@@ -156,7 +156,7 @@ set(handles.decision_thresh,'string','0.5')
 set(handles.initial_p_same_slider,'value',0.5);
 set(handles.initial_p_same_threshold,'string','0.5');
 set(handles.final_p_same_slider,'value',0.5);
-set(handles.model_maximal_distance,'string','12')
+set(handles.model_maximal_distance,'string','14')
 set(handles.distance_threshold,'string','5')
 set(handles.correlation_threshold,'string','0.65')
 set(handles.simple_distance_threshold,'string','5')
@@ -1323,7 +1323,7 @@ set(handles.decision_thresh,'string','0.5')
 set(handles.initial_p_same_slider,'value',0.5);
 set(handles.initial_p_same_threshold,'string','0.5');
 set(handles.final_p_same_slider,'value',0.5);
-set(handles.model_maximal_distance,'string','12')
+set(handles.model_maximal_distance,'string','14')
 set(handles.distance_threshold,'string','5')
 set(handles.correlation_threshold,'string','0.65')
 set(handles.simple_distance_threshold,'string','5')
@@ -2228,7 +2228,7 @@ if get(handles.one_photon,'Value')==1
     set(handles.spatial_correlations_2,'value',1)
     set(handles.maximal_rotation,'enable','on')
     set(handles.transformation_smoothness,'enable','off')
-    set(handles.model_maximal_distance,'string',num2str(12))        
+    set(handles.model_maximal_distance,'string',num2str(14))        
 end
 
 
