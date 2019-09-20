@@ -119,7 +119,7 @@ disp('Done')
 % correlations from the data.
 
 % Defining the parameters for the probabilstic modeling:
-maximal_distance=12; % cell-pairs that are more than 12 micrometers apart are assumed to be different cells
+maximal_distance=14; % cell-pairs that are more than 12 micrometers apart are assumed to be different cells
 normalized_maximal_distance=maximal_distance/microns_per_pixel;
 p_same_certainty_threshold=0.95; % certain cells are those with p_same>threshld or <1-threshold
 
