@@ -30,26 +30,31 @@
 %% Setting paths for the cell registration procedure:
 
 % Defining the results_directory and creating the figures_directory:
-results_directory='D:\Liron\CellReg test\SampleData\Results';
+% results_directory='D:\dev\Cell registration\CellReg\SampleData\Results';
+results_directory='G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\Results';
+
 figures_directory=fullfile(results_directory,'Figures');
 if exist(figures_directory,'dir')~=7
     mkdir(figures_directory);
 end
 figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
     
-file_names={'D:\Liron\CellReg test\SampleData\spatial_footprints_01.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_02.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_03.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_04.mat' ,...
-            'D:\Liron\CellReg test\SampleData\spatial_footprints_05.mat'};
+% file_names={'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_01.mat' ,...
+%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_02.mat' ,...
+%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_03.mat' ,...
+%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_04.mat' ,...
+%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_05.mat'};
+        
+file_names={'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\finalFiltersMat_1.mat',...
+    'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\finalFiltersMat_2.mat',...
+    'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\finalFiltersMat_3.mat'};
         
 %% Stage 1 - Loading the spatial footprints of cellular activity:
 % This stage loads a new data set which includes several sessions with the
 % identified spatial footprints.
 
 % Defining the parameters:
-imaging_technique='one_photon'; % either 'one_photon' or 'two_photon'
-microns_per_pixel=2.35;
+microns_per_pixel=0.8;
 
 % Loading the data:
 disp('Stage 1 - Loading sessions')
@@ -66,7 +71,7 @@ disp('Done')
 % 3. Evaluating how suitable the data is for longitudinal analysis
 
 % Defining the parameters for image alignment:
-alignment_type='Translations and Rotations'; % either 'Translations', 'Translations and Rotations' or 'Non-rigid'
+alignment_type='Non-rigid'; % either 'Translations', 'Translations and Rotations' or 'Non-rigid'
 use_parallel_processing=true; % either true or false
 maximal_rotation=30; % in degrees - only relevant if 'Translations and Rotations' is used
 transformation_smoothness=2; % levels of non-rigid FOV transformation smoothness (range 0.5-3)
@@ -127,7 +132,7 @@ p_same_certainty_threshold=0.95; % certain cells are those with p_same>threshld 
 disp('Stage 3 - Calculating a probabilistic model of the data')
 [number_of_bins,centers_of_bins]=estimate_number_of_bins(spatial_footprints,normalized_maximal_distance);
 [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=...
-    compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance,imaging_technique);
+    compute_data_distribution(spatial_footprints_corrected,centroid_locations_corrected,normalized_maximal_distance);
 
 % Plotting the (x,y) displacements:
 plot_x_y_displacements(neighbors_x_displacements,neighbors_y_displacements,microns_per_pixel,normalized_maximal_distance,number_of_bins,centers_of_bins,figures_directory,figures_visibility);
@@ -143,40 +148,23 @@ disp('Calculating a probabilistic model of the data')
     compute_centroid_distances_model(neighbors_centroid_distances,microns_per_pixel,centers_of_bins);
 
 % Modeling the distribution of spatial correlations:
-if strcmp(imaging_technique,'one_photon')
-    [spatial_correlations_model_parameters,p_same_given_spatial_correlation,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,MSE_spatial_correlations_model,spatial_correlation_intersection]=...
-        compute_spatial_correlations_model(neighbors_spatial_correlations,centers_of_bins);
-end
+[spatial_correlations_model_parameters,p_same_given_spatial_correlation,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,MSE_spatial_correlations_model,spatial_correlation_intersection]=...
+    compute_spatial_correlations_model(neighbors_spatial_correlations,centers_of_bins);
 
 % estimating registration accuracy:
-if strcmp(imaging_technique,'one_photon')
-    [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,uncertain_fraction_spatial_correlations,cdf_p_same_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold]=...
-        estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,neighbors_spatial_correlations,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
-    % Checking which model is better according to a defined cost function:
-    [best_model_string]=choose_best_model(MSE_centroid_distances_model,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,imaging_technique,MSE_spatial_correlations_model,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
-else
-    [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold]=...
-        estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins);
-    [best_model_string]=choose_best_model(MSE_centroid_distances_model,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,imaging_technique);
-end
+[p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,uncertain_fraction_spatial_correlations,cdf_p_same_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold]=...
+    estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,neighbors_spatial_correlations,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
+% Checking which model is better according to a defined cost function:
+[best_model_string]=choose_best_model(MSE_centroid_distances_model,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,MSE_spatial_correlations_model,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,p_same_given_spatial_correlation);
 
 % Plotting the probabilistic models and estimated registration accuracy:
-if strcmp(imaging_technique,'one_photon')
-    plot_models(centroid_distances_model_parameters,NN_centroid_distances,NNN_centroid_distances,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,centroid_distance_intersection,centers_of_bins,microns_per_pixel,normalized_maximal_distance,figures_directory,figures_visibility,spatial_correlations_model_parameters,NN_spatial_correlations,NNN_spatial_correlations,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,spatial_correlation_intersection)
-    plot_estimated_registration_accuracy(p_same_centers_of_bins,p_same_certainty_threshold,p_same_given_centroid_distance,centroid_distances_distribution,cdf_p_same_centroid_distances,uncertain_fraction_centroid_distances,true_positive_per_distance_threshold,false_positive_per_distance_threshold,centers_of_bins,normalized_maximal_distance,microns_per_pixel,imaging_technique,figures_directory,figures_visibility,p_same_given_spatial_correlation,spatial_correlations_distribution,cdf_p_same_spatial_correlations,uncertain_fraction_spatial_correlations,true_positive_per_correlation_threshold,false_positive_per_correlation_threshold)
-else
-    plot_models(centroid_distances_model_parameters,NN_centroid_distances,NNN_centroid_distances,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,centroid_distance_intersection,centers_of_bins,microns_per_pixel,normalized_maximal_distance,figures_directory,figures_visibility)
-    plot_estimated_registration_accuracy(p_same_centers_of_bins,p_same_certainty_threshold,p_same_given_centroid_distance,centroid_distances_distribution,cdf_p_same_centroid_distances,uncertain_fraction_centroid_distances,true_positive_per_distance_threshold,false_positive_per_distance_threshold,centers_of_bins,normalized_maximal_distance,microns_per_pixel,imaging_technique,figures_directory,figures_visibility)
-end
+plot_models(centroid_distances_model_parameters,NN_centroid_distances,NNN_centroid_distances,centroid_distances_distribution,centroid_distances_model_same_cells,centroid_distances_model_different_cells,centroid_distances_model_weighted_sum,centroid_distance_intersection,centers_of_bins,microns_per_pixel,normalized_maximal_distance,figures_directory,figures_visibility,spatial_correlations_model_parameters,NN_spatial_correlations,NNN_spatial_correlations,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,spatial_correlation_intersection)
+plot_estimated_registration_accuracy(p_same_centers_of_bins,p_same_certainty_threshold,p_same_given_centroid_distance,centroid_distances_distribution,cdf_p_same_centroid_distances,uncertain_fraction_centroid_distances,true_positive_per_distance_threshold,false_positive_per_distance_threshold,centers_of_bins,normalized_maximal_distance,microns_per_pixel,figures_directory,figures_visibility,p_same_given_spatial_correlation,spatial_correlations_distribution,cdf_p_same_spatial_correlations,uncertain_fraction_spatial_correlations,true_positive_per_correlation_threshold,false_positive_per_correlation_threshold)
 
 % Computing the P_same for each neighboring cell-pair according to the different models:
-if strcmp(imaging_technique,'one_photon')
-    [all_to_all_p_same_centroid_distance_model,all_to_all_p_same_spatial_correlation_model]=...
-        compute_p_same(all_to_all_centroid_distances,p_same_given_centroid_distance,centers_of_bins,imaging_technique,all_to_all_spatial_correlations,p_same_given_spatial_correlation);
-else
-    [all_to_all_p_same_centroid_distance_model]=...
-        compute_p_same(all_to_all_centroid_distances,p_same_given_centroid_distance,centers_of_bins,imaging_technique);
-end
+[all_to_all_p_same_centroid_distance_model,all_to_all_p_same_spatial_correlation_model]=...
+    compute_p_same(all_to_all_centroid_distances,p_same_given_centroid_distance,centers_of_bins,all_to_all_spatial_correlations,p_same_given_spatial_correlation);
+
 disp('Done')
 
 %% Stage 4 - Initial cell registration
@@ -196,14 +184,10 @@ if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlat
         initial_threshold=spatial_correlation_intersection; % the threshold for p_same=0.5;
     else
         initial_threshold=0.65; % a fixed correlation threshold not based on the model
-    end
-    if strcmp(imaging_technique,'two_photon')
-        error('The spatial correlations model is only applied for 1-photon imaging data')
-    else
+    end   
         [cell_to_index_map,registered_cells_spatial_correlations,non_registered_cells_spatial_correlations]=...
             initial_registration_spatial_correlations(normalized_maximal_distance,initial_threshold,spatial_footprints_corrected,centroid_locations_corrected);
         plot_initial_registration(cell_to_index_map,number_of_bins,spatial_footprints_corrected,initial_registration_type,figures_directory,figures_visibility,registered_cells_spatial_correlations,non_registered_cells_spatial_correlations)
-    end
 else % if centroid distances are used
     if exist('centroid_distance_intersection','var')
         initial_threshold=centroid_distance_intersection; % the threshold for p_same=0.5;
@@ -306,15 +290,15 @@ save(fullfile(results_directory,['cellRegistered_' datestr(clock,'yyyymmdd_HHMMs
 comments=''; % anything written here will be added to the log file
 if strcmp(registration_approach,'Probabilistic')
     if strcmp(model_type,'Spatial correlation')
-        save_log_file(results_directory,file_names,imaging_technique,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments,uncertain_fraction_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold,MSE_spatial_correlations_model)
+        save_log_file(results_directory,file_names,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments,uncertain_fraction_spatial_correlations,false_positive_per_correlation_threshold,true_positive_per_correlation_threshold,MSE_spatial_correlations_model)
     elseif strcmp(model_type,'Centroid distance')
-        save_log_file(results_directory,file_names,imaging_technique,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments,uncertain_fraction_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,MSE_centroid_distances_model)
+        save_log_file(results_directory,file_names,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments,uncertain_fraction_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,MSE_centroid_distances_model)
     end
 elseif strcmp(registration_approach,'Simple threshold')
     if strcmp(model_type,'Spatial correlation')
-        save_log_file(results_directory,file_names,imaging_technique,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments)
+        save_log_file(results_directory,file_names,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments)
     elseif strcmp(model_type,'Centroid distance')
-        save_log_file(results_directory,file_names,imaging_technique,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments)
+        save_log_file(results_directory,file_names,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments)
     end
 end
 disp([num2str(size(optimal_cell_to_index_map,1)) ' cells were found'])

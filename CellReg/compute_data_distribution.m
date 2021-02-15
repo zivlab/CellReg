@@ -1,4 +1,4 @@
-function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=compute_data_distribution(spatial_footprints,centroid_locations,maximal_distance,imaging_technique)
+function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=compute_data_distribution(spatial_footprints,centroid_locations,maximal_distance)
 % This function computes the distributions of distances and correlations
 % for all the neighboring cells pairs acorss sessions with a distance <12 microns
 
@@ -6,8 +6,6 @@ function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid
 % 1. spatial_footprints
 % 2. centroid_locations
 % 3. maximal distance - in pixels 
-% 4. imaging_technique
-
 
 % Outputs:
 % 1. all_to_all_indexes - cell-pairs with centroid_distance<maximal distance
@@ -85,7 +83,7 @@ for n=1:number_of_sessions
                         neighbors_y_displacements(neighbor_count)=distance_vec_y(l);
                     end
                 end
-                if num_empty_spatial_footprints<length(spatial_footprints_to_check);
+                if num_empty_spatial_footprints<length(spatial_footprints_to_check)
                     NN_count=NN_count+1;
                     NN_spatial_correlations(NN_count)=max(corr_vec);
                     NN_centroid_distances(NN_count)=min(distance_vec(spatial_footprints_to_check));
@@ -129,15 +127,10 @@ neighbors_centroid_distances_temp(neighbors_centroid_distances_temp==0)=10^-10;
 neighbors_spatial_correlations_temp(neighbors_centroid_distances>maximal_distance)=[];
 neighbors_centroid_distances_temp(neighbors_centroid_distances>maximal_distance)=[];
 
-% the maximal distance should be chosen in a way that neighboring cells
-% pairs have non-zero overlap
 if sum(neighbors_spatial_correlations_temp<0)/length(neighbors_spatial_correlations_temp)>0.05
-    warning('A good fit might not be attainable because some of the cells seem to be smaller than expected. This could also occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large')
+    warning('A large portion of neighboring cells with negative spatial correlations (non-overlapping) were found. This could occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large. For 2-photon registration try reducing maximal distance to 10-12 microns')
 end
-if strcmp(imaging_technique,'one_photon');
-    neighbors_centroid_distances_temp(neighbors_spatial_correlations_temp<0)=[];
-    neighbors_spatial_correlations_temp(neighbors_spatial_correlations_temp<0)=[];
-end
+neighbors_spatial_correlations_temp(neighbors_spatial_correlations_temp<0)=[];
 
 neighbors_spatial_correlations=neighbors_spatial_correlations_temp;
 neighbors_centroid_distances=neighbors_centroid_distances_temp;
@@ -151,18 +144,14 @@ NN_spatial_correlations_temp(NN_centroid_distances>maximal_distance)=[];
 NN_centroid_distances_temp(NN_centroid_distances>maximal_distance)=[];
 NNN_spatial_correlations_temp(NNN_centroid_distances>maximal_distance)=[];
 NNN_centroid_distances_temp(NNN_centroid_distances>maximal_distance)=[];
-if strcmp(imaging_technique,'one_photon');
-    NN_centroid_distances_temp(NN_spatial_correlations_temp<0)=[];
-    NN_spatial_correlations_temp(NN_spatial_correlations_temp<0)=[];
-    NNN_centroid_distances_temp(NNN_spatial_correlations_temp<0)=[];
-    NNN_spatial_correlations_temp(NNN_spatial_correlations_temp<0)=[];
-end
+NN_spatial_correlations_temp(NN_spatial_correlations_temp<0)=[];
+NNN_spatial_correlations_temp(NNN_spatial_correlations_temp<0)=[];
 NN_centroid_distances=NN_centroid_distances_temp;
 NNN_centroid_distances=NNN_centroid_distances_temp;
 NN_spatial_correlations=NN_spatial_correlations_temp;
 NNN_spatial_correlations=NNN_spatial_correlations_temp;
 
-if length(NNN_centroid_distances_temp)<0.1*length(NN_centroid_distances_temp);
+if length(NNN_centroid_distances_temp)<0.1*length(NN_centroid_distances_temp)
     warning('There is insufficient number of non-nearest neighboring cells to estimate the different cells distribution. This could occur if the provided microns per pixel ratio is incorrect or if the data is sparse. You can try increasing the maximal distance')
 end
 

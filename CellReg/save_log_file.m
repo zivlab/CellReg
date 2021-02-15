@@ -1,31 +1,30 @@
-function save_log_file(results_directory,file_names,imaging_technique,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments,varargin)
+function save_log_file(results_directory,file_names,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments,varargin)
 % This function saves into a log-file all the parameters that were used for
 % registration and a summary of the registration results.
 
 % Inputs:
 % 1. results_directory
 % 2. file_names - a cell array
-% 3. imaging_technique
-% 4. microns_per_pixel
-% 5. adjusted_x_size
-% 6. adjusted_y_size
-% 7. alignment_type
-% 8. reference_session
-% 9. maximal_distance
-% 10. number_of_bins
-% 11. initial_registration_type
-% 12. initial_threshold
-% 13. registration_approach
-% 14. model_type
-% 15. final_threshold
-% 16. optimal_cell_to_index_map
-% 17. cell_registered_struct
-% 18. comments
-% 19. varargin
-% 19{1}. uncertain_fraction
-% 19{2}. false_positive
-% 19{3}. true_positive
-% 19{4}. model_MSE
+% 3. microns_per_pixel
+% 4. adjusted_x_size
+% 5. adjusted_y_size
+% 6. alignment_type
+% 7. reference_session
+% 8. maximal_distance
+% 9. number_of_bins
+% 10. initial_registration_type
+% 11. initial_threshold
+% 12. registration_approach
+% 13. model_type
+% 14. final_threshold
+% 15. optimal_cell_to_index_map
+% 16. cell_registered_struct
+% 17. comments
+% 18. varargin
+% 18{1}. uncertain_fraction
+% 18{2}. false_positive
+% 18{3}. true_positive
+% 18{4}. model_MSE
 
 number_of_cells=size(optimal_cell_to_index_map,1);
 if ~isempty(varargin)
@@ -48,11 +47,6 @@ for n=1:number_of_sessions
     fprintf(logFile,'\n');
 end
 fprintf(logFile,'\n\nGeneral data parameters:\n------------------------\n');
-if strcmp(imaging_technique,'one_photon')
-    fprintf(logFile,'Imaging technique - 1-photon\n');
-else
-    fprintf(logFile,'Imaging technique - 2-photon\n');
-end
 fprintf(logFile,['Number of sessions - ' num2str(number_of_sessions) '\n']);
 FOV_size=[adjusted_x_size*microns_per_pixel adjusted_y_size*microns_per_pixel];
 fprintf(logFile,['FOV size - ' num2str(FOV_size(1)) 'X' num2str(FOV_size(2)) ' [microns] ; (x,y)\n']);

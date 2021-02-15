@@ -26,13 +26,6 @@ diff_model = @(x,p,q)(x.^(p-1).*(1-x).^(q-1))/(beta(p,q));
 number_of_bins=length(centers_of_bins{2});
 spatial_correlations_centers=centers_of_bins{2};
 
-% the maximal distance should be chosen in a way that neighboring cells
-% pairs have non-zero overlap
-[spatial_correlations_distribution,~]=hist(neighbors_spatial_correlations,spatial_correlations_centers);
-if sum(spatial_correlations_distribution(spatial_correlations_centers<0.05))>0.05*sum(spatial_correlations_distribution)
-    warning('A good fit might not be attainable because some of the cells seem to be smaller than expected. This could also occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large')
-end
-
 % finding initial parameters for EM:
 data = 1-neighbors_spatial_correlations;
 same_params=lognfit(data(neighbors_spatial_correlations>=0.7));
