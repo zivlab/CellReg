@@ -30,8 +30,7 @@
 %% Setting paths for the cell registration procedure:
 
 % Defining the results_directory and creating the figures_directory:
-% results_directory='D:\dev\Cell registration\CellReg\SampleData\Results';
-results_directory='G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\Results';
+results_directory='D:\dev\Cell registration\CellReg\SampleData\Results';
 
 figures_directory=fullfile(results_directory,'Figures');
 if exist(figures_directory,'dir')~=7
@@ -39,22 +38,19 @@ if exist(figures_directory,'dir')~=7
 end
 figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
     
-% file_names={'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_01.mat' ,...
-%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_02.mat' ,...
-%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_03.mat' ,...
-%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_04.mat' ,...
-%             'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_05.mat'};
-        
-file_names={'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\finalFiltersMat_1.mat',...
-    'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\finalFiltersMat_2.mat',...
-    'G:\Liron\M.Sc\Cell alignment\2-photon data\Allen Institute\Test 6 - exp_511510675\finalFiltersMat_3.mat'};
+file_names={'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_01.mat' ,...
+            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_02.mat' ,...
+            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_03.mat' ,...
+            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_04.mat' ,...
+            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_05.mat'};
+
         
 %% Stage 1 - Loading the spatial footprints of cellular activity:
 % This stage loads a new data set which includes several sessions with the
 % identified spatial footprints.
 
 % Defining the parameters:
-microns_per_pixel=0.8;
+microns_per_pixel=2.35;
 
 % Loading the data:
 disp('Stage 1 - Loading sessions')
@@ -71,7 +67,7 @@ disp('Done')
 % 3. Evaluating how suitable the data is for longitudinal analysis
 
 % Defining the parameters for image alignment:
-alignment_type='Non-rigid'; % either 'Translations', 'Translations and Rotations' or 'Non-rigid'
+alignment_type='Translations and Rotations'; % either 'Translations', 'Translations and Rotations' or 'Non-rigid'
 use_parallel_processing=true; % either true or false
 maximal_rotation=30; % in degrees - only relevant if 'Translations and Rotations' is used
 transformation_smoothness=2; % levels of non-rigid FOV transformation smoothness (range 0.5-3)
