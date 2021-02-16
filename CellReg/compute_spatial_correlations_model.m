@@ -1,4 +1,4 @@
-function [spatial_correlations_model_parameters,p_same_given_spatial_correlation,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,MSE_spatial_correlations_model,spatial_correlation_intersection]=jeev_compute_spatial_correlations_model(neighbors_spatial_correlations,centers_of_bins)
+function [spatial_correlations_model_parameters,p_same_given_spatial_correlation,spatial_correlations_distribution,spatial_correlations_model_same_cells,spatial_correlations_model_different_cells,spatial_correlations_model_weighted_sum,MSE_spatial_correlations_model,spatial_correlation_intersection]=compute_spatial_correlations_model(neighbors_spatial_correlations,centers_of_bins)
 % This function recieves the distribution of spatial correlations for all
 % neighboring cells-pairs across sessions, and computes a probabilistic
 % model by finding the weighted sum of same cells and different cells that
@@ -22,11 +22,11 @@ function [spatial_correlations_model_parameters,p_same_given_spatial_correlation
 same_model =@(x,sln,mln)( (1./(x*sln*sqrt(2*pi))).* exp(-0.5*(1/(sln^2))*(log(x)-mln).^2));
 diff_model = @(x,p,q)(x.^(p-1).*(1-x).^(q-1))/(beta(p,q));
 
-
 number_of_bins=length(centers_of_bins{2});
 spatial_correlations_centers=centers_of_bins{2};
 
 % finding initial parameters for EM:
+neighbors_spatial_correlations(neighbors_spatial_correlations<0)=[];
 data = 1-neighbors_spatial_correlations;
 same_params=lognfit(data(neighbors_spatial_correlations>=0.7));
 mu = same_params(1); sigma = same_params(2);

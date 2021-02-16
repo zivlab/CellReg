@@ -6,6 +6,8 @@ if ~isempty(varargin)
     spatial_correlations_model_parameters=varargin{1};
     NN_spatial_correlations=varargin{2};
     NNN_spatial_correlations=varargin{3};
+    NN_spatial_correlations(NN_spatial_correlations<0)=[];
+    NNN_spatial_correlations(NNN_spatial_correlations<0)=[];
     spatial_correlations_distribution=varargin{4};    
     spatial_correlations_model_same_cells=varargin{5};
     spatial_correlations_model_different_cells=varargin{6};

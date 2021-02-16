@@ -130,7 +130,6 @@ neighbors_centroid_distances_temp(neighbors_centroid_distances>maximal_distance)
 if sum(neighbors_spatial_correlations_temp<0)/length(neighbors_spatial_correlations_temp)>0.05
     warning('A large portion of neighboring cells with negative spatial correlations (non-overlapping) were found. This could occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large. For 2-photon registration try reducing maximal distance to 10-12 microns')
 end
-neighbors_spatial_correlations_temp(neighbors_spatial_correlations_temp<0)=[];
 
 neighbors_spatial_correlations=neighbors_spatial_correlations_temp;
 neighbors_centroid_distances=neighbors_centroid_distances_temp;
@@ -144,8 +143,6 @@ NN_spatial_correlations_temp(NN_centroid_distances>maximal_distance)=[];
 NN_centroid_distances_temp(NN_centroid_distances>maximal_distance)=[];
 NNN_spatial_correlations_temp(NNN_centroid_distances>maximal_distance)=[];
 NNN_centroid_distances_temp(NNN_centroid_distances>maximal_distance)=[];
-NN_spatial_correlations_temp(NN_spatial_correlations_temp<0)=[];
-NNN_spatial_correlations_temp(NNN_spatial_correlations_temp<0)=[];
 NN_centroid_distances=NN_centroid_distances_temp;
 NNN_centroid_distances=NNN_centroid_distances_temp;
 NN_spatial_correlations=NN_spatial_correlations_temp;
