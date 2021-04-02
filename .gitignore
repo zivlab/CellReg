@@ -99,8 +99,8 @@ ENV/
 *.asv
 *.mat
 *.fig
-/SampleData/Figure
-/SampleData/Figure/*
+/SampleData/Figures
+/SampleData/Figures/*
 
 # PyCharm
 .idea/
