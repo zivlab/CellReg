@@ -212,9 +212,18 @@ function load_new_data_Callback(hObject,~, handles)
 data_struct=handles.data_struct;
 
 % choosing the files to load:
-msgbox('Please choose the files containing the spatial footprints from all the sessions: ')
+mb = msgbox('Please choose the files containing the spatial footprints from all the sessions: ')
 pause(3)
+close(mb)
 [file_names,files_path]=uigetfile('*.mat','MultiSelect','on');
+
+% in case only one file is selected uigetfile will return a char and not a
+% cell, and thus make later code bug.
+if ischar(file_names)
+    mb = warndlg('To process only one session you shoudl use Add Session button');
+    pause(1)
+    close(mb)
+end
 
 number_of_sessions=size(file_names,2);
 sessions_list=cell(1,number_of_sessions);
@@ -237,8 +246,9 @@ set(handles.microns_per_pixel,'string',num2str(round(100*microns_per_pixel)/100)
 set(handles.microns_per_pixel,'backgroundColor',[1 1 1]);
 
 % defining the results directory:
-msgbox('Please select the folder in which the results will be saved')
+mb = msgbox('Please select the folder in which the results will be saved')
 pause(3)
+close(mb)
 results_directory=uigetdir(files_path); % the directory which the final results will be saved
 figures_directory=fullfile(results_directory,'Figures');
 if exist(figures_directory,'dir')~=7
@@ -270,7 +280,9 @@ set(handles.list_of_sessions,'string',data_struct.sessions_list);
 handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
-msgbox('Finished loading sessions')
+mb = msgbox('Finished loading sessions')
+pause(3)
+close(mb)
 
 
 % --- Executes on button press in add_session.
@@ -299,8 +311,9 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     results_directory=data_struct.results_directory;
     
     % loading the session:
-    msgbox('Please choose the file with the spatial footprints for this session: ')
+    mb = msgbox('Please choose the file with the spatial footprints for this session: ')
     pause(1)
+    close(mb)
     [file_name,file_path]=uigetfile(results_directory,'*.mat','MultiSelect','off');
     number_of_sessions=number_of_sessions+1;
     file_names{number_of_sessions}=[file_path file_name];
@@ -315,8 +328,9 @@ else % first loaded session
     data_struct=handles.data_struct;
     
     % choosing the file to load:
-    msgbox('Please choose the file with the spatial footprints for this session: ')
+    mb = msgbox('Please choose the file with the spatial footprints for this session: ')
     pause(3)
+    close(mb)
     [file_name,file_path]=uigetfile('*.mat','MultiSelect','off');
     number_of_sessions=1;
     sessions_list={['Session 1 - ' file_path file_name]};
@@ -325,17 +339,20 @@ else % first loaded session
     % defining the microns per pixel ratio:
     microns_per_pixel=str2num(get(handles.microns_per_pixel,'string'));
     if isempty(microns_per_pixel)
-        msgbox('Please insert the pixel size in microns and press enter ')
+        mb = msgbox('Please insert the pixel size in microns and press enter ')
         set(handles.microns_per_pixel,'backgroundColor',[1 0.5 0.5]);
         waitfor(handles.microns_per_pixel,'value',1);
         microns_per_pixel=str2num(get(handles.microns_per_pixel,'string'));
+        close(mb)
     end
     set(handles.microns_per_pixel,'string',num2str(round(100*microns_per_pixel)/100));
     set(handles.microns_per_pixel,'backgroundColor',[1 1 1]);
     
     % defining the results directory:
-    msgbox('Please select the folder in which the results will be saved')
+    mb = msgbox('Please select the folder in which the results will be saved')
     pause(3)
+    close(mb)
+    
     results_directory=uigetdir(file_path); % the directory which the final results will be saved
     figures_directory=fullfile(results_directory,'Figures');
     if exist(figures_directory,'dir')~=7
@@ -364,7 +381,9 @@ set(handles.list_of_sessions,'string',data_struct.sessions_list);
 handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
-msgbox('Finished loading session')
+mb = msgbox('Finished loading session')
+pause(3)
+close(mb)
 
 % --- Executes on button press in remove_session.
 function remove_session_Callback(hObject,~, handles)
@@ -435,7 +454,9 @@ if isfield(data_struct,'spatial_footprints')
     set(handles.list_of_sessions,'string',data_struct.sessions_list);
     handles.data_struct=data_struct;
     guidata(hObject, handles)
-    msgbox('Finished removing session')
+    mb = msgbox('Finished removing session')
+    pause(3)
+    close(mb)
 end
 
 % --------------------------------------------------------------------
@@ -743,7 +764,9 @@ if use_parallel_processing
     delete(gcp);
 end
 disp('Done')
-msgbox('Finished aligning sessions')
+mb = msgbox('Finished aligning sessions')
+pause(3)
+close(mb)
 
 
 % --- Executes on button press in compute_model.
