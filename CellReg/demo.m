@@ -29,21 +29,25 @@
 
 %% Setting paths for the cell registration procedure:
 
+% we need to find the path up-two levels
+[fileroot,~,~] = fileparts(mfilename('fullpath'));
+[fileroot,~,~] = fileparts(fileroot);
+
+
 % Defining the results_directory and creating the figures_directory:
-results_directory='D:\dev\Cell registration\CellReg\SampleData\Results';
+results_directory= fullfile(fileroot,'SampleData', 'Results') ;
 
 figures_directory=fullfile(results_directory,'Figures');
 if exist(figures_directory,'dir')~=7
     mkdir(figures_directory);
 end
-figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
-    
-file_names={'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_01.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_02.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_03.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_04.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_05.mat'};
 
+figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
+
+% define path of sample data
+for it = 1:5
+    file_names{it} = fullfile(fileroot, 'SampleData',sprintf('spatial_footprints_0%1i.mat',1));
+end
         
 %% Stage 1 - Loading the spatial footprints of cellular activity:
 % This stage loads a new data set which includes several sessions with the
