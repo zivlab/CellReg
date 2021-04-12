@@ -329,7 +329,7 @@ else % first loaded session
     
     % choosing the file to load:
     mb = msgbox('Please choose the file with the spatial footprints for this session: ')
-    pause(3)
+    pause(1)
     close(mb)
     [file_name,file_path]=uigetfile('*.mat','MultiSelect','off');
     number_of_sessions=1;
@@ -382,7 +382,7 @@ handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
 mb = msgbox('Finished loading session')
-pause(3)
+pause(1)
 close(mb)
 
 % --- Executes on button press in remove_session.

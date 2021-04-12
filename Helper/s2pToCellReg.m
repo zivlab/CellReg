@@ -1,4 +1,4 @@
-function [footprint] = s2pToCellReg(s2p_path,maskOverlap)
+function [footprint] = s2pToCellReg(s2p_path,varargin)
 %S2PTOCELLREG 
 % convert suite2p outputs to CellReg compatible footprint matrix 
 % NoteI will later try to make the indeing faster (it is currently slow for
@@ -11,11 +11,19 @@ function [footprint] = s2pToCellReg(s2p_path,maskOverlap)
 % Output:
 %           - footprint matrix (Ncells, ypix, xpix)
 
+%% check inputs and load data
+
+if nargin < 1 
+    maskOverlap = varargin{1};
+else 
+    maskOverlap = 1;
+end 
+
 load(s2p_path,'stat','ops');
 
-footprint = zeros(size(ops.neuropil_masks));
-nCells = size(footprint,1);
-
+%% Process data 
+nCells =length(stat);
+footprint = zeros(nCells,ops.Lx, ops.Ly);
 
 for itCell = 1:nCells
     % find subindices of the current neuron
@@ -39,4 +47,5 @@ end
 
 
 end
+
 
