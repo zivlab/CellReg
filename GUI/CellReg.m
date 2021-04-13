@@ -328,7 +328,7 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
 else % first loaded session
     data_struct=handles.data_struct;
     
-    % choosing the file to load:
+    % chosing the file to load:
     % msgbox('Please choose the file with the spatial footprints for this session: ')
     msgbox_timed('Please choose the file with the spatial footprints for this session: ',1)
     
