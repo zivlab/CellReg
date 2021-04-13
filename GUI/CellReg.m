@@ -314,7 +314,7 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     % msgbox('Please choose the file with the spatial footprints for this session: ')
     msgbox_timed('Please choose the file with the spatial footprints for this session: ',1)
 
-    [file_name,file_path]=uigetfile([results_directory,'*.mat'],...
+    [file_name,file_path]=uigetfile(strcat(results_directory,filesep,'*.mat'),...
         'Choose the file with the spatial footprints for this session: ','MultiSelect','off');
     number_of_sessions=number_of_sessions+1;
     file_names{number_of_sessions}=[file_path file_name];
