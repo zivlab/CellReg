@@ -1,6 +1,6 @@
 function [cell_to_index_map,registered_cells_spatial_correlations,non_registered_cells_spatial_correlations]=initial_registration_spatial_correlations(maximal_distance,spatial_correlation_threshold,spatial_footprints,centroid_locations)
-% This function performs an initial cell registration across sessios
-% based on a chosen spatial correlation thresohld. 
+% This function performs an initial cell registration across sessions
+% based on a chosen spatial correlation threshold. 
 
 % Inputs:
 % 1. maximal_distance

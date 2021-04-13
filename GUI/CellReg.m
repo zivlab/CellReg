@@ -215,12 +215,14 @@ data_struct=handles.data_struct;
 % msgbox('Please choose the files containing the spatial footprints from all the sessions: ')
 msgbox_timed('Please choose the files containing the spatial footprints from all the sessions: ',3)
 
-[file_names,files_path]=uigetfile('*.mat','MultiSelect','on');
+[file_names,files_path]=uigetfile('*.mat','MultiSelect','on',...
+    'Choose spatial footprints from all the sessions: ' );
 
 % in case only one file is selected uigetfile will return a char and not a
 % cell, and thus make later code bug.
 if ischar(file_names)
-    warndlg_timed('To process only one session you shoudl use Add Session button',1)
+    warndlg_timed('To process only one session you should use Add Session button',3)
+    return
 end
 
 number_of_sessions=size(file_names,2);
@@ -312,8 +314,8 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     % msgbox('Please choose the file with the spatial footprints for this session: ')
     msgbox_timed('Please choose the file with the spatial footprints for this session: ',1)
 
-    
-    [file_name,file_path]=uigetfile(results_directory,'*.mat','MultiSelect','off');
+    [file_name,file_path]=uigetfile([results_directory,'*.mat'],...
+        'Choose the file with the spatial footprints for this session: ','MultiSelect','off');
     number_of_sessions=number_of_sessions+1;
     file_names{number_of_sessions}=[file_path file_name];
     sessions_list{number_of_sessions}=['Session ' num2str(number_of_sessions) ' - ' file_path file_name];
@@ -330,7 +332,8 @@ else % first loaded session
     % msgbox('Please choose the file with the spatial footprints for this session: ')
     msgbox_timed('Please choose the file with the spatial footprints for this session: ',1)
     
-    [file_name,file_path]=uigetfile('*.mat','MultiSelect','off');
+    [file_name,file_path]=uigetfile('*.mat',...
+        'Choose the file with the spatial footprints for this session: ','MultiSelect','off');
     number_of_sessions=1;
     sessions_list={['Session 1 - ' file_path file_name]};
     file_names={[file_path file_name]};
@@ -468,7 +471,8 @@ function load_transformed_data_Callback(hObject,~, handles)
 
 % msgbox('Please choose the file containing the aligned data structure: ')
 msgbox_timed('Please choose the file containing the aligned data structure: ',3)
-[file_name,file_path]=uigetfile('*.mat','MultiSelect','off');
+[file_name,file_path]=uigetfile('*.mat',...
+    'Choose the file containing the aligned data: ','MultiSelect','off');
 disp('Loading aligned data')
 aligned_data_struct=load(fullfile(file_path,file_name));
 if ~isstruct(aligned_data_struct)
@@ -544,7 +548,8 @@ function load_modeled_data_Callback(hObject, eventdata, handles)
 %msgbox('Please choose the file containing the modeled data structure: ')
 msgbox_timed('Please choose the file containing the modeled data structure: ',3)
 
-[file_name,file_path]=uigetfile('*.mat','MultiSelect','off');
+[file_name,file_path]=uigetfile('*.mat',...
+    'Choose the file containing the modeled data','MultiSelect','off');
 disp('Loading modeled data')
 modeled_data_struct=load(fullfile(file_path,file_name));
 if ~isstruct(modeled_data_struct)
