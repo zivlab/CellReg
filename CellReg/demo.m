@@ -64,7 +64,7 @@ plot_all_sessions_projections(footprints_projections,figures_directory,figures_v
 disp('Done')
 
 %% Stage 2 - Aligning all the sessions to a reference coordinate system:
-% A rigid-body transfomration is applied to all the sessions
+% A rigid-body transformation is applied to all the sessions
 % according to a chosen reference ssseion. The alignment includes:
 % 1. Preparing the data for alignment
 % 2. Aligning all the sessions according to a reference coordinate system
