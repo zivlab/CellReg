@@ -1,6 +1,6 @@
 function [number_of_bins,centers_of_bins]=estimate_number_of_bins(spatial_footprints,maximal_distance)
 % This function estiamtes the number of bins to use for the probability
-% distributions that are modeled. and then creates the centerss with the
+% distributions that are modeled. and then creates the centers with the
 % centers of the bins
 
 % Inputs:

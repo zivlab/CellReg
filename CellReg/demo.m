@@ -29,21 +29,25 @@
 
 %% Setting paths for the cell registration procedure:
 
+% we need to find the path up-two levels
+[fileroot,~,~] = fileparts(mfilename('fullpath'));
+[fileroot,~,~] = fileparts(fileroot);
+
+
 % Defining the results_directory and creating the figures_directory:
-results_directory='D:\dev\Cell registration\CellReg\SampleData\Results';
+results_directory= fullfile(fileroot,'SampleData', 'Results') ;
 
 figures_directory=fullfile(results_directory,'Figures');
 if exist(figures_directory,'dir')~=7
     mkdir(figures_directory);
 end
-figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
-    
-file_names={'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_01.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_02.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_03.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_04.mat' ,...
-            'D:\dev\Cell registration\CellReg\SampleData\spatial_footprints_05.mat'};
 
+figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
+
+% define path of sample data
+for it = 1:5
+    file_names{it} = fullfile(fileroot, 'SampleData',sprintf('spatial_footprints_0%1i.mat',1));
+end
         
 %% Stage 1 - Loading the spatial footprints of cellular activity:
 % This stage loads a new data set which includes several sessions with the
@@ -60,7 +64,7 @@ plot_all_sessions_projections(footprints_projections,figures_directory,figures_v
 disp('Done')
 
 %% Stage 2 - Aligning all the sessions to a reference coordinate system:
-% A rigid-body transfomration is applied to all the sessions
+% A rigid-body transformation is applied to all the sessions
 % according to a chosen reference ssseion. The alignment includes:
 % 1. Preparing the data for alignment
 % 2. Aligning all the sessions according to a reference coordinate system

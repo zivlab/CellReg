@@ -1,6 +1,6 @@
 function [cell_to_index_map,registered_cells_centroid_distances,non_registered_cells_centroid_distances]=initial_registration_centroid_distances(maximal_distance,centroid_distance_threshold,centroid_locations)
-% This function performs an initial cell registration across sessios
-% based on a chosen centroid distance thresohld. 
+% This function performs an initial cell registration across sessions
+% based on a chosen centroid distance threshold. 
 
 % Inputs:
 % 1. maximal_distance

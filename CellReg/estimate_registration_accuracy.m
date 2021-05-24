@@ -1,5 +1,5 @@
 function [p_same_centers_of_bins,uncertain_fraction_centroid_distances,cdf_p_same_centroid_distances,false_positive_per_distance_threshold,true_positive_per_distance_threshold,varargout]=estimate_registration_accuracy(p_same_certainty_threshold,neighbors_centroid_distances,centroid_distances_model_same_cells,centroid_distances_model_different_cells,p_same_given_centroid_distance,centers_of_bins,varargin)
-% This function estiamtes the fraction of cell-pairs with less than 95%
+% This function estimates the fraction of cell-pairs with less than 95%
 % confidence of registration, and the false positive and false negative
 % rates.
 
