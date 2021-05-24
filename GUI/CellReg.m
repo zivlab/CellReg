@@ -212,7 +212,6 @@ function load_new_data_Callback(hObject,~, handles)
 data_struct=handles.data_struct;
 
 % choosing the files to load:
-% msgbox('Please choose the files containing the spatial footprints from all the sessions: ')
 msgbox_timed('Please choose the files containing the spatial footprints from all the sessions: ',3)
 
 [file_names,files_path]=uigetfile('*.mat','MultiSelect','on',...
@@ -237,7 +236,7 @@ file_names=temp_file_names;
 % defining the microns per pixel ratio:
 microns_per_pixel=str2num(get(handles.microns_per_pixel,'string'));
 if isempty(microns_per_pixel)
-    msgbox('Please insert the pixel size in microns and press enter ')
+    msgbox_timed('Please insert the pixel size in microns and press enter ',3);
     set(handles.microns_per_pixel,'backgroundColor',[1 0.5 0.5]);
     waitfor(handles.microns_per_pixel,'value',1);
     microns_per_pixel=str2num(get(handles.microns_per_pixel,'string'));
@@ -246,7 +245,6 @@ set(handles.microns_per_pixel,'string',num2str(round(100*microns_per_pixel)/100)
 set(handles.microns_per_pixel,'backgroundColor',[1 1 1]);
 
 % defining the results directory:
-% msgbox('Please select the folder in which the results will be saved')
 msgbox_timed('Please select the folder in which the results will be saved',3)
 
 results_directory=uigetdir(files_path); % the directory which the final results will be saved
@@ -280,9 +278,7 @@ set(handles.list_of_sessions,'string',data_struct.sessions_list);
 handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
-% msgbox('Finished loading sessions')
 msgbox_timed('Finished loading sessions',3)
-
 
 
 % --- Executes on button press in add_session.
@@ -311,7 +307,6 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     results_directory=data_struct.results_directory;
     
     % loading the session:
-    % msgbox('Please choose the file with the spatial footprints for this session: ')
     msgbox_timed('Please choose the file with the spatial footprints for this session: ',1)
 
     [file_name,file_path]=uigetfile(strcat(results_directory,filesep,'*.mat'),...
@@ -329,7 +324,6 @@ else % first loaded session
     data_struct=handles.data_struct;
     
     % chosing the file to load:
-    % msgbox('Please choose the file with the spatial footprints for this session: ')
     msgbox_timed('Please choose the file with the spatial footprints for this session: ',1)
     
     [file_name,file_path]=uigetfile('*.mat',...
@@ -341,17 +335,15 @@ else % first loaded session
     % defining the microns per pixel ratio:
     microns_per_pixel=str2num(get(handles.microns_per_pixel,'string'));
     if isempty(microns_per_pixel)
-        mb = msgbox('Please insert the pixel size in microns and press enter ')
+        msgbox_timed('Please insert the pixel size in microns and press enter ',3);
         set(handles.microns_per_pixel,'backgroundColor',[1 0.5 0.5]);
         waitfor(handles.microns_per_pixel,'value',1);
         microns_per_pixel=str2num(get(handles.microns_per_pixel,'string'));
-        close(mb)
     end
     set(handles.microns_per_pixel,'string',num2str(round(100*microns_per_pixel)/100));
     set(handles.microns_per_pixel,'backgroundColor',[1 1 1]);
     
     % defining the results directory:
-    % msgbox('Please select the folder in which the results will be saved')
     msgbox_timed('Please select the folder in which the results will be saved',3)
     
     results_directory=uigetdir(file_path); % the directory which the final results will be saved
@@ -382,7 +374,6 @@ set(handles.list_of_sessions,'string',data_struct.sessions_list);
 handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
-% msgbox('Finished loading session')
 msgbox_timed('Finished loading session',1)
 
 
@@ -455,7 +446,6 @@ if isfield(data_struct,'spatial_footprints')
     set(handles.list_of_sessions,'string',data_struct.sessions_list);
     handles.data_struct=data_struct;
     guidata(hObject, handles)
-    % msgbox('Finished removing session')
     msgbox_timed('Finished removing session',1)
 
 end
@@ -469,7 +459,6 @@ function load_transformed_data_Callback(hObject,~, handles)
 % This callback loads sessions that were already aligned into a reference coordinate system.
 % For such data the compute model should be the next step.
 
-% msgbox('Please choose the file containing the aligned data structure: ')
 msgbox_timed('Please choose the file containing the aligned data structure: ',3)
 [file_name,file_path]=uigetfile('*.mat',...
     'Choose the file containing the aligned data: ','MultiSelect','off');
@@ -483,7 +472,6 @@ elseif ~isfield(aligned_data_struct,'aligned_data_struct')
     error('This file does not contain data with the required format')
 else
     % loading the aligned data:
-    % msgbox('Please select the folder in which the results will be saved')
     msgbox_timed('Please select the folder in which the results will be saved',3)
 
     results_directory=uigetdir(file_path); % the directory which the final results will be saved
@@ -531,9 +519,7 @@ end
 handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
-% msgbox('Finished loading aligned sessions')
 msgbox_timed('Finished loading aligned sessions',3)
-
 
 
 % --- Executes on button press in load_modeled_data.
@@ -545,7 +531,6 @@ function load_modeled_data_Callback(hObject, eventdata, handles)
 % This callback loads data that were already modeled.
 % For such data the initial registration should be the next step.
 
-%msgbox('Please choose the file containing the modeled data structure: ')
 msgbox_timed('Please choose the file containing the modeled data structure: ',3)
 
 [file_name,file_path]=uigetfile('*.mat',...
@@ -560,7 +545,6 @@ elseif ~isfield(modeled_data_struct,'modeled_data_struct')
     error('This file does not contain data with the required format')
 else
     % loading the aligned data:
-    % msgbox('Please select the folder in which the results will be saved')
     msgbox_timed('Please select the folder in which the results will be saved',3)
 
     results_directory=uigetdir(file_path); % the directory which the final results will be saved
@@ -609,9 +593,7 @@ end
 handles.data_struct=data_struct;
 guidata(hObject, handles)
 disp('Done')
-% msgbox('Finished loading modeled data')
 msgbox_timed('Finished loading modeled data',1)
-
 
 
 % --- Executes on button press in transform_sessions.
@@ -687,7 +669,7 @@ if isempty(reference_session_index) || reference_session_index<1 || reference_se
 end
 while reference_valid==0
     set(handles.reference_session_index,'value',0)
-    msgbox('Please insert a valid reference session number and press enter ');
+    msgbox_timed('Please insert a valid reference session number and press enter ',3);
     waitfor(handles.reference_session_index,'value',1);
     reference_session_index=str2num(get(handles.reference_session_index,'string'));
     if ~isempty(reference_session_index) && reference_session_index>=1 && reference_session_index<=number_of_sessions
@@ -774,9 +756,7 @@ if use_parallel_processing
     delete(gcp);
 end
 disp('Done')
-% msgbox('Finished aligning sessions')
 msgbox_timed('Finished aligning sessions',1)
-
 
 
 % --- Executes on button press in compute_model.
@@ -1008,7 +988,6 @@ disp('Saving the modeled data structure')
 save(fullfile(results_directory,'modeled_data_struct.mat'),'modeled_data_struct','-v7.3')
 guidata(hObject, handles)
 disp('Done')
-% msgbox(['Finished computing probabilistic model - The ' best_model_string ' model is best suited for the data'])
 msgbox_timed(['Finished computing probabilistic model - The ' best_model_string ' model is best suited for the data'],3)
 
 
@@ -1064,10 +1043,7 @@ data_struct.initial_registration_type=initial_registration_type;
 
 handles.data_struct=data_struct;
 guidata(hObject, handles)
-% msgbox(['Finished performing initial cell registration - ' num2str(size(cell_to_index_map,1)) ' were found'])
 msgbox_timed(['Finished performing initial cell registration - ' num2str(size(cell_to_index_map,1)) ' were found'],3)
-
-
 
 
 % --- Executes on button press in register_cells_final.
@@ -1235,7 +1211,6 @@ disp('End of cell registration procedure')
 
 handles.data_struct=data_struct;
 guidata(hObject, handles)
-% msgbox(['Finished performing final cell registration - ' num2str(size(optimal_cell_to_index_map,1)) ' were found'])
 msgbox_timed(['Finished performing final cell registration - ' num2str(size(optimal_cell_to_index_map,1)) ' were found'],3)
 
 
