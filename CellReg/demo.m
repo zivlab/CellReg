@@ -45,6 +45,8 @@ end
 figures_visibility='on'; % either 'on' or 'off' (in any case figures are saved)
 
 % define path of sample data
+number_of_sessions=5;
+file_names=cell(1,number_of_sessions);
 for it = 1:5
     file_names{it} = fullfile(fileroot, 'SampleData',sprintf('spatial_footprints_0%1i.mat',1));
 end
@@ -58,7 +60,7 @@ microns_per_pixel=2.35;
 
 % Loading the data:
 disp('Stage 1 - Loading sessions')
-[spatial_footprints,number_of_sessions]=load_multiple_sessions(file_names);
+[spatial_footprints,~]=load_multiple_sessions(file_names);
 [footprints_projections]=compute_footprints_projections(spatial_footprints);
 plot_all_sessions_projections(footprints_projections,figures_directory,figures_visibility)
 disp('Done')
