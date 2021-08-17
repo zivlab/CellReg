@@ -35,7 +35,6 @@ diff_params=betafit(neighbors_spatial_correlations(neighbors_spatial_correlation
 p = diff_params(1); q = diff_params(2);
 PIsame = 0.5;
 
-
 %EM ALgorithm
 for i=1:100
 %E-step
@@ -51,20 +50,51 @@ for i=1:100
         /sum(assignments));
 
     [p,q] = estimate_beta_mixture_params(1-assignments,data,1);
+    spatial_correlations_model_parameters=[PIsame mu p sigma q];
+    spatial_correlations_model_same_cells=lognpdf(1-spatial_correlations_centers,mu,sigma);
+    spatial_correlations_model_different_cells=betapdf(1-spatial_correlations_centers,p,q);
+end
+
+if isnan(p)
+    % the maximal distance should be chosen in a way that neighboring cells
+    % pairs have non-zero overlap
+    [spatial_correlations_distribution,~]=hist(neighbors_spatial_correlations,spatial_correlations_centers);
+    if sum(spatial_correlations_distribution(spatial_correlations_centers<0.05))>0.05*sum(spatial_correlations_distribution)
+        warning('A good fit might not be attainable because some of the cells seem to be smaller than expected. This could also occur if the provided microns per pixel ratio is incorrect or the maximal distance is too large')
+    end
+    
+    % finding initial parameters for mle function:
+    pdf_betamixture = @(x,p,A1,A2,B1,B2) ...
+        p*lognpdf(x,A1,B1) + (1-p)*betapdf(x,A2,B2);
+    phat_same=lognfit(1-neighbors_spatial_correlations(neighbors_spatial_correlations>=0.7));
+    phat_diff=betafit(neighbors_spatial_correlations(neighbors_spatial_correlations<0.7));
+    pinitial_parameters=0.5;
+    Ainitial_parameters=[phat_same(1) phat_diff(1)];
+    Binitial_parameters=[phat_same(2) phat_diff(2)];
+    initial_parameters=[pinitial_parameters Ainitial_parameters Binitial_parameters];
+    lb = [0 -inf 0 0 0];
+    ub = [1 Inf Inf Inf Inf];
+    options = statset('MaxIter',1000, 'MaxFunEvals',2000);
+    
+    % finding the parameters that best fit the data:
+    spatial_correlations_model_parameters=mle(1-neighbors_spatial_correlations,'pdf',pdf_betamixture, 'start',initial_parameters, 'lower',lb, 'upper',ub,'options',options);
+    spatial_correlations_model_same_cells=lognpdf(1-spatial_correlations_centers,spatial_correlations_model_parameters(2),spatial_correlations_model_parameters(4));
+    spatial_correlations_model_different_cells=betapdf(1-spatial_correlations_centers,spatial_correlations_model_parameters(3),spatial_correlations_model_parameters(5));
 end
 
 % calculating the distribution for same cells:
-spatial_correlations_model_same_cells=lognpdf(1-spatial_correlations_centers,mu,sigma);
 spatial_correlations_model_same_cells=spatial_correlations_model_same_cells./sum(spatial_correlations_model_same_cells)*(number_of_bins/((spatial_correlations_centers(2)-spatial_correlations_centers(1))+(spatial_correlations_centers(end)-spatial_correlations_centers(1))));
+
 % the same cells model is multiplied by a sigmoid function because 
 %the lognormal ditribution goes to infinity but the correlation is bounded:
 sigmoid_function=@(x,ac)1./(1+exp(-ac(1)*(x-ac(2)))); % defining the sigmoid function - (sigmf requires Fuzzy Logic Toolbox)
 smoothing_func=sigmoid_function(spatial_correlations_centers,[20 min(spatial_correlations_centers)+0.5]);
 spatial_correlations_model_same_cells=spatial_correlations_model_same_cells.*smoothing_func;
 spatial_correlations_model_same_cells(1:round(number_of_bins/10:end))=0;
+
 % calculating the distribution for different cells:
-spatial_correlations_model_different_cells=betapdf(1-spatial_correlations_centers,p,q);
 spatial_correlations_model_different_cells=spatial_correlations_model_different_cells./sum(spatial_correlations_model_different_cells)*(number_of_bins/((spatial_correlations_centers(2)-spatial_correlations_centers(1))+(spatial_correlations_centers(end)-spatial_correlations_centers(1))));
+
 % calculating the weighted sum:
 spatial_correlations_model_weighted_sum=PIsame*spatial_correlations_model_same_cells+(1-PIsame)*spatial_correlations_model_different_cells;
 [spatial_correlations_distribution,~]=hist(neighbors_spatial_correlations,spatial_correlations_centers);
@@ -86,7 +116,6 @@ index_range_of_intersection=find(spatial_correlations_model_same_cells>minimal_p
 index_range_of_intersection(end)=[];
 [~,index_of_intersection]=min(abs(PIsame*spatial_correlations_model_same_cells(index_range_of_intersection)-(1-PIsame)*spatial_correlations_model_different_cells(index_range_of_intersection)));
 spatial_correlation_intersection=round(100*spatial_correlations_centers(index_of_intersection+index_range_of_intersection(1)-1))/100;
-spatial_correlations_model_parameters=[PIsame mu p sigma q];
 
 end
 

@@ -33,7 +33,6 @@
 [fileroot,~,~] = fileparts(mfilename('fullpath'));
 [fileroot,~,~] = fileparts(fileroot);
 
-
 % Defining the results_directory and creating the figures_directory:
 results_directory= fullfile(fileroot,'SampleData', 'Results') ;
 
