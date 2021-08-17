@@ -56,7 +56,7 @@ for i=1:100
     spatial_correlations_model_different_cells=betapdf(1-spatial_correlations_centers,p,q);
 end
 
-if isnan(p)
+if isnan(p) % If EM doesn't work use the older spatial correlation modeling based on mle
     % the maximal distance should be chosen in a way that neighboring cells
     % pairs have non-zero overlap
     [spatial_correlations_distribution,~]=hist(neighbors_spatial_correlations,spatial_correlations_centers);
