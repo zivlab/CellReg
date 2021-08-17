@@ -27,7 +27,7 @@ spatial_correlations_centers=centers_of_bins{2};
 
 % finding initial parameters for EM:
 neighbors_spatial_correlations(neighbors_spatial_correlations<0)=[];
-neighbors_spatial_correlations(neighbors_spatial_correlations<1)=[];
+neighbors_spatial_correlations(neighbors_spatial_correlations>1)=[];
 data = 1-neighbors_spatial_correlations;
 same_params=lognfit(data(neighbors_spatial_correlations>=0.7));
 mu = same_params(1); sigma = same_params(2);
@@ -51,7 +51,6 @@ for i=1:100
         /sum(assignments));
 
     [p,q] = estimate_beta_mixture_params(1-assignments,data,1);
-
 end
 
 % calculating the distribution for same cells:
