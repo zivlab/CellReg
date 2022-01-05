@@ -261,7 +261,12 @@ end
 
 % loading the spatial footprints:
 disp('Stage 1 - Loading sessions')
-[spatial_footprints,number_of_sessions]=load_multiple_sessions(file_names);
+if get(handles.write2file_on,'Value');
+    spatial_footprints = file_names;
+    number_of_sessions = length(file_names);
+else
+    [spatial_footprints,number_of_sessions]=load_multiple_sessions(file_names);
+end
 [footprints_projections]=compute_footprints_projections(spatial_footprints);
 plot_all_sessions_projections(footprints_projections,figures_directory,figures_visibility)
 
@@ -315,7 +320,12 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     file_names{number_of_sessions}=[file_path file_name];
     sessions_list{number_of_sessions}=['Session ' num2str(number_of_sessions) ' - ' file_path file_name];
     disp('Stage 1 - Loading sessions')
-    [added_spatial_footprints]=load_single_session(file_names{number_of_sessions});
+   
+    if get(handles.write2file_on,'Value');
+        added_spatial_footprints = file_names{number_of_sessions};
+    else
+        [added_spatial_footprints]=load_single_session(file_names{number_of_sessions});
+    end
     spatial_footprints{number_of_sessions}=added_spatial_footprints;
     [added_footprints_projection]=compute_footprints_projections({added_spatial_footprints});
     footprints_projections{number_of_sessions}=added_footprints_projection;
@@ -354,7 +364,12 @@ else % first loaded session
         
     % loading the spatial footprints:
     disp('Stage 1 - Loading sessions')
-    [spatial_footprints]={load_single_session(file_names{1})};
+    if get(handles.write2file_on,'Value');
+        spatial_footprints = {file_names{1}};
+    else
+        [spatial_footprints]={load_single_session(file_names{1})};
+    end
+    
     [footprints_projections]=compute_footprints_projections(spatial_footprints);
     plot_single_session_projections(footprints_projections,1,figures_visibility)
     

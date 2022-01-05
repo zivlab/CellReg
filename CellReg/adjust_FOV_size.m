@@ -1,4 +1,5 @@
-function [adjusted_spatial_footprints,adjusted_FOV_all_sessions,adjusted_x_size,adjusted_y_size,adjustment_zero_padding]=adjust_FOV_size(spatial_footprints)
+function [adjusted_spatial_footprints,adjusted_FOV_all_sessions,...
+    adjusted_x_size,adjusted_y_size,adjustment_zero_padding]=adjust_FOV_size(spatial_footprints)
 % This function adjusts the sizes of the FOV of each session to be the same
 
 % Inputs:
@@ -19,14 +20,14 @@ adjusted_y_size=0;
 FOV_all_sessions=cell(1,number_of_sessions);
 
 for n=1:number_of_sessions
-    this_session_FOV=squeeze(spatial_footprints{n}(1,:,:));
-    FOV_all_sessions{n}=ones(size(this_session_FOV,1),size(this_session_FOV,2));
+    footprint_dat = get_spatial_footprints(spatial_footprints{n});
+    FOV_all_sessions{n}=ones(footprint_dat.size(2), footprint_dat.size(3));
     if n==1
-        adjusted_x_size=size(this_session_FOV,2);
-        adjusted_y_size=size(this_session_FOV,1);
+        adjusted_x_size = footprint_dat.size(3);
+        adjusted_y_size = footprint_dat.size(2);
     else
-        adjusted_x_size=max(adjusted_x_size,size(this_session_FOV,2));
-        adjusted_y_size=max(adjusted_y_size,size(this_session_FOV,1));
+        adjusted_x_size=max(adjusted_x_size,footprint_dat.size(3));
+        adjusted_y_size=max(adjusted_y_size,footprint_dat.size(2));
     end
 end
 
@@ -39,13 +40,24 @@ for n=1:number_of_sessions
     new_adjusted_FOV=zeros(adjusted_y_size,adjusted_x_size);
     new_adjusted_FOV(1:size(adjusted_FOV_temp,1),1:size(adjusted_FOV_temp,2))=adjusted_FOV_temp;
     adjusted_FOV_all_sessions(:,:,n)=new_adjusted_FOV;
-    spatial_footprints_temp=spatial_footprints{n};
+    
+    footprints_info = get_spatial_footprints(spatial_footprints{n});
+    spatial_footprints_temp = footprints_info.load_footprints;
+    spatial_footprints_temp = spatial_footprints_temp.footprints;
     
     [number_of_cells, sz_y, sz_x] = size(spatial_footprints_temp);
     adjusted_spatial_footprints_temp = zeros(number_of_cells,adjusted_y_size,adjusted_x_size);
     adjusted_spatial_footprints_temp(:,1:sz_y,1:sz_x) = spatial_footprints_temp;
     
-    adjusted_spatial_footprints{n}=adjusted_spatial_footprints_temp;
+    if ~isempty(footprints_info.write2path)
+        footprint = mat_to_sparse_cell(adjusted_spatial_footprints_temp);
+        adjusted_spatial_footprints{n} = [footprints_info.write2path, filesep,...
+            'adjusted_spatial_footprints_',num2str(n),'.mat'];
+        save([footprints_info.write2path, filesep, 'adjusted_spatial_footprints_',...
+            num2str(n),'.mat'],'footprint','-v7.3')
+    else
+        adjusted_spatial_footprints{n}=adjusted_spatial_footprints_temp;
+    end
     adjustment_zero_padding(1,n)=adjusted_x_size-sz_x;
     adjustment_zero_padding(2,n)=adjusted_y_size-sz_y;
     
