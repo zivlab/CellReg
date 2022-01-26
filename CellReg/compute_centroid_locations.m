@@ -23,8 +23,10 @@ for n=1:number_of_sessions
     else
         display_progress_bar('Calculating centroid locations for this session - ',false)
     end
-    this_session_spatial_footprints=spatial_footprints{n};
-    num_spatial_footprints=size(this_session_spatial_footprints,1);
+    this_session_footprint_info=get_spatial_footprints(spatial_footprints{n});
+    this_session_spatial_footprints = this_session_footprint_info.load_footprints;
+    this_session_spatial_footprints = this_session_spatial_footprints.footprints;
+    num_spatial_footprints=this_session_footprint_info.size(1);
     centroid_locations{n}=zeros(num_spatial_footprints,2);
     for k=1:num_spatial_footprints
         display_progress_bar(100*(k)/(num_spatial_footprints),false)

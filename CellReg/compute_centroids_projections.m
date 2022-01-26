@@ -14,8 +14,8 @@ centroid_projections=cell(1,number_of_sessions);
 for n=1:number_of_sessions
     this_session_centroids=centroid_locations{n};
     number_of_cells=size(this_session_centroids,1);
-    this_session_spatial_footprints=spatial_footprints{n};
-    normalized_centroids=zeros(size(this_session_spatial_footprints));
+    this_session_footprint_info = get_spatial_footprints(spatial_footprints{n});
+    normalized_centroids=zeros(this_session_footprint_info.size);
     for k=1:number_of_cells
         if round(this_session_centroids(k,2))>1.5 && round(this_session_centroids(k,1))>1.5 && round(this_session_centroids(k,2))<size(normalized_centroids,2)-1 && round(this_session_centroids(k,1))<size(normalized_centroids,3)-1
             normalized_centroids(k,round(this_session_centroids(k,2))-1:round(this_session_centroids(k,2))+1,round(this_session_centroids(k,1))-1:round(this_session_centroids(k,1))+1)=1/4;
