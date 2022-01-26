@@ -15,13 +15,7 @@ maximal_number_of_bins=100;
 number_of_cells_factor=600;
 
 number_of_sessions=size(spatial_footprints,2);
-
-aligned_spatial_footprints = get_spatial_footprints(spatial_footprints{1});
-ncells = aligned_spatial_footprints.size(1);
-
-    
-number_of_bins=10*round((minimal_number_of_bins+ncells/...
-    number_of_cells_factor*(number_of_sessions)^2)/10);
+number_of_bins=10*round((minimal_number_of_bins+size(spatial_footprints{1},1)/number_of_cells_factor*(number_of_sessions)^2)/10);
 if number_of_bins>maximal_number_of_bins
     number_of_bins=maximal_number_of_bins;
 end

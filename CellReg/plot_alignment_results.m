@@ -2,18 +2,8 @@ function plot_alignment_results(spatial_footprints,centroid_locations,spatial_fo
 % This function plots all the results for the image alignment step
 
 number_of_sessions=size(footprints_projections,2);
-
-aligned_spatial_footprints = get_spatial_footprints(spatial_footprints{reference_session_index});
-
-adjusted_x_size = aligned_spatial_footprints.size(3);
-adjusted_y_size = aligned_spatial_footprints.size(2);
-
-corrected_spatial_footprints = get_spatial_footprints(spatial_footprints_corrected{1});
-
-corrected_x_size = corrected_spatial_footprints.size(3);
-corrected_y_size = corrected_spatial_footprints.size(2);
-    
-
+adjusted_x_size=size(spatial_footprints{1},3);
+adjusted_y_size=size(spatial_footprints{1},2);
 registration_order=setdiff(1:number_of_sessions,reference_session_index);
 
 best_x_translation=best_translations(1,:);
@@ -75,8 +65,8 @@ for n=1:number_of_sessions
     legend_strings{n}=['S. ' num2str(n)];
 end
 title('Centroid locations: Pre-alignment','FontWeight','Bold','FontSize',14)
-xlim([0 corrected_x_size])
-ylim([0 corrected_y_size])
+xlim([0 size(spatial_footprints{1},3)])
+ylim([0 size(spatial_footprints{1},2)])
 set(gca,'xtick',[])
 set(gca,'ytick',[])
 legend(legend_strings)
@@ -90,8 +80,8 @@ for n=1:number_of_sessions
     hold on
 end
 title('Centroid locations: Post-alignment','FontWeight','Bold','FontSize',14)
-xlim([0 corrected_x_size])
-ylim([0 corrected_y_size])
+xlim([0 size(spatial_footprints_corrected{1},3)])
+ylim([0 size(spatial_footprints_corrected{1},2)])
 set(gca,'xtick',[])
 set(gca,'ytick',[])
 legend(legend_strings)

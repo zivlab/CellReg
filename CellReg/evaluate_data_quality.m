@@ -1,7 +1,4 @@
-function [all_projections_correlations,number_of_cells_per_session]=...
-    evaluate_data_quality(spatial_footprints,centroid_projections_corrected,...
-    footprints_projections_corrected,maximal_cross_correlation,best_translations,...
-    reference_session_index,sufficient_correlation,alignment_type)
+function [all_projections_correlations,number_of_cells_per_session]=evaluate_data_quality(spatial_footprints,centroid_projections_corrected,footprints_projections_corrected,maximal_cross_correlation,best_translations,reference_session_index,sufficient_correlation,alignment_type)
 % This function assesses the quality of the data and its suitabilty for
 % longitudinal analysis.
 
@@ -41,8 +38,7 @@ end
 
 number_of_cells_per_session=zeros(1,number_of_sessions);
 for n=1:number_of_sessions
-    footprint_info = get_spatial_footprints(spatial_footprints{n});
-    number_of_cells_per_session(n) = footprint_info.size(1);
+    number_of_cells_per_session(n)=size(spatial_footprints{n},1);
 end
 mean_number_of_cells=mean(number_of_cells_per_session);
 

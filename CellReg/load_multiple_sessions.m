@@ -16,7 +16,7 @@ else
     spatial_footprints=cell(1,number_of_sessions);
     for n=1:number_of_sessions
         this_file_name=file_names{1,n};
-        temp_data = load_footprint_data(this_file_name);
+        temp_data=load(this_file_name);
         if isstruct(temp_data)
             field_name=fieldnames(temp_data);
             spatial_footprints{n}=getfield(temp_data,field_name{1});
