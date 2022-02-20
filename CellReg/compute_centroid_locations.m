@@ -9,7 +9,7 @@ function [centroid_locations]=compute_centroid_locations(spatial_footprints,micr
 % Outputs:
 % 1. centroid_locations
 
-typical_cell_size=10; % in micrometers - determines the radius that is used for gaussfit
+typical_cell_size=12; % in micrometers - determines the radius that is used for gaussfit
 normalized_typical_cell_size=typical_cell_size/microns_per_pixel;
 gaussian_radius=round(2*normalized_typical_cell_size); % for estimation of centroid
 

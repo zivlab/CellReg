@@ -61,7 +61,8 @@ for n=1:number_of_sessions
     all_to_all_indexes{n}=cell(number_of_cells,number_of_sessions);
     sessions_to_compare=1:number_of_sessions;
     sessions_to_compare(n)=[];
-   
+    cell_counter = 1;
+    total_cells = number_of_cells * length(sessions_to_compare);
     for m=1:length(sessions_to_compare)
         this_session=sessions_to_compare(m);
         this_session_centroids=centroid_locations{this_session};
@@ -71,7 +72,7 @@ for n=1:number_of_sessions
         this_session_spatial_footprints = this_session_spatial_footprints.footprints;
         
         for k=1:number_of_cells % for each cell
-            display_progress_bar(100*(k)/(number_of_cells),false)
+            display_progress_bar(100*(cell_counter)/(total_cells),false)
             new_spatial_footprint=squeeze(new_spatial_footprints(k,:,:));
             centroid=repmat(new_centroids(k,:),size(this_session_centroids,1),1);
             distance_vec=sqrt(sum((centroid-this_session_centroids).^2,2));
@@ -114,6 +115,7 @@ for n=1:number_of_sessions
                 all_to_all_centroid_distances{n}{k,this_session}=this_distance_vec;
                 all_to_all_indexes{n}{k,this_session}=spatial_footprints_to_check;
             end
+            cell_counter = cell_counter + 1;
         end
     end
     display_progress_bar(' done',false);

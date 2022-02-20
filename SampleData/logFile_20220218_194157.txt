@@ -1,0 +1,52 @@
+Sessions list:
+-----------------
+Session 1 - C:\Users\BarryLab\Documents\CellReg\SampleData\spatial_footprints_01.mat
+Session 2 - C:\Users\BarryLab\Documents\CellReg\SampleData\spatial_footprints_02.mat
+Session 3 - C:\Users\BarryLab\Documents\CellReg\SampleData\spatial_footprints_03.mat
+Session 4 - C:\Users\BarryLab\Documents\CellReg\SampleData\spatial_footprints_04.mat
+Session 5 - C:\Users\BarryLab\Documents\CellReg\SampleData\spatial_footprints_05.mat
+
+
+General data parameters:
+------------------------
+Number of sessions - 5
+FOV size - 3260X2570 [microns] ; (x,y)
+Image size - 326X257 [pixels] ; (x,y)
+
+
+Session alignment parameters:
+----------------------------------
+Reference session - 1
+Alignment Type - Translations and Rotations
+
+
+Cell registration parameters:
+-----------------------------
+Model maximal distance - 14 [microns]
+Number of bins - 60
+initial registration type - Centroid distances
+Initial threshold - 9.9 [microns]
+Registration approach - Probabilistic modeling
+Final registration type - Centroid distances
+P_same threshold - 0.5 
+
+
+General results:
+----------------
+Final number of cells - 932
+Average fraction of active cells - 0.6
+
+Fraction of false positives - 1
+Fraction of false negatives - 0
+Fraction of uncertain cell-pairs - 0
+
+Average register score - 0.97
+Average true positive score - 0.96
+Average true negative score - 1
+Average exclusivity score - 1
+
+Discrepancy of the model - 0.06
+
+
+Comments:
+---------

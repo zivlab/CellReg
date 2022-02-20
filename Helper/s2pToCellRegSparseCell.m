@@ -1,4 +1,4 @@
-function [footprint] = s2pToCellRegSparseCell(s2p_path,varargin)
+function [footprint] = s2pToCellRegSparseCell(s2p_path, cell_ns, varargin)
 %S2PTOCELLREG 
 % convert suite2p outputs to CellReg compatible footprint cell containing
 % sparse footprints for each cell
@@ -17,21 +17,25 @@ function [footprint] = s2pToCellRegSparseCell(s2p_path,varargin)
 if nargin < 1 
     maskOverlap = varargin{1};
 else 
-    maskOverlap = 1;
+    maskOverlap = 0;
 end 
 
 if ~isstruct(s2p_path)
-    load(s2p_path,'stat','ops');
-    nCells =length(stat);
-    cell_ns = 1:nCells;
+    load(s2p_path,'stat','ops');    
 else
     stat = s2p_path.stat;
     ops = s2p_path.ops;
-    nCells = length(s2p_path.iscell);
-    cell_ns = s2p_path.iscell;
 end
+
+if isempty(cell_ns)
+    nCells = length(stat);
+    cell_ns = 1:nCells;
+else
+    nCells = length(cell_ns);
+end
+
 %% Process data 
-% footprint = zeros(nCells,ops.Lx, ops.Ly);
+footprint = cell(1,nCells);
 
 for cell_n = 1:nCells
     itCell = cell_ns(cell_n);

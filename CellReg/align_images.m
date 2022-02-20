@@ -38,6 +38,8 @@ function [spatial_footprints_corrected,centroid_locations_corrected,...
 % 8. varargout
 % 8{1}. displacement_fields - for non-rigid transormation
 
+bad_algn_sessions = [];
+
 rotation_step=0.5; % check rotations every xx degrees
 minimal_rotation=0.3; % less than this rotation in degrees does not justify rotating the cells
 typical_cell_size=10; % in micrometers - determines the radius that is used for gaussfit
@@ -422,8 +424,11 @@ else
                 warning(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - could not align session'])
                 warndlg(['Session ' num2str(registration_order(n)) ' does not resemble the reference session - could not align session'])
             end
+            bad_algn_sessions = [bad_algn_sessions, registration_order(n)];
         end
     end
+    
+    varargout{2} = bad_algn_sessions;
     
     best_translations=microns_per_pixel*[best_x_translations ; best_y_translations];
     if strcmp(alignment_type,'Translations and Rotations')

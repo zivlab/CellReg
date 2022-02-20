@@ -23,10 +23,10 @@ for n=1:number_of_sessions
     
     temp_spatial_footprint_max= max(max(this_session_spatial_footprints,[],2),[],3);
     normalized_spatial_footprints = ...
-        this_session_spatial_footprints ./ temp_spatial_footprint_max;
+        this_session_spatial_footprints ./ temp_spatial_footprint_max; %divide by max val
     normalized_spatial_footprints(normalized_spatial_footprints<pixel_weight_threshold)=0;
 
-    footprints_projections{n}=squeeze(sum(normalized_spatial_footprints,1));
+    footprints_projections{n}=squeeze(nansum(normalized_spatial_footprints,1));
     display_progress_bar(' done',false);
 end
 

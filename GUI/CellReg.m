@@ -162,6 +162,7 @@ set(handles.correlation_threshold,'string','0.65')
 set(handles.simple_distance_threshold,'string','5')
 set(handles.simple_correlation_threshold,'string','0.65')
 set(handles.figures_visibility_on,'Value',1);
+set(handles.write2file_on, 'Value', 0);
 set(handles.translations_rotations,'Value',1);
 set(handles.spatial_correlations_2,'Value',1);
 set(handles.spatial_correlations,'Value',1);
@@ -259,18 +260,31 @@ else
     figures_visibility='Off';
 end
 
+    
 % loading the spatial footprints:
 disp('Stage 1 - Loading sessions')
-if get(handles.write2file_on,'Value');
+
+if get(handles.write2file_on,'Value')
     spatial_footprints = file_names;
     number_of_sessions = length(file_names);
 else
     [spatial_footprints,number_of_sessions]=load_multiple_sessions(file_names);
 end
+
 [footprints_projections]=compute_footprints_projections(spatial_footprints);
 plot_all_sessions_projections(footprints_projections,figures_directory,figures_visibility)
 
 % saving the loaded data into the data struct for the GUI
+
+if get(handles.write2file_on,'Value')
+    data_struct.temp_dir = [figures_directory, filesep, 'temp']; 
+    if ~exist(data_struct.temp_dir)
+        mkdir(data_struct.temp_dir);
+    end
+else
+    data_struct.temp_dir = [];
+end
+
 data_struct.results_directory=results_directory;
 data_struct.figures_directory=figures_directory;
 data_struct.microns_per_pixel=microns_per_pixel;
@@ -321,7 +335,7 @@ if isfield(data_struct,'spatial_footprints') % some sessions were already loaded
     sessions_list{number_of_sessions}=['Session ' num2str(number_of_sessions) ' - ' file_path file_name];
     disp('Stage 1 - Loading sessions')
    
-    if get(handles.write2file_on,'Value');
+    if get(handles.write2file_on,'Value')
         added_spatial_footprints = file_names{number_of_sessions};
     else
         [added_spatial_footprints]=load_single_session(file_names{number_of_sessions});
@@ -694,7 +708,11 @@ end
 
 % Preparing the data for alignment:
 disp('Stage 2 - Aligning sessions')
-[normalized_spatial_footprints]=normalize_spatial_footprints(spatial_footprints);
+if ~isempty(data_struct.temp_dir)
+    [normalized_spatial_footprints] = normalize_spatial_footprints(spatial_footprints, data_struct.temp_dir);
+else
+    [normalized_spatial_footprints]=normalize_spatial_footprints(spatial_footprints);
+end
 [adjusted_spatial_footprints,adjusted_FOV,adjusted_x_size,adjusted_y_size,adjustment_zero_padding]=...
     adjust_FOV_size(normalized_spatial_footprints);
 [adjusted_footprints_projections]=compute_footprints_projections(adjusted_spatial_footprints);
@@ -1221,6 +1239,21 @@ elseif strcmp(registration_approach,'Simple threshold')
         save_log_file(results_directory,file_names,microns_per_pixel,adjusted_x_size,adjusted_y_size,alignment_type,reference_session_index,maximal_distance,number_of_bins,initial_registration_type,initial_threshold,registration_approach,model_type,final_threshold,optimal_cell_to_index_map,cell_registered_struct,comments)
     end
 end
+
+if ~isempty(data_struct.temp_dir)
+    for file_n = 1:length(spatial_footprints_corrected)
+        split_name = strsplit(spatial_footprints_corrected{file_n},filesep);
+        f_name = split_name{end};
+        footprints = get_spatial_footprints(spatial_footprints_corrected{file_n});
+        footprints = footprints.load_footprints;
+        footprints = footprints.footprints;
+        footprint = mat_to_sparse_cell(footprints);
+        spatial_footprints_corrected{file_n} = fullfile(results_directory,f_name);
+        save(fullfile(results_directory,f_name),'footprint');
+    end
+    rmdir(data_struct.temp_dir,'s');
+end
+
 disp([num2str(size(optimal_cell_to_index_map,1)) ' cells were found'])
 disp('End of cell registration procedure')
 

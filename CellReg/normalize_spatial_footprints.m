@@ -35,8 +35,8 @@ for n=1:number_of_sessions
         
     else
         % if no pixel threshold we do not need to normalize by max first
-        tmp_sum = sum(sum(this_session_spatial_footprints,2),3);
-        temp_spatial_footprint = this_session_spatial_footprints ./ tmp_sum;
+        tmp_sum = nansum(nansum(this_session_spatial_footprints,2),3);
+        temp_spatial_footprint = this_session_spatial_footprints ./ tmp_sum; % if spatial footprint sums to 0 this will give NaN
     end
     if ~isempty(write_path)
         footprint = mat_to_sparse_cell(temp_spatial_footprint);

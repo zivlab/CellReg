@@ -1,0 +1,26 @@
+function [spatial_footprints_corrected,...
+    centroid_locations_corrected, footprints_projections_corrected,centroid_projections_corrected,...
+    maximal_cross_correlation,alignment_translations,adjusted_spatial_footprints,centroid_locations,...
+    adjusted_footprints_projections,reference_session_index ] = ...
+    remove_bad_aligned_datasets(spatial_footprints_corrected,...
+    centroid_locations_corrected, footprints_projections_corrected,centroid_projections_corrected,...
+    maximal_cross_correlation,alignment_translations,...
+    adjusted_spatial_footprints,centroid_locations,...
+    adjusted_footprints_projections,bad_alignments, reference_session_index)
+    
+    ref_session_vec = zeros(1, length(spatial_footprints_corrected));
+    ref_session_vec(reference_session_index) = 1;
+    ref_session_vec(bad_alignments)= [];
+    reference_session_index = find(ref_session_vec);
+    
+    spatial_footprints_corrected(bad_alignments)= [];
+    footprints_projections_corrected(bad_alignments)= [];
+    centroid_projections_corrected(bad_alignments)= [];
+    maximal_cross_correlation(bad_alignments)= [];
+    alignment_translations(:,bad_alignments)= [];
+    
+    adjusted_spatial_footprints(bad_alignments)= [];
+    centroid_locations(bad_alignments)= [];
+    adjusted_footprints_projections(bad_alignments)= [];
+    centroid_locations_corrected(bad_alignments)= [];
+end

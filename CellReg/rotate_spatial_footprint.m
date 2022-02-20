@@ -36,6 +36,7 @@ for p=1:N
             if wanted_coords(2)>M+1;
                 wanted_coords(1)=M+1;
             end
+            
             rotated_spatial_footprint(p,q)=interpolate_pixel_value(original_spatial_footprint,wanted_coords);
         end
     end

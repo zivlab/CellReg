@@ -103,9 +103,9 @@ reference_session_index=1;
 % Preparing the data for alignment:
 disp('Stage 2 - Aligning sessions')
 if memory_efficient_run
-    [normalized_spatial_footprints]=normalize_spatial_footprints(spatial_footprints, temp_dir);
+    [normalized_spatial_footprints] = normalize_spatial_footprints(spatial_footprints, temp_dir);
 else
-    [normalized_spatial_footprints]=normalize_spatial_footprints(spatial_footprints);
+    [normalized_spatial_footprints] = normalize_spatial_footprints(spatial_footprints);
 end
 clear spatial_footprints
 
