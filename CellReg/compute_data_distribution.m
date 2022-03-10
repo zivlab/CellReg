@@ -1,4 +1,8 @@
-function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,NN_centroid_distances,NNN_centroid_distances]=compute_data_distribution(spatial_footprints,centroid_locations,maximal_distance)
+function [all_to_all_indexes,all_to_all_spatial_correlations,all_to_all_centroid_distances,...
+    neighbors_spatial_correlations,neighbors_centroid_distances,neighbors_x_displacements,...
+    neighbors_y_displacements,NN_spatial_correlations,NNN_spatial_correlations,...
+    NN_centroid_distances,NNN_centroid_distances]=compute_data_distribution(...
+    spatial_footprints,centroid_locations,maximal_distance)
 % This function computes the distributions of distances and correlations
 % for all the neighboring cells pairs acorss sessions with a distance <12 microns
 
@@ -45,7 +49,11 @@ disp('Calculating the distributions of cell-pair similarities:')
 display_progress_bar('Terminating previous progress bars',true)    
 for n=1:number_of_sessions 
     display_progress_bar(['Calculating spatial correlations and centroid distances for session #' num2str(n) ' - '],false)
-    new_spatial_footprints=spatial_footprints{n};
+    
+    new_spatial_footprints = get_spatial_footprints(spatial_footprints{n});
+    new_spatial_footprints = new_spatial_footprints.load_footprints;
+    new_spatial_footprints = new_spatial_footprints.footprints;
+    
     new_centroids=centroid_locations{n};
     number_of_cells=size(new_spatial_footprints,1);
     all_to_all_spatial_correlations{n}=cell(number_of_cells,number_of_sessions);
@@ -53,14 +61,20 @@ for n=1:number_of_sessions
     all_to_all_indexes{n}=cell(number_of_cells,number_of_sessions);
     sessions_to_compare=1:number_of_sessions;
     sessions_to_compare(n)=[];
-    for k=1:number_of_cells % for each cell
-        display_progress_bar(100*(k)/(number_of_cells),false)
-        new_spatial_footprint=squeeze(new_spatial_footprints(k,:,:));
-        for m=1:length(sessions_to_compare)
-            this_session=sessions_to_compare(m);
-            this_session_centroids=centroid_locations{this_session};
+    cell_counter = 1;
+    total_cells = number_of_cells * length(sessions_to_compare);
+    for m=1:length(sessions_to_compare)
+        this_session=sessions_to_compare(m);
+        this_session_centroids=centroid_locations{this_session};
+        
+        this_session_spatial_footprints = get_spatial_footprints(spatial_footprints{this_session});
+        this_session_spatial_footprints = this_session_spatial_footprints.load_footprints;
+        this_session_spatial_footprints = this_session_spatial_footprints.footprints;
+        
+        for k=1:number_of_cells % for each cell
+            display_progress_bar(100*(cell_counter)/(total_cells),false)
+            new_spatial_footprint=squeeze(new_spatial_footprints(k,:,:));
             centroid=repmat(new_centroids(k,:),size(this_session_centroids,1),1);
-            this_session_spatial_footprints=spatial_footprints{this_session};
             distance_vec=sqrt(sum((centroid-this_session_centroids).^2,2));
             diff_temp=centroid-this_session_centroids;
             spatial_footprints_to_check=find(distance_vec<maximal_distance);
@@ -101,6 +115,7 @@ for n=1:number_of_sessions
                 all_to_all_centroid_distances{n}{k,this_session}=this_distance_vec;
                 all_to_all_indexes{n}{k,this_session}=spatial_footprints_to_check;
             end
+            cell_counter = cell_counter + 1;
         end
     end
     display_progress_bar(' done',false);

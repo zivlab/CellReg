@@ -1,4 +1,7 @@
-function [all_projections_correlations,number_of_cells_per_session]=evaluate_data_quality(spatial_footprints,centroid_projections_corrected,footprints_projections_corrected,maximal_cross_correlation,best_translations,reference_session_index,sufficient_correlation,alignment_type)
+function [all_projections_correlations,number_of_cells_per_session]=...
+    evaluate_data_quality(spatial_footprints,centroid_projections_corrected,...
+    footprints_projections_corrected,maximal_cross_correlation,best_translations,...
+    reference_session_index,sufficient_correlation,alignment_type)
 % This function assesses the quality of the data and its suitabilty for
 % longitudinal analysis.
 
@@ -38,7 +41,8 @@ end
 
 number_of_cells_per_session=zeros(1,number_of_sessions);
 for n=1:number_of_sessions
-    number_of_cells_per_session(n)=size(spatial_footprints{n},1);
+    footprint_info = get_spatial_footprints(spatial_footprints{n});
+    number_of_cells_per_session(n) = footprint_info.size(1);
 end
 mean_number_of_cells=mean(number_of_cells_per_session);
 
@@ -61,8 +65,7 @@ for n=1:number_of_sessions-1
             warning([num2str(best_translations(2,n)) ' degrees rotation was found for session number ' num2str(registration_order(n))])
         end
     end
-end
-    if maximal_cross_correlation(n)<sufficient_correlation
+     if maximal_cross_correlation(n)<sufficient_correlation
         if strcmp(alignment_type,'Translations and Rotations')
             warning(['No appropriate translations/rotations were found for session number ' num2str(registration_order(n)) ' - consider using non-rigid transformation'])
         elseif strcmp(alignment_type,'Translations')
@@ -71,5 +74,7 @@ end
             warning(['No appropriate translations were found for session number ' num2str(registration_order(n))])
         end
     end
+end
+   
 end
 
