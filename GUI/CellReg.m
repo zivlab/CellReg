@@ -394,6 +394,15 @@ else % first loaded session
 end
 
 % saving the loaded data into the data struct for the GUI
+if get(handles.write2file_on,'Value')
+    data_struct.temp_dir = [figures_directory, filesep, 'temp']; 
+    if ~exist(data_struct.temp_dir)
+        mkdir(data_struct.temp_dir);
+    end
+else
+    data_struct.temp_dir = [];
+end
+
 data_struct.spatial_footprints=spatial_footprints;
 data_struct.footprints_projections=footprints_projections;
 data_struct.number_of_sessions=number_of_sessions;
