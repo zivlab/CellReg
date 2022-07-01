@@ -11,7 +11,7 @@ We encourage the use of official versions (e.g., v1.5.1) for easier debugging pr
 `git clone https://github.com/zivlab/CellReg.git`
 2. Checkout version:
 `git checkout v<major>.<minor>.<bugfix> (e.g., v1.5.1)`
-3. Run `setup.m`
+3. Run `CellReg_setup.m`
 
 ## Usage and documentation
 To run the cell registration procedure you can either use the full GUI version or access the API directly.
