@@ -20,10 +20,10 @@ An example of how to use the API is provided in the file *CellReg\demo.m*.
 
 
 The inputs for the cell registration method are the spatial footprints of cellular activity (ROIs) of the cells that were detected in the different sessions. 
-
+The matrix of the spatial footprints should be of size NxMxK, where N is the number of neurons, M is the number of pixels in the y axis and K is the number of pixels in the x axis.
 
 The main output for the cell registration method is the obtained mapping of cell identity across all registered sessions.
-Other outputs include a log file with all the relevant information regarding the data, registration
+Other outputs include the cell scores, the probability for each cell-pair to the be the same cell, the spatial footprints of the cells after the alignment step, and a log file with all the relevant information regarding the data, registration
 configurations, and a summary of the registration results and quality. In addition, important figures are saved automatically in a figures directory. 
 
 
