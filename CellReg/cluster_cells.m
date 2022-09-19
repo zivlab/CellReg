@@ -262,6 +262,8 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
                     if over_thresh_2==sum(this_cluster_cells>0) && over_thresh_1==sum(candidate_cells>0)
                         cell_to_index_map_temp(n,candidate_sessions)=cell_to_index_map_temp(clusters_to_check(k),candidate_sessions);
                         cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,number_of_sessions);
+                        this_cluster_cells=cell_to_index_map_temp(n,:);
+                        this_cluster_sessions=find(this_cluster_cells>0);
                         changes_count(iteration)=changes_count(iteration)+1;
                         clusters_centroid_locations(:,clusters_to_check(k))=[1000 1000];
                     end
@@ -270,6 +272,8 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
                     if max_all_to_all_temp>registration_threshold;
                         cell_to_index_map_temp(n,candidate_sessions)=cell_to_index_map_temp(clusters_to_check(k),candidate_sessions);
                         cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,number_of_sessions);
+                        this_cluster_cells=cell_to_index_map_temp(n,:);
+                        this_cluster_sessions=find(this_cluster_cells>0);
                         changes_count(iteration)=changes_count(iteration)+1;
                         clusters_centroid_locations(:,clusters_to_check(k))=[1000 1000];
                     end
@@ -281,6 +285,8 @@ while (changes_count(iteration)>num_changes_thresh || changes_count(iteration)==
                     if over_thresh_2==sum(this_cluster_cells>0) && over_thresh_1==sum(candidate_cells>0)
                         cell_to_index_map_temp(n,candidate_sessions)=cell_to_index_map_temp(clusters_to_check(k),candidate_sessions);
                         cell_to_index_map_temp(clusters_to_check(k),:)=zeros(1,number_of_sessions);
+                        this_cluster_cells=cell_to_index_map_temp(n,:);
+                        this_cluster_sessions=find(this_cluster_cells>0);
                         changes_count(iteration)=changes_count(iteration)+1;
                         clusters_centroid_locations(:,clusters_to_check(k))=[1000 1000];
                     end

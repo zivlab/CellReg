@@ -718,7 +718,7 @@ end
 % Preparing the data for alignment:
 disp('Stage 2 - Aligning sessions')
 if ~isempty(data_struct.temp_dir)
-    [normalized_spatial_footprints] = normalize_spatial_footprints(spatial_footprints, data_struct.temp_dir);
+    [normalized_spatial_footprints]=normalize_spatial_footprints(spatial_footprints, data_struct.temp_dir);
 else
     [normalized_spatial_footprints]=normalize_spatial_footprints(spatial_footprints);
 end
