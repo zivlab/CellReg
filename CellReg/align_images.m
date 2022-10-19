@@ -257,6 +257,11 @@ else
                 end
             end
             centroid_projections_rotated{registration_order(n)}=squeeze(sum(normalized_centroids,1));
+            
+        else
+            footprint_info = get_spatial_footprints(spatial_footprints_corrected{registration_order(n)});
+            unrotated_spatial_footprints = footprint_info.load_footprints;
+            unrotated_spatial_footprints = unrotated_spatial_footprints.footprints;
         end
         
         % Finding translations with subpixel resolution:
