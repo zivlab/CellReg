@@ -13,7 +13,7 @@ function [rotated_spatial_footprint]=rotate_spatial_footprint(original_spatial_f
 % Outputs:
 % 1. rotated_spatial_footprint
 
-maximal_cell_radius=25; % in microns
+maximal_cell_radius=30; % in microns
 
 theta=theta*pi/180;
 N=size(original_spatial_footprint,1);
@@ -36,7 +36,6 @@ for p=1:N
             if wanted_coords(2)>M+1;
                 wanted_coords(1)=M+1;
             end
-            
             rotated_spatial_footprint(p,q)=interpolate_pixel_value(original_spatial_footprint,wanted_coords);
         end
     end
