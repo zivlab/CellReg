@@ -13,10 +13,10 @@ We encourage the use of official versions (e.g., v1.5.5) for easier debugging pr
 `git checkout v<major>.<minor>.<bugfix> (e.g., v1.5.5)`
 3. Run `CellReg_setup.m`
 
-*CellReg version v1.5.5 includes a fix to an important issue with FOV alignment introduced into CellReg in version update (v1.5.0) on March 2022.*
+*CellReg version v1.5.5 includes a fix to an important issue with FOV alignment that was introduced into CellReg in version update v1.5.0 on March 2022.*
 *This issue may have resulted in some cases in cells being cut off or disappearing from specific sessions, especially if there are relatively large translations/rotations across sessions in the data.*
 *The issue is relevant for everyone who has used any version between v1.5.0-v1.5.3.* 
-*In cases where versions between v1.5.0-v1.5.3 were used, it is recommended to use the new versions (v1.5.5 and onward) and to re-register the data and verify that the same results are obtained.*
+*In cases where versions between v1.5.0-v1.5.3 were used, it is recommended to switch to a new version (v1.5.5 and onward) and to re-register the data and verify that the same results are obtained.*
 
 ## Usage and documentation
 To run the cell registration procedure you can either use the full GUI version or access the API directly.
