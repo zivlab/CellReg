@@ -49,7 +49,7 @@ ub = [1 Inf Inf Inf Inf inf];
 options = statset('MaxIter',1000, 'MaxFunEvals',2000);
 
 % finding the parameters that best fit the data:
-options.algorithm=[];
+options.Algorithm=[];
 centroid_distances_model_parameters=lsqcurvefit(F,initial_parameters,microns_per_pixel*centroid_distances_centers,centroid_distances_distribution,lb,ub,options);
 
 % calculating the distribution for same cells:
