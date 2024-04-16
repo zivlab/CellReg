@@ -53,7 +53,11 @@ x_vec=(centers_of_bins{2}(2:end)+centers_of_bins{2}(1:end-1))/2;
 x_vec=repmat(x_vec,[2 1]);
 x_vec=[start_x; x_vec(:); end_x];
 for run_bins=1:length(x_vec)/2
-    current_color=1-p_value_corr(run_bins)*[1 1 1];
+    if ~isnan(p_value_corr(run_bins))
+        current_color=1-p_value_corr(run_bins)*[1 1 1];
+    else
+        current_color=[1 1 1];
+    end
     patch(x_vec([1 1 2 2]+2*(run_bins-1)),[0 [1 1]*n_corr(run_bins) 0],current_color,'EdgeColor',current_color)
     hold on
 end
