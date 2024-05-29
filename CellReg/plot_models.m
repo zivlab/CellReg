@@ -17,8 +17,8 @@ end
 
 number_of_bins=length(centers_of_bins{1});
 
-figure('units','normalized','outerposition',[0.2 0.1 0.6 0.8],'Visible',figures_visibility)
-set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+ModelFig=figure('units','normalized','outerposition',[0.2 0.1 0.6 0.8],'Visible',figures_visibility);
+set(ModelFig,'CreateFcn','set(ModelFig,''Visible'',''on'')')
 if ~isempty(varargin)
     subplot(2,2,2)
     [n1,~]=hist(NN_spatial_correlations,centers_of_bins{2});
@@ -34,7 +34,7 @@ if ~isempty(varargin)
     set(gca,'fontsize',14)
     set(gca,'XTick',x)
     set(gca,'XTickLabel',x_label,'fontsize',14)
-    set(gcf,'PaperPositionMode','auto')
+    set(ModelFig,'PaperPositionMode','auto')
     xlabel('Spatial correlation','FontWeight','Bold','fontsize',14)
     ylabel('Number of cell-pairs','FontWeight','Bold','fontsize',14)
     set(gca,'fontsize',14)
@@ -119,9 +119,9 @@ text(centroid_distance_intersection+1,0.9*max(centroid_distances_distribution),[
 text(centroid_distance_intersection-1,0.9*max(centroid_distances_distribution),[num2str(round(100*(1-same_more_than_thresh))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','g')
 text(centroid_distance_intersection+1,0.8*max(centroid_distances_distribution),[num2str(round(100*(diff_more_than_thresh))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','r')
 text(centroid_distance_intersection-1,0.8*max(centroid_distances_distribution),[num2str(round(100*(1-diff_more_than_thresh))) '%'],'fontsize',14,'fontweight','bold','HorizontalAlignment','Center','color','r')
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 3 - model.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 3 - model'),'png')
+set(ModelFig,'PaperPositionMode','auto')
+savefig(ModelFig,fullfile(figures_directory,'Stage 3 - model.fig'))
+saveas(ModelFig,fullfile(figures_directory,'Stage 3 - model'),'png')
 
 end
 
