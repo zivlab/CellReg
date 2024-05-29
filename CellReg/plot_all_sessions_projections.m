@@ -11,8 +11,8 @@ number_of_sessions=size(footprints_projections,2);
 subx=4;
 suby=ceil(number_of_sessions/subx);
 if number_of_sessions>4
-    figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
-    set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+    FP_Fig=figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility);
+    set(FP_Fig,'CreateFcn','set(FP_Fig,''Visible'',''on'')')
     for n=1:number_of_sessions
         subplot(suby,subx,n)
         imagesc(footprints_projections{n},[0 2])
@@ -22,8 +22,8 @@ if number_of_sessions>4
         title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
     end
 else
-    figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility)
-    set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+    FP_Fig=figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility);
+    set(FP_Fig,'CreateFcn','set(FP_Fig,''Visible'',''on'')')
     for n=1:number_of_sessions
         subplot(1,number_of_sessions,n)
         imagesc(footprints_projections{n},[0 2])
@@ -33,9 +33,9 @@ else
         title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
     end
 end
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 1 - spatial footprints projections.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 1 - spatial footprints projections'),'png')
+set(FP_Fig,'PaperPositionMode','auto')
+savefig(FP_Fig,fullfile(figures_directory,'Stage 1 - spatial footprints projections.fig'))
+saveas(FP_Fig,fullfile(figures_directory,'Stage 1 - spatial footprints projections'),'png')
 
 end
 
