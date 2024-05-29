@@ -17,9 +17,9 @@ number_of_clusters=size(cell_scores,2);
 number_of_bins=41;
 xout_temp=linspace(0,1,number_of_bins);
 xout=xout_temp(2:2:end);
-figure('units','normalized','outerposition',[0.25 0.2 0.5 0.6],'Visible',figures_visibility)
-set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
-set(gcf,'PaperOrientation','portrait');
+ScoreFig=figure('units','normalized','outerposition',[0.25 0.2 0.5 0.6],'Visible',figures_visibility);
+set(ScoreFig,'CreateFcn','set(ScoreFig,''Visible'',''on'')')
+set(ScoreFig,'PaperOrientation','portrait');
 size_x=0.65;
 size_y=0.65;
 
@@ -139,9 +139,9 @@ set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 set(h, 'Xdir', 'reverse')
 xlabel('Score','fontsize',14,'fontweight','bold')
 ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 5 - cell scores.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 5 - cell scores'),'png')
+set(ScoreFig,'PaperPositionMode','auto')
+savefig(ScoreFig,fullfile(figures_directory,'Stage 5 - cell scores.fig'))
+saveas(ScoreFig,fullfile(figures_directory,'Stage 5 - cell scores'),'png')
 
 % plotting the distribution of P_same for all registered cell-pairs
 number_of_sessions=size(p_same_registered_pairs{1},1);
@@ -159,7 +159,7 @@ for n=1:number_of_clusters
 end
 all_pairs_p_same(pair_count+1:end)=[];
 
-figure('units','normalized','outerposition',[0.35 0.3 0.3 0.4],'Visible',figures_visibility)
+PairFig=figure('units','normalized','outerposition',[0.35 0.3 0.3 0.4],'Visible',figures_visibility);
 [n1,~]=hist(all_pairs_p_same,xout);
 n1=n1./sum(n1);
 bar(xout,n1,1)
@@ -186,9 +186,9 @@ set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 set(h, 'Xdir', 'reverse')
 xlabel('P_s_a_m_e','fontsize',14,'fontweight','bold')
 ylabel('Cum. fraction','fontsize',14,'fontweight','bold')
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 5 - Registered pairs P_same.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 5 - Registered pairs P_same'),'png')
+set(PairFig,'PaperPositionMode','auto')
+savefig(PairFig,fullfile(figures_directory,'Stage 5 - Registered pairs P_same.fig'))
+saveas(PairFig,fullfile(figures_directory,'Stage 5 - Registered pairs P_same'),'png')
 
 end
 
