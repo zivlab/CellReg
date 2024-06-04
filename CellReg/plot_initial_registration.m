@@ -18,8 +18,8 @@ registered_cells=varargin{1};
 non_registered_cells=varargin{2};
 
 if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlations are used 
-    figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility)
-    set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+    DiffFig=figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility);
+    set(DiffFig,'CreateFcn','set(DiffFig,''Visible'',''on'')')
     xout=linspace(0,1,number_of_bins);
     [n1,~]=hist(registered_cells,xout);
     [n2,~]=hist(non_registered_cells,xout);
@@ -40,8 +40,8 @@ if strcmp(initial_registration_type,'Spatial correlation') % if spatial correlat
 else
     pixel_to_mic=varargin{3};
     maximal_distance=varargin{4};    
-    figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility)
-    set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+    DiffFig=figure('units','normalized','outerposition',[0.3 0.25 0.4 0.5],'Visible',figures_visibility);
+    set(DiffFig,'CreateFcn','set(DiffFig,''Visible'',''on'')')
     xout=linspace(0,maximal_distance,number_of_bins);
     [n1,~]=hist(registered_cells,xout);
     [n2,~]=hist(non_registered_cells,xout);
@@ -59,9 +59,9 @@ else
     legend('Same Cell','Different Cells','location','northwest')
     legend('boxoff')
 end
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 4 - same versus different cells.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 4 - same versus different cells'),'png')
+set(DiffFig,'PaperPositionMode','auto')
+savefig(DiffFig,fullfile(figures_directory,'Stage 4 - same versus different cells.fig'))
+saveas(DiffFig,fullfile(figures_directory,'Stage 4 - same versus different cells'),'png')
 
 % Plotting the registration results with the cell maps from all sessions:
 is_initial_stage=true;

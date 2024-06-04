@@ -94,7 +94,7 @@ spatial_correlations_model_different_cells=spatial_correlations_model_different_
 sigmoid_function=@(x,ac)1./(1+exp(-ac(1)*(x-ac(2)))); % defining the sigmoid function - (sigmf requires Fuzzy Logic Toolbox)
 smoothing_func=sigmoid_function(spatial_correlations_centers,[20 min(spatial_correlations_centers)+0.5]);
 spatial_correlations_model_same_cells=spatial_correlations_model_same_cells.*smoothing_func;
-spatial_correlations_model_same_cells(1:round(number_of_bins/10:end))=0;
+spatial_correlations_model_same_cells(1:round(number_of_bins/10))=0;
 
 % calculating the weighted sum:
 if ~isnan(p)

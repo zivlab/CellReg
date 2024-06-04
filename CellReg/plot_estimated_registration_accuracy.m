@@ -6,8 +6,8 @@ number_of_p_same_bins=length(p_same_centers_of_bins);
 number_of_bins=length(centers_of_bins{1});
 p_same_certainty_threshold=1-p_same_certainty_threshold;
 
-figure('units','normalized','outerposition',[0.2 0.1 0.6 0.8],'Visible',figures_visibility)
-set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+RegFig=figure('units','normalized','outerposition',[0.2 0.1 0.6 0.8],'Visible',figures_visibility);
+set(RegFig,'CreateFcn','set(gcf,''Visible'',''on'')')
 size_x=0.78;
 size_y=0.78;
 p_same_given_spatial_correlation=varargin{1};
@@ -196,9 +196,9 @@ set(gca,'XTick',x)
 set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 p=patch([0 1 1 0],[1 1 0 0],[0.8 0.8 0.8]);
 set(p,'FaceAlpha',0.3,'EdgeColor','none');
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 3 - registration certainty.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 3 - registration certainty'),'png')
+set(RegFig,'PaperPositionMode','auto')
+savefig(RegFig,fullfile(figures_directory,'Stage 3 - registration certainty.fig'))
+saveas(RegFig,fullfile(figures_directory,'Stage 3 - registration certainty'),'png')
 
 end
 

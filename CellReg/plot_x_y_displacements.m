@@ -21,9 +21,9 @@ x_y_displacements=hist3([neighbors_x_displacements;neighbors_y_displacements]',c
 x_y_displacements=flipud(x_y_displacements);
 x_y_displacements=fliplr(x_y_displacements);
 
-figure('units','normalized','outerposition',[0.35 0.25 0.3 0.5],'Visible',figures_visibility)
-set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
-set(gcf,'PaperOrientation','portrait');
+DisplaceFig=figure('units','normalized','outerposition',[0.35 0.25 0.3 0.5],'Visible',figures_visibility);
+set(DisplaceFig,'CreateFcn','set(DisplaceFig,''Visible'',''on'')')
+set(DisplaceFig,'PaperOrientation','portrait');
 size_x=0.75;
 size_y=0.75;
 axes('position',[0.12 0.15 size_x size_y])
@@ -59,9 +59,9 @@ text(3.5,0.5,'Number of cell-pairs (log)','fontsize',14,'fontweight','bold','rot
 text(1.5,0,'0','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
 text(1.5,1,'Max','fontsize',14,'fontweight','bold','HorizontalAlignment','Left')
 set(gca,'fontsize',14)
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 3 - (x,y) displacements.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 3 - (x,y) displacements'),'png')
+set(DisplaceFig,'PaperPositionMode','auto')
+savefig(DisplaceFig,fullfile(figures_directory,'Stage 3 - (x,y) displacements.fig'))
+saveas(DisplaceFig,fullfile(figures_directory,'Stage 3 - (x,y) displacements'),'png')
 
 end
 

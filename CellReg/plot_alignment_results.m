@@ -41,8 +41,8 @@ end
 footprints_projections_corrected_rgb(footprints_projections_corrected_rgb>1)=1;
 footprints_projections_corrected_rgb=footprints_projections_corrected_rgb+0.25*max(max(max(footprints_projections_corrected_rgb)))*repmat(overlapping_FOV,1,1,3);
 
-figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
-set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+AlignFig=figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility);
+set(AlignFig,'CreateFcn','set(AlignFig,''Visible'',''on'')')
 subplot(2,2,1)
 imshow(footprints_projections_rgb)
 if number_of_sessions>2
@@ -96,15 +96,15 @@ set(gca,'xtick',[])
 set(gca,'ytick',[])
 legend(legend_strings)
 legend('boxoff')
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 2 - pre vs post alignment.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 2 - pre vs post alignment'),'png')
+set(AlignFig,'PaperPositionMode','auto')
+savefig(AlignFig,fullfile(figures_directory,'Stage 2 - pre vs post alignment.fig'))
+saveas(AlignFig,fullfile(figures_directory,'Stage 2 - pre vs post alignment'),'png')
 
 % Plotting measurments of preparation stability:
 if number_of_sessions>2
     % plottig the FOV correlations between all pairs of sessions:
-    figure('units','normalized','outerposition',[0.2 0.3 0.6 0.4],'Visible',figures_visibility)
-    set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+    AbnormalFig=figure('units','normalized','outerposition',[0.2 0.3 0.6 0.4],'Visible',figures_visibility);
+    set(AbnormalFig,'CreateFcn','set(AbnormalFig,''Visible'',''on'')')
     subplot(1,2,1)
     imagesc(all_centroid_projections_correlations)
     colormap('jet')
@@ -172,13 +172,13 @@ if number_of_sessions>2
     set(gca,'fontsize',14)
     xlabel('Session number','FontWeight','Bold','fontsize',14)
     ylabel('Maximal correlation','FontWeight','Bold','fontsize',14)
-    set(gcf,'PaperPositionMode','auto')
-    savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations.fig'))
-    saveas(gcf,fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations'),'png')
+    set(AbnormalFig,'PaperPositionMode','auto')
+    savefig(AbnormalFig,fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations.fig'))
+    saveas(AbnormalFig,fullfile(figures_directory,'Stage 2 - abnormalities test - Correlations'),'png')
 end
 
-figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
-set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+AbnormalGenFig=figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility);
+set(AbnormalGenFig,'CreateFcn','set(AbnormalGenFig,''Visible'',''on'')')
 % plotting the translations for each session compared to the reference
 subplot(2,2,1)
 for n=1:number_of_sessions
@@ -306,9 +306,9 @@ x=1:number_of_sessions;
 set(gca,'XTick',x)
 set(gca,'XTickLabel',x_label,'fontsize',14,'fontweight','bold')
 set(gca,'fontsize',14)
-set(gcf,'PaperPositionMode','auto')
-savefig(fullfile(figures_directory,'Stage 2 - abnormalities test - general.fig'))
-saveas(gcf,fullfile(figures_directory,'Stage 2 - abnormalities test - general'),'png')
+set(AbnormalGenFig,'PaperPositionMode','auto')
+savefig(AbnormalGenFig,fullfile(figures_directory,'Stage 2 - abnormalities test - general.fig'))
+saveas(AbnormalGenFig,fullfile(figures_directory,'Stage 2 - abnormalities test - general'),'png')
 
 % if non-rigid transformation was used:
 if strcmp(alignment_type,'Non-rigid')
@@ -322,8 +322,8 @@ if strcmp(alignment_type,'Non-rigid')
     subx=4;
     suby=ceil(number_of_sessions/subx);
     if number_of_sessions>4
-        figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility)
-        set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+        NonRigidFig=figure('units','normalized','outerposition',[0.1 0.1 0.8 0.8],'Visible',figures_visibility);
+        set(NonRigidFig,'CreateFcn','set(NonRigidFig,''Visible'',''on'')')
         for n=1:number_of_sessions
             subplot(suby,subx,n)
             quiver(x,y,squeeze(displacement_fields(n,(y_vector),(x_vector),1)),squeeze(flipud(displacement_fields(n,(y_vector),(x_vector),2))))
@@ -335,8 +335,8 @@ if strcmp(alignment_type,'Non-rigid')
             title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
         end
     else
-        figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility)
-        set(gcf,'CreateFcn','set(gcf,''Visible'',''on'')')
+        NonRigidFig=figure('units','normalized','outerposition',[0.1 0.2 0.8 0.5],'Visible',figures_visibility);
+        set(NonRigidFig,'CreateFcn','set(NonRigidFig,''Visible'',''on'')')
         for n=1:number_of_sessions
             subplot(1,number_of_sessions,n)
             quiver(x,y,squeeze(displacement_fields(n,(y_vector),(x_vector),1)),squeeze(flipud(displacement_fields(n,(y_vector),(x_vector),2))))
@@ -348,9 +348,9 @@ if strcmp(alignment_type,'Non-rigid')
             title(['Session ' num2str(n)],'fontsize',14,'fontweight','bold')
         end
     end
-    set(gcf,'PaperPositionMode','auto')
-    savefig(fullfile(figures_directory,'Stage 1 - Non-rigid transformations.fig'))
-    saveas(gcf,fullfile(figures_directory,'Stage 1 - Non-rigid transformations'),'png')    
+    set(NonRigidFig,'PaperPositionMode','auto')
+    savefig(NonRigidFig,fullfile(figures_directory,'Stage 1 - Non-rigid transformations.fig'))
+    saveas(NonRigidFig,fullfile(figures_directory,'Stage 1 - Non-rigid transformations'),'png')    
 end
     
 end
