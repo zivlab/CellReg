@@ -292,6 +292,20 @@ else
         
         % finding the best translation with a gaussian fit:
         gaussian_radius=round(1.5*normalized_typical_cell_size);
+        % Edge guard: for a session that does not overlap the reference, the
+        % correlation peak (x_ind,y_ind) can land within gaussian_radius of the
+        % cross_corr_partial border, making the sub-pixel window indices below
+        % (e.g. x_ind-gaussian_radius, x_ind-1) non-positive and aborting MATLAB
+        % with "Array indices must be positive integers". That crash happens
+        % before the maximal_cross_correlation resemblance gate further down can
+        % reject the session gracefully. Clamp the peak into the interior so the
+        % sub-pixel fit is always in-bounds; a genuinely non-resembling session
+        % still fails that gate and is added to bad_algn_sessions as before. For
+        % a well-aligned session the peak sits near the centre of
+        % cross_corr_partial, so the clamp is a no-op.
+        [cross_corr_partial_height,cross_corr_partial_width]=size(cross_corr_partial);
+        x_ind=min(max(x_ind,gaussian_radius+1),cross_corr_partial_width-gaussian_radius);
+        y_ind=min(max(y_ind,gaussian_radius+1),cross_corr_partial_height-gaussian_radius);
         temp_corr_x=cross_corr_partial(y_ind-1:y_ind+1,x_ind-gaussian_radius:x_ind+gaussian_radius);
         sigma_0=normalized_typical_cell_size/5;
         [~,mu_x_1]=gaussfit(-gaussian_radius:gaussian_radius,temp_corr_x(1,:)./sum(temp_corr_x(1,:)),sigma_0,0);
